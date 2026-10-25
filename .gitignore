@@ -1,0 +1,26 @@
+# secrets
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.keystore
+sui.keystore
+*.sqlite
+*.sqlite-journal
+*.db
+
+# deps and build
+node_modules/
+dist/
+build/
+.next/
+.turbo/
+coverage/
+*.tsbuildinfo
+
+# misc
+.DS_Store
+*.log
+.vscode/
+.idea/
