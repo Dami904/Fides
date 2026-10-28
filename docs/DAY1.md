@@ -6,7 +6,7 @@ Results of SPEC section 15. Record what was tried, what happened, and the fallba
 |---|---|---|---|
 | 1 | Walrus Memory write and recall on mainnet | done | See "Check 1" below. |
 | 2 | Two delegate keys, one account, shared namespace | done | See "Check 2" below. Shared registry design confirmed. |
-| 3 | Tatum Sui: auth, JSON-RPC vs gRPC, event queries, `rpcUrl` for `@suimpp/mpp` | todo | |
+| 3 | Tatum Sui: auth, JSON-RPC vs gRPC, event queries, `rpcUrl` for `@suimpp/mpp` | partial | See "Check 3" below. `rpcUrl` for `@suimpp/mpp` is tested in check 4. |
 | 4 | End-to-end MPP payment on Sui mainnet | todo | |
 | 5 | Publish Move anchor, emit event, read back via Tatum | todo | |
 | 6 | Sign and verify an evidence record | done | Offline. See below. Run: `node packages/evidence/day1-check6-signing.mjs` |
@@ -42,6 +42,19 @@ Results of SPEC section 15. Record what was tried, what happened, and the fallba
 - Result: key A wrote a record in namespace `fides-day1` (queued in about 4 s, stored after about 35 s). Key B, a different key, recalled it in the same namespace on the first query (distance 0.33). So the shared Fides Registry design from SPEC section 5 works: one account, a delegate key per agent, one shared recall space.
 - Timing for the engine: a write takes tens of seconds to land, so `report()` must wait for the job and must not block the payment path.
 - Still open: these keys are reused from other setups. Before the demo, create dedicated delegate keys for the agents with `addDelegateKey` (needs the account owner wallet), and use a fresh account and a `merchants` namespace for the registry.
+
+## Check 3: Tatum Sui mainnet (2026-10-28, free mainnet key)
+
+- Auth per docs: `x-api-key` request header (also accepted: Bearer, Basic, `?xApiKey=`, path; the header is checked first). Each free account has one mainnet and one testnet key. We only use the mainnet key, named `TATUM_MAINNET_API_KEY` in `.env` (the check script also accepts `TATUM_API_KEY`).
+- **The docs page and the live gateway disagree.** The docs list Sui JSON-RPC (`sui_*`, `suix_queryEvents`). The live host `https://sui-mainnet.gateway.tatum.io` answers JSON-RPC POSTs with 404 on every path and auth variant I tried. Its own `/_methods` and `/llms.txt` list one interface: **GraphQL** at `https://sui-mainnet.gateway.tatum.io/graphql` (one operation per POST, no batching, no subscriptions; queries and mutations billed separately). Consistent with Sui retiring JSON-RPC.
+- **GraphQL works on mainnet and covers what Fides needs:**
+  - latest checkpoint: `{ checkpoint { sequenceNumber digest timestamp } }` returned the current checkpoint.
+  - event reads: `events(first, filter: { sender })` returns events with `transaction.digest`, `sender.address` and `contents.json`. A filter on `type: "0x2::coin"` returned nothing, so type filters need a full event type; test with our own module once the anchor is published (check 5).
+  - transaction and finality: `transaction(digest) { sender effects { status checkpoint { sequenceNumber } balanceChanges { nodes { owner { address } amount coinType { repr } } } } }` returns sender, status, checkpoint and balance changes. That is enough for SPEC section 8 check 4 (exists, final, sender, amount, recipient).
+- **gRPC** host `https://sui-mainnet-grpc.gateway.tatum.io` answers `sui.rpc.v2.LedgerService/GetServiceInfo` over HTTP/2 (grpc-status 0, 123 bytes). Not yet used for anything else.
+- **Observed: the gateway did not reject requests without a key** (GraphQL checkpoint and gRPC GetServiceInfo both answered with no key). Do not rely on that: it may be anonymous throttling, and the hackathon requires Tatum to be used with our key. Always send `x-api-key`.
+- Decision: read path is **GraphQL** through Tatum. SPEC section 8 said to prefer gRPC; the spec's fallback applies in part: events and finality come from Tatum GraphQL, gRPC stays an option for `@suimpp/mpp` verification (check 4). `.env` now has `TATUM_SUI_RPC_URL` pointing at the GraphQL URL (name kept from the spec) and `TATUM_SUI_GRPC_URL` at the gRPC host.
+- Rate limit: all probes were spaced at least 450 ms apart. Script: `packages/chain/day1-check3-tatum.mjs` (its JSON-RPC probes return 404, kept as the record of that finding).
 
 ## Check 7: hackathon rules (2026-10-26, https://recall-tatum-walrus.vercel.app/)
 
