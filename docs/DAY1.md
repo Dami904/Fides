@@ -6,8 +6,8 @@ Results of SPEC section 15. Record what was tried, what happened, and the fallba
 |---|---|---|---|
 | 1 | Walrus Memory write and recall on mainnet | done | See "Check 1" below. |
 | 2 | Two delegate keys, one account, shared namespace | done | See "Check 2" below. Shared registry design confirmed. |
-| 3 | Tatum Sui: auth, JSON-RPC vs gRPC, event queries, `rpcUrl` for `@suimpp/mpp` | partial | See "Check 3" below. `rpcUrl` for `@suimpp/mpp` is tested in check 4. |
-| 4 | End-to-end MPP payment on Sui mainnet | todo | |
+| 3 | Tatum Sui: auth, JSON-RPC vs gRPC, event queries, `rpcUrl` for `@suimpp/mpp` | done | See "Check 3" and "Check 4". Tatum gRPC cannot be `rpcUrl` for `@suimpp/mpp`; GraphQL is the Tatum path. |
+| 4 | End-to-end MPP payment on Sui | testnet done | See "Check 4" below. Mainnet payment still to do. |
 | 5 | Publish Move anchor, emit event, read back via Tatum | testnet done | See "Check 5" below. Mainnet publish still to do. |
 | 6 | Sign and verify an evidence record | done | Offline. See below. Run: `node packages/evidence/day1-check6-signing.mjs` |
 | 7 | Hackathon rules: mainnet for Agent Payments award, how memories are counted | partial | See "Check 7" below. The linked Event Rules page was not readable. |
@@ -55,6 +55,16 @@ Results of SPEC section 15. Record what was tried, what happened, and the fallba
 - **Observed: the gateway did not reject requests without a key** (GraphQL checkpoint and gRPC GetServiceInfo both answered with no key). Do not rely on that: it may be anonymous throttling, and the hackathon requires Tatum to be used with our key. Always send `x-api-key`.
 - Decision: read path is **GraphQL** through Tatum. SPEC section 8 said to prefer gRPC; the spec's fallback applies in part: events and finality come from Tatum GraphQL, gRPC stays an option for `@suimpp/mpp` verification (check 4). `.env` now has `TATUM_SUI_RPC_URL` pointing at the GraphQL URL (name kept from the spec) and `TATUM_SUI_GRPC_URL` at the gRPC host.
 - Rate limit: all probes were spaced at least 450 ms apart. Script: `packages/chain/day1-check3-tatum.mjs` (its JSON-RPC probes return 404, kept as the record of that finding).
+
+## Check 4: MPP payment on testnet (2026-10-28)
+
+- Script: `apps/merchants/day1-check4-mpp.mjs [testnet|mainnet] [server-rpc-url]`. Merchant and client run in one process. Packages: `@suimpp/mpp` 0.9.0, `mppx` 0.4.12, `@mysten/sui` 2.37.
+- Funds: Agent A got 20 testnet USDC from Circle's faucet (done by the user in the browser) and 1 SUI from the CLI faucet.
+- Flow works: unpaid request gets 402 with a `WWW-Authenticate: Payment ...` challenge; the client pays 0.01 USDC and retries; the merchant verifies and returns 200 with a `Payment-Receipt`. Paid request took about 11.6 s end to end on testnet. Payment digest `EyDnQAhoR9Y2z9arkKNuJVpyWHqs53cRGhD2gQNpVyQ7`.
+- API notes for the merchants app: `Mppx` comes from `mppx/server` and `mppx/client`; with one method use `mppx.sui.charge({ amount })`, which returns `(Request) => { status: 402, challenge } | { status: 200, withReceipt(response) }`. The README's `mppx.charge(...)(handler)` shape does not match 0.4.12. There is no ready Node http adapter (`NodeListener` only has `sendResponse`), so the script adapts `IncomingMessage` to `Request` by hand. A digest store is required (`InMemoryDigestStore` is fine for dev). Set `secretKey` and `realm` on `Mppx.create`.
+- **Tatum gRPC cannot be used as `rpcUrl` for `@suimpp/mpp`.** Two separate reasons: (1) without a key Tatum's gRPC host answers `RESOURCE_EXHAUSTED` (anonymous throttling), so the key is needed; (2) with the key sent, the host replies with content type `application/grpc` while `SuiGrpcClient` (and so `@suimpp/mpp`) speaks gRPC-web, error "unexpected response content type: application/grpc". Also `@suimpp/mpp` builds its client from `baseUrl` only, so it has no way to send the `x-api-key` header. With Tatum as `rpcUrl` the merchant answered 402 "Could not find the referenced transaction" even though the payment had landed. Side effect: that run still moved 0.01 testnet USDC from Agent A (digest `FLPg5bHeiE7F...`), a paid-but-refused payment; harmless on testnet but a real scenario on mainnet.
+- **Decision:** merchants verify with the package default fullnode. Fides' own payment verification (write rule and SPEC section 8 check 4) uses **Tatum GraphQL**. Tested on the payment above through the testnet gateway: `transaction(digest)` returned sender = Agent A, status SUCCESS, checkpoint 400173491, and balance changes of -10000 and +10000 raw USDC (0.01) between Agent A and the merchants wallet. That is everything section 8 needs (exists, final, sender, amount, recipient). Tatum is therefore on the agent's verification path, not the merchant's.
+- Not done: a mainnet payment (needs mainnet USDC and SUI in Agent A and gas in the merchants wallet), and the x402 dialect (not needed).
 
 ## Check 5: Move anchor on testnet (2026-10-28)
 
