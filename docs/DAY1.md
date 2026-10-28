@@ -8,7 +8,7 @@ Results of SPEC section 15. Record what was tried, what happened, and the fallba
 | 2 | Two delegate keys, one account, shared namespace | done | See "Check 2" below. Shared registry design confirmed. |
 | 3 | Tatum Sui: auth, JSON-RPC vs gRPC, event queries, `rpcUrl` for `@suimpp/mpp` | partial | See "Check 3" below. `rpcUrl` for `@suimpp/mpp` is tested in check 4. |
 | 4 | End-to-end MPP payment on Sui mainnet | todo | |
-| 5 | Publish Move anchor, emit event, read back via Tatum | todo | |
+| 5 | Publish Move anchor, emit event, read back via Tatum | testnet done | See "Check 5" below. Mainnet publish still to do. |
 | 6 | Sign and verify an evidence record | done | Offline. See below. Run: `node packages/evidence/day1-check6-signing.mjs` |
 | 7 | Hackathon rules: mainnet for Agent Payments award, how memories are counted | partial | See "Check 7" below. The linked Event Rules page was not readable. |
 | 8 | Fund a small test wallet | todo | |
@@ -55,6 +55,16 @@ Results of SPEC section 15. Record what was tried, what happened, and the fallba
 - **Observed: the gateway did not reject requests without a key** (GraphQL checkpoint and gRPC GetServiceInfo both answered with no key). Do not rely on that: it may be anonymous throttling, and the hackathon requires Tatum to be used with our key. Always send `x-api-key`.
 - Decision: read path is **GraphQL** through Tatum. SPEC section 8 said to prefer gRPC; the spec's fallback applies in part: events and finality come from Tatum GraphQL, gRPC stays an option for `@suimpp/mpp` verification (check 4). `.env` now has `TATUM_SUI_RPC_URL` pointing at the GraphQL URL (name kept from the spec) and `TATUM_SUI_GRPC_URL` at the gRPC host.
 - Rate limit: all probes were spaced at least 450 ms apart. Script: `packages/chain/day1-check3-tatum.mjs` (its JSON-RPC probes return 404, kept as the record of that finding).
+
+## Check 5: Move anchor on testnet (2026-10-28)
+
+- Module `packages/move/sources/anchor.move`: `report(merchant, evidence_sha256, pay_tx_digest, verdict)` emits `Report`. It aborts if the hash is not 32 bytes or the verdict is above 1. Compiles with Sui CLI 1.83.0 (downloaded from the MystenLabs GitHub release, 242.9 MB, kept in `~/.tools/sui-cli`, outside the repo).
+- Side effect to know about: the CLI creates its own default wallet in `~/.sui` on first run. We do not use it. Project keys stay in `.env` and are never imported into the CLI.
+- Publish and report are done by `packages/move/publish.mjs <testnet|mainnet>` with `@mysten/sui` 2.37 (`SuiGrpcClient`, `Transaction.publish`), signed by Agent A. The CLI is only used to compile. Testnet funds came from the CLI faucet command (1 SUI each to Agent A and the merchants wallet); the plain REST faucet URL I tried first returned 404.
+- Testnet results: package `0x1e58e339d2914686089424a956b34f22997d8cf5fac477f3604d05c027ae6b4a`, publish tx `72qRj4ceSoYzVpyp7MMjuFvDUPcHKD3oC52a2yZEFQRC`, test report tx `FPK8RHuG1y6AbWnwUTSYymV6M98WT8HLpRkNUBBdoWho`.
+- Read back through Tatum's **testnet** GraphQL with the testnet key, on the first try: `events(filter: { type: "<pkg>::anchor::Report" })` returned the event with `sender.address` equal to the publisher, and `contents.json` with the merchant string, the verdict, and the two `vector<u8>` fields **as base64** (the sha256 `cd33dc91...` came back as `zTPckTXz...`). Readers must base64-decode before comparing with the hex digest. `transaction(digest)` returned SUCCESS with a checkpoint.
+- So the full-type filter works (a bare `0x2::coin` filter did not, see check 3). The event query is the exact, public index the spec wants.
+- Still to do: publish on mainnet (`node packages/move/publish.mjs mainnet`, needs about 0.1 SUI in Agent A's mainnet wallet) and update the package ID for `FIDES_NETWORK=mainnet`.
 
 ## Check 7: hackathon rules (2026-10-26, https://recall-tatum-walrus.vercel.app/)
 
