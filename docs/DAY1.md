@@ -4,8 +4,8 @@ Results of SPEC section 15. Record what was tried, what happened, and the fallba
 
 | # | Check | Status | Notes |
 |---|---|---|---|
-| 1 | Walrus Memory write and recall on mainnet | todo | |
-| 2 | Two delegate keys, one account, shared namespace | todo | |
+| 1 | Walrus Memory write and recall on mainnet | done | See "Check 1" below. |
+| 2 | Two delegate keys, one account, shared namespace | done | See "Check 2" below. Shared registry design confirmed. |
 | 3 | Tatum Sui: auth, JSON-RPC vs gRPC, event queries, `rpcUrl` for `@suimpp/mpp` | todo | |
 | 4 | End-to-end MPP payment on Sui mainnet | todo | |
 | 5 | Publish Move anchor, emit event, read back via Tatum | todo | |
@@ -26,6 +26,22 @@ Results of SPEC section 15. Record what was tried, what happened, and the fallba
 - Verify: `verifyPersonalMessageSignature(bytes, signature)` from `@mysten/sui/verify` returns the signer's public key. Compare `publicKey.toSuiAddress()` to `reporter.suiAddress`. It throws "Signature is not valid for the provided message" on a tampered body.
 - Results: valid record verifies and the signer matches the reporter; a tampered body is rejected (throws); a record signed by a different key verifies but the signer does NOT match `reporter.suiAddress`, so the address comparison is mandatory.
 - Canonical JSON (sorted keys, no whitespace, floats rejected) and sha256 of the canonical bytes worked as in SPEC section 8.
+
+## Check 1: Walrus Memory write and recall (2026-10-28, mainnet relayer)
+
+- Done through the MemWal Claude Code plugin (`memwal-mcp` 0.0.16), not the SDK directly. Login is a browser wallet approval of an on-chain `add_delegate_key`; credentials land in `~/.memwal/credentials.json`.
+- `health`: status ok, relayer version 0.1.0, `write_ready=true`, relayer `https://relayer.memory.walrus.xyz`.
+- Write: `remember` returned ACCEPTED with a job id, not stored yet. The status call reported it saved after under 45 s, with a blob id, in namespace `fides-day1`. So a write is two steps (queue, then wait), as SPEC section 5 says.
+- Recall right after: the record came back, distance 0.320 for a loosely worded query. No fee was charged to us beyond the wallet approval gas. No rate limit hit in one write.
+- Not yet tested: the SDK path (`MemWal.create` with a hex delegate key), which the engine will use. This account is the one the plugin logged into, `MEMWAL_ACCOUNT_ID` in `.env` is set to it.
+
+## Check 2: two delegate keys, one account (2026-10-28, SDK `@mysten-incubation/memwal` 0.1.9)
+
+- Scripts: `packages/memory/day1-check2-delegates.mjs` (which keys the relayer accepts) and `packages/memory/day1-check2-share.mjs` (write with A, recall with B).
+- Two different delegate keys are accepted by the relayer on the one account: the plugin's login key and `WALRUS_PRIVATE_KEY`. `WEBAPP_DELEGATE_KEY` is rejected with a 401 (not registered on this account, or wrong account). In `.env`, `MEMWAL_KEY_A` is the plugin's delegate key and `MEMWAL_KEY_B` is `WALRUS_PRIVATE_KEY`.
+- Result: key A wrote a record in namespace `fides-day1` (queued in about 4 s, stored after about 35 s). Key B, a different key, recalled it in the same namespace on the first query (distance 0.33). So the shared Fides Registry design from SPEC section 5 works: one account, a delegate key per agent, one shared recall space.
+- Timing for the engine: a write takes tens of seconds to land, so `report()` must wait for the job and must not block the payment path.
+- Still open: these keys are reused from other setups. Before the demo, create dedicated delegate keys for the agents with `addDelegateKey` (needs the account owner wallet), and use a fresh account and a `merchants` namespace for the registry.
 
 ## Check 7: hackathon rules (2026-10-26, https://recall-tatum-walrus.vercel.app/)
 
