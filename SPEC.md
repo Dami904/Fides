@@ -480,3 +480,34 @@ Not verified (do these on day 1, section 15):
 - Whether the Agent Payments award requires mainnet, and exactly how memories are counted.
 - Exact `@mysten/sui` signing and verification helper names.
 - Exact Node minimum version for the memwal SDK.
+
+
+---
+
+## 24. Network profile: testnet first, mainnet for the submission (added 2026-10-28)
+
+Develop and rehearse on testnet where it is free, then run the real thing on mainnet. Nothing counts toward the hackathon until the mainnet runs.
+
+All network-specific values sit behind one setting, `FIDES_NETWORK=testnet|mainnet`, which picks: Walrus Memory relayer URL, Tatum gateway and key, Sui network, USDC coin type, anchor package ID. Switching must need no code changes.
+
+| Thing | Testnet | Mainnet |
+|---|---|---|
+| Walrus Memory relayer | `https://relayer-staging.memory.walrus.xyz` | `https://relayer.memory.walrus.xyz` |
+| Walrus Memory dashboard | `https://staging.memory.walrus.xyz` | `https://memory.walrus.xyz` |
+| Tatum Sui (GraphQL) | `https://sui-testnet.gateway.tatum.io/graphql`, testnet key | `https://sui-mainnet.gateway.tatum.io/graphql`, mainnet key |
+| Tatum Sui (gRPC) | `https://sui-testnet-grpc.gateway.tatum.io` | `https://sui-mainnet-grpc.gateway.tatum.io` |
+| Funds | Sui faucet, Circle faucet (https://faucet.circle.com) for USDC | Real SUI and USDC, cents |
+| Move anchor | publish on testnet | publish again, new package ID |
+
+Status of each line:
+- VERIFIED (2026-10-28): staging relayer and dashboard URLs are named in the Walrus Memory SDK quick start (https://docs.wal.app/walrus-memory/sdk/quick-start). Tatum testnet GraphQL answers with the testnet key. Tatum serves GraphQL and gRPC, not JSON-RPC (see `docs/DAY1.md` check 3).
+- UNVERIFIED: the staging relayer currently fails TLS from Node (certificate is for `*.up.railway.app`, not the staging host). Do not disable certificate checks. Retry later; if it stays broken, write Walrus Memory only on mainnet and keep the rest on testnet. Testnet USDC from the Circle faucet is not yet confirmed to be the coin type `@suimpp/mpp` accepts on testnet. The Tatum testnet gRPC host is assumed from the mainnet pattern.
+
+Do not carry over from testnet to mainnet:
+- Memories written on testnet do not count toward the 10 mainnet memories.
+- Create a separate mainnet Walrus Memory account and delegate keys.
+- Republish the Move anchor on mainnet and update the package ID.
+- Re-run the day 1 checks on mainnet once, early (target Nov 3), with tiny amounts. Mainnet fails in ways testnet does not: real USDC, relayer funding, rate limits.
+- The mainnet `MEMWAL_AGENT_ID` for the submission form comes from the mainnet dashboard. Where exactly it appears is UNVERIFIED: the SDK quick start does not mention `MEMWAL_AGENT_ID`. A note given to us says it is the public key under "Delegate keys" in the dashboard. Check in the dashboard before relying on it.
+
+Timing: testnet for days 1 to 4, real runs on mainnet by about Nov 3, so the 10+ mainnet memories exist well before the Nov 6 core freeze.
