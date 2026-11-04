@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-11-04T16:21:44.337Z",
+  "generatedAt": "2026-11-04T17:08:18.310Z",
   "mode": "sim",
   "network": "sim",
   "ok": true,
@@ -20,7 +20,7 @@
       "results": [
         {
           "agent": "A",
-          "url": "http://127.0.0.1:56063/data/prices",
+          "url": "http://127.0.0.1:56316/data/prices",
           "host": "good.fides-demo.test",
           "decision": "ASK",
           "approved": true,
@@ -36,7 +36,7 @@
               "payToMatchesPinned": true
             },
             "problems": [],
-            "responseHash": "8c95fba6a091f04a52ea6c3f1d6cba869b1972378975c01389fafb6e9dfcbc82",
+            "responseHash": "1b63a7f2a245f88141e8688cd08346d9629c2dd54043c51e69a9a076ddab2209",
             "responseBytes": 120
           },
           "check": {
@@ -63,7 +63,7 @@
             "pending": 0
           },
           "receipt": {
-            "evidenceId": "55faf4002508e76b92f002dbd6aff90112536186c479432110e2730dc50f49fb",
+            "evidenceId": "a5b9be9269020cac7cf23c60f4640b2d8f511b0a5d6940759df98905f9b9907d",
             "status": "complete",
             "steps": {
               "anchor": {
@@ -72,14 +72,14 @@
               },
               "memory": {
                 "ok": true,
-                "blobId": "blob-of-job-55faf400"
+                "blobId": "blob-of-job-a5b9be92"
               }
             }
           }
         },
         {
           "agent": "A",
-          "url": "http://127.0.0.1:56064/data/news",
+          "url": "http://127.0.0.1:56317/data/news",
           "host": "flaky.fides-demo.test",
           "decision": "ASK",
           "approved": true,
@@ -95,7 +95,7 @@
               "payToMatchesPinned": true
             },
             "problems": [],
-            "responseHash": "3ea2d3ae0d7e5c24d1fb045a7211fc4b6294e47b631946e26ffba839daadf0d4",
+            "responseHash": "0250ccd288830f0d17d7c07597874fa6decb0d66df1d09e5f9b56698e8f81612",
             "responseBytes": 146
           },
           "check": {
@@ -122,7 +122,7 @@
             "pending": 0
           },
           "receipt": {
-            "evidenceId": "b7b6e0a42b93c3e90872c4b2f30432567c1b9edcc87f4794e719aa035d3b0363",
+            "evidenceId": "d90ca52d53ca56e31662598ce8f10d58af522cee71db72638aec003c81415306",
             "status": "complete",
             "steps": {
               "anchor": {
@@ -131,14 +131,14 @@
               },
               "memory": {
                 "ok": true,
-                "blobId": "blob-of-job-b7b6e0a4"
+                "blobId": "blob-of-job-d90ca52d"
               }
             }
           }
         },
         {
           "agent": "A",
-          "url": "http://127.0.0.1:56065/data/signal",
+          "url": "http://127.0.0.1:56318/data/signal",
           "host": "malicious.fides-demo.test",
           "decision": "ASK",
           "approved": true,
@@ -154,7 +154,7 @@
               "payToMatchesPinned": true
             },
             "problems": [],
-            "responseHash": "20d0e8f1f9dfd5bfd8deeee017cdcc8bb5ecf67da95011925670e6fa91f57cb5",
+            "responseHash": "e1bb98f64f0a7606f80d9c95fa6f3b7875a752bc1d93af87bc8669e5f07c3975",
             "responseBytes": 104
           },
           "check": {
@@ -181,7 +181,7 @@
             "pending": 0
           },
           "receipt": {
-            "evidenceId": "9342cd98857ee25cd2d44afc4644719365bd18e9a6d16f868b75ca1972dd63d2",
+            "evidenceId": "9ba95f444c7c7f6d04a8a2b646187e1e3dcae6bde3ca60fb92d75accb411edd1",
             "status": "complete",
             "steps": {
               "anchor": {
@@ -190,7 +190,7 @@
               },
               "memory": {
                 "ok": true,
-                "blobId": "blob-of-job-9342cd98"
+                "blobId": "blob-of-job-9ba95f44"
               }
             }
           }
@@ -234,7 +234,7 @@
       "results": [
         {
           "agent": "A",
-          "url": "http://127.0.0.1:56064/data/news",
+          "url": "http://127.0.0.1:56317/data/news",
           "host": "flaky.fides-demo.test",
           "decision": "ASK",
           "approved": true,
@@ -253,7 +253,7 @@
               "schema is \"wrong/v0\", expected fides.news/v1",
               "data is missing or not an object"
             ],
-            "responseHash": "bd678abc7391f047ea1a208d2b934fdf84dd2c43891907cc5af8971acf5d2c29",
+            "responseHash": "d9006650e4b30d93cb4abe61930c463a9a13a1231a87d2937ea2bcf968849802",
             "responseBytes": 94
           },
           "check": {
@@ -267,12 +267,12 @@
               ],
               "citations": {
                 "evidenceIds": [
-                  "b7b6e0a42b93c3e90872c4b2f30432567c1b9edcc87f4794e719aa035d3b0363"
+                  "d90ca52d53ca56e31662598ce8f10d58af522cee71db72638aec003c81415306"
                 ],
                 "memoryBlobIds": []
               },
               "tier": "new",
-              "confidence": 0.13177876031114893,
+              "confidence": 0.13177876083565376,
               "cannotSay": true,
               "alerts": []
             },
@@ -282,7 +282,7 @@
             "pending": 0
           },
           "receipt": {
-            "evidenceId": "381ab15ed0b95c5a6b1cc31b9bfe48462f7ee2bf06dff24e0eece33f098ef3a3",
+            "evidenceId": "9360527c9890726ac4d0b59c7748c0706614aa79fb4ecc3be14a9c82d34be7ac",
             "status": "complete",
             "steps": {
               "anchor": {
@@ -291,7 +291,7 @@
               },
               "memory": {
                 "ok": true,
-                "blobId": "blob-of-job-381ab15e"
+                "blobId": "blob-of-job-9360527c"
               }
             }
           }
@@ -316,7 +316,7 @@
       "results": [
         {
           "agent": "C",
-          "url": "http://127.0.0.1:56064/data/news",
+          "url": "http://127.0.0.1:56317/data/news",
           "host": "flaky.fides-demo.test",
           "decision": "PAY_CAPPED",
           "approved": null,
@@ -334,7 +334,7 @@
             "problems": [
               "asOf is 3600 s old, maximum is 120 s"
             ],
-            "responseHash": "84986fe9a4d40fae08e076954463e4b5e621c8dbb96c1449116a2e09b2fc0261",
+            "responseHash": "7f05241b26c4422995d3bd657776657602b80bd82741a597f33cb205b185e557",
             "responseBytes": 146
           },
           "check": {
@@ -349,18 +349,18 @@
               ],
               "citations": {
                 "evidenceIds": [
-                  "381ab15ed0b95c5a6b1cc31b9bfe48462f7ee2bf06dff24e0eece33f098ef3a3"
+                  "9360527c9890726ac4d0b59c7748c0706614aa79fb4ecc3be14a9c82d34be7ac"
                 ],
                 "memoryBlobIds": []
               },
               "tier": "new",
-              "confidence": 0.19391623721840748,
+              "confidence": 0.1939162386515785,
               "cannotSay": false,
               "alerts": []
             },
             "decisionId": 1,
             "claim": {
-              "key": "C:flaky.fides-demo.test:1793809304199:1",
+              "key": "C:flaky.fides-demo.test:1793812098210:1",
               "status": "reserved"
             },
             "sharedState": "attached",
@@ -368,7 +368,7 @@
             "pending": 0
           },
           "receipt": {
-            "evidenceId": "aef07b22286e719ba5908af80eb7f2977964157f9ec74f557069101c958ae0b1",
+            "evidenceId": "e3c51c6a6148596f912afee19f7d610b515d44f0625660999fcc1c51f39d7468",
             "status": "complete",
             "steps": {
               "anchor": {
@@ -377,14 +377,14 @@
               },
               "memory": {
                 "ok": true,
-                "blobId": "blob-of-job-aef07b22"
+                "blobId": "blob-of-job-e3c51c6a"
               }
             }
           }
         },
         {
           "agent": "B",
-          "url": "http://127.0.0.1:56064/data/news",
+          "url": "http://127.0.0.1:56317/data/news",
           "host": "flaky.fides-demo.test",
           "decision": "REFUSE",
           "approved": null,
@@ -400,13 +400,13 @@
               ],
               "citations": {
                 "evidenceIds": [
-                  "381ab15ed0b95c5a6b1cc31b9bfe48462f7ee2bf06dff24e0eece33f098ef3a3",
-                  "aef07b22286e719ba5908af80eb7f2977964157f9ec74f557069101c958ae0b1"
+                  "9360527c9890726ac4d0b59c7748c0706614aa79fb4ecc3be14a9c82d34be7ac",
+                  "e3c51c6a6148596f912afee19f7d610b515d44f0625660999fcc1c51f39d7468"
                 ],
                 "memoryBlobIds": []
               },
               "tier": "burned",
-              "confidence": 0.24038475706413812,
+              "confidence": 0.24038475907355636,
               "cannotSay": false,
               "alerts": []
             },
@@ -446,7 +446,7 @@
       "results": [
         {
           "agent": "A",
-          "url": "http://127.0.0.1:56065/data/signal",
+          "url": "http://127.0.0.1:56318/data/signal",
           "host": "malicious.fides-demo.test",
           "decision": "REFUSE",
           "approved": null,
@@ -465,7 +465,7 @@
                 "memoryBlobIds": []
               },
               "tier": "new",
-              "confidence": 0.1498126254022388,
+              "confidence": 0.14981262802977832,
               "cannotSay": true,
               "alerts": [
                 {
@@ -483,7 +483,7 @@
         },
         {
           "agent": "B",
-          "url": "http://127.0.0.1:56065/data/signal",
+          "url": "http://127.0.0.1:56318/data/signal",
           "host": "malicious.fides-demo.test",
           "decision": "REFUSE",
           "approved": null,
@@ -503,7 +503,7 @@
                 "memoryBlobIds": []
               },
               "tier": "new",
-              "confidence": 0.13177875493497448,
+              "confidence": 0.1317787573608093,
               "cannotSay": true,
               "alerts": [
                 {
@@ -545,7 +545,7 @@
       "results": [
         {
           "agent": "B",
-          "url": "http://127.0.0.1:56064/data/news",
+          "url": "http://127.0.0.1:56317/data/news",
           "host": "flaky.fides-demo.test",
           "decision": "ASK",
           "approved": true,
@@ -564,7 +564,7 @@
               "schema is \"wrong/v0\", expected fides.news/v1",
               "data is missing or not an object"
             ],
-            "responseHash": "f9bcd5740a4766dc69705dd9ec0dd55413d3a90ed6648d5dee14afbfc4d90619",
+            "responseHash": "2ce48267037b27a0ed1266217bc93a71b061f51f41f073790968192deedee148",
             "responseBytes": 94
           },
           "check": {
@@ -591,7 +591,7 @@
             "pending": 0
           },
           "receipt": {
-            "evidenceId": "5b417c84e6b2c32e7c2a71eaa60b7209663d673f35a9cdcf0fba2216f0885b65",
+            "evidenceId": "f2a41d3c46634c4329ac4eb9490b8c3058d357a9b22f88809cdf1413de21365c",
             "status": "partial",
             "steps": {
               "anchor": {
@@ -637,11 +637,11 @@
       "checks": [],
       "notes": [
         "re-verify format        ok   well formed, 1076 bytes, canonical",
-        "re-verify hash          ok   sha256 b7b6e0a42b93c3e90872c4b2f30432567c1b9edcc87f4794e719aa035d3b0363 matches the Sui anchor",
-        "re-verify signature     ok   signed by reporter 0x0eb48552bd4de4dc47b687593daedcf2a4cf789491cd1dbfbf5161495f2177ae",
+        "re-verify hash          ok   sha256 d90ca52d53ca56e31662598ce8f10d58af522cee71db72638aec003c81415306 matches the Sui anchor",
+        "re-verify signature     ok   signed by reporter 0xcd1fd3c73d6ce88ad19306d091d1a5261202f53c5d4ce3426821e1bb06026786",
         "re-verify anchor-sender ok   anchor event sender equals the reporter",
-        "re-verify payment       ok   final in checkpoint 1002, sender is the reporter, 10000 paid to 0x7c6fa36c5469abe8e61e2532cee920e863950972cf6b9638d1a5476a63207bb4",
-        "forged record 9904358b: REJECTED, no anchor event found for this evidence (it may not be indexed yet)"
+        "re-verify payment       ok   final in checkpoint 1002, sender is the reporter, 10000 paid to 0x2806ae60964d666578bf1fe731683a5df03ef52c54aa13ca4c1212e736bd8383",
+        "forged record 4985c2a5: REJECTED, no anchor event found for this evidence (it may not be indexed yet)"
       ],
       "expectations": [
         {
@@ -681,14 +681,14 @@
               ],
               "citations": {
                 "evidenceIds": [
-                  "381ab15ed0b95c5a6b1cc31b9bfe48462f7ee2bf06dff24e0eece33f098ef3a3",
-                  "aef07b22286e719ba5908af80eb7f2977964157f9ec74f557069101c958ae0b1",
-                  "5b417c84e6b2c32e7c2a71eaa60b7209663d673f35a9cdcf0fba2216f0885b65"
+                  "9360527c9890726ac4d0b59c7748c0706614aa79fb4ecc3be14a9c82d34be7ac",
+                  "e3c51c6a6148596f912afee19f7d610b515d44f0625660999fcc1c51f39d7468",
+                  "f2a41d3c46634c4329ac4eb9490b8c3058d357a9b22f88809cdf1413de21365c"
                 ],
                 "memoryBlobIds": []
               },
               "tier": "burned",
-              "confidence": 0.31287555927267774,
+              "confidence": 0.3128755641799184,
               "cannotSay": false,
               "alerts": []
             },
@@ -697,7 +697,7 @@
             "rejected": [
               {
                 "blobId": "inj6",
-                "evidenceId": "9904358baee85e3fb11c67f143c262fd8107586f891a44a14ccde870d32b2083",
+                "evidenceId": "4985c2a5f29ef187d023f39c41dd7ba1c6c3b942e171a00d7bc30465f591c9bd",
                 "reason": "no anchor event found for this evidence (it may not be indexed yet)"
               }
             ],
@@ -717,12 +717,12 @@
               ],
               "citations": {
                 "evidenceIds": [
-                  "5b417c84e6b2c32e7c2a71eaa60b7209663d673f35a9cdcf0fba2216f0885b65"
+                  "f2a41d3c46634c4329ac4eb9490b8c3058d357a9b22f88809cdf1413de21365c"
                 ],
                 "memoryBlobIds": []
               },
               "tier": "new",
-              "confidence": 0.07053702099244444,
+              "confidence": 0.07053702140570653,
               "cannotSay": false,
               "alerts": []
             },
@@ -745,14 +745,14 @@
               ],
               "citations": {
                 "evidenceIds": [
-                  "381ab15ed0b95c5a6b1cc31b9bfe48462f7ee2bf06dff24e0eece33f098ef3a3",
-                  "aef07b22286e719ba5908af80eb7f2977964157f9ec74f557069101c958ae0b1",
-                  "5b417c84e6b2c32e7c2a71eaa60b7209663d673f35a9cdcf0fba2216f0885b65"
+                  "9360527c9890726ac4d0b59c7748c0706614aa79fb4ecc3be14a9c82d34be7ac",
+                  "e3c51c6a6148596f912afee19f7d610b515d44f0625660999fcc1c51f39d7468",
+                  "f2a41d3c46634c4329ac4eb9490b8c3058d357a9b22f88809cdf1413de21365c"
                 ],
                 "memoryBlobIds": []
               },
               "tier": "burned",
-              "confidence": 0.312875558656706,
+              "confidence": 0.31287556393352983,
               "cannotSay": false,
               "alerts": []
             },
@@ -761,7 +761,7 @@
             "rejected": [
               {
                 "blobId": "inj6",
-                "evidenceId": "9904358baee85e3fb11c67f143c262fd8107586f891a44a14ccde870d32b2083",
+                "evidenceId": "4985c2a5f29ef187d023f39c41dd7ba1c6c3b942e171a00d7bc30465f591c9bd",
                 "reason": "no anchor event found for this evidence (it may not be indexed yet)"
               }
             ],
@@ -799,10 +799,10 @@
     {
       "type": "challenge",
       "agent": "A",
-      "url": "http://127.0.0.1:56063/data/prices",
+      "url": "http://127.0.0.1:56316/data/prices",
       "host": "good.fides-demo.test",
       "amount": "0.01",
-      "recipient": "0x7c6fa36c5469abe8e61e2532cee920e863950972cf6b9638d1a5476a63207bb4"
+      "recipient": "0x2806ae60964d666578bf1fe731683a5df03ef52c54aa13ca4c1212e736bd8383"
     },
     {
       "type": "check",
@@ -841,7 +841,7 @@
       "agent": "A",
       "host": "good.fides-demo.test",
       "status": 200,
-      "latencyMs": 5,
+      "latencyMs": 6,
       "checks": {
         "schemaValid": true,
         "fresh": true,
@@ -856,16 +856,16 @@
       "agent": "A",
       "host": "good.fides-demo.test",
       "status": "complete",
-      "evidenceId": "55faf4002508e76b92f002dbd6aff90112536186c479432110e2730dc50f49fb",
+      "evidenceId": "a5b9be9269020cac7cf23c60f4640b2d8f511b0a5d6940759df98905f9b9907d",
       "verdict": "clean"
     },
     {
       "type": "challenge",
       "agent": "A",
-      "url": "http://127.0.0.1:56064/data/news",
+      "url": "http://127.0.0.1:56317/data/news",
       "host": "flaky.fides-demo.test",
       "amount": "0.01",
-      "recipient": "0x7c6fa36c5469abe8e61e2532cee920e863950972cf6b9638d1a5476a63207bb4"
+      "recipient": "0x2806ae60964d666578bf1fe731683a5df03ef52c54aa13ca4c1212e736bd8383"
     },
     {
       "type": "check",
@@ -904,7 +904,7 @@
       "agent": "A",
       "host": "flaky.fides-demo.test",
       "status": 200,
-      "latencyMs": 4,
+      "latencyMs": 3,
       "checks": {
         "schemaValid": true,
         "fresh": true,
@@ -919,16 +919,16 @@
       "agent": "A",
       "host": "flaky.fides-demo.test",
       "status": "complete",
-      "evidenceId": "b7b6e0a42b93c3e90872c4b2f30432567c1b9edcc87f4794e719aa035d3b0363",
+      "evidenceId": "d90ca52d53ca56e31662598ce8f10d58af522cee71db72638aec003c81415306",
       "verdict": "clean"
     },
     {
       "type": "challenge",
       "agent": "A",
-      "url": "http://127.0.0.1:56065/data/signal",
+      "url": "http://127.0.0.1:56318/data/signal",
       "host": "malicious.fides-demo.test",
       "amount": "0.01",
-      "recipient": "0x7c6fa36c5469abe8e61e2532cee920e863950972cf6b9638d1a5476a63207bb4"
+      "recipient": "0x2806ae60964d666578bf1fe731683a5df03ef52c54aa13ca4c1212e736bd8383"
     },
     {
       "type": "check",
@@ -967,7 +967,7 @@
       "agent": "A",
       "host": "malicious.fides-demo.test",
       "status": 200,
-      "latencyMs": 5,
+      "latencyMs": 3,
       "checks": {
         "schemaValid": true,
         "fresh": true,
@@ -982,16 +982,16 @@
       "agent": "A",
       "host": "malicious.fides-demo.test",
       "status": "complete",
-      "evidenceId": "9342cd98857ee25cd2d44afc4644719365bd18e9a6d16f868b75ca1972dd63d2",
+      "evidenceId": "9ba95f444c7c7f6d04a8a2b646187e1e3dcae6bde3ca60fb92d75accb411edd1",
       "verdict": "clean"
     },
     {
       "type": "challenge",
       "agent": "A",
-      "url": "http://127.0.0.1:56064/data/news",
+      "url": "http://127.0.0.1:56317/data/news",
       "host": "flaky.fides-demo.test",
       "amount": "0.01",
-      "recipient": "0x7c6fa36c5469abe8e61e2532cee920e863950972cf6b9638d1a5476a63207bb4"
+      "recipient": "0x2806ae60964d666578bf1fe731683a5df03ef52c54aa13ca4c1212e736bd8383"
     },
     {
       "type": "check",
@@ -1005,14 +1005,14 @@
         "cannot say: not enough history to classify this merchant"
       ],
       "evidenceIds": [
-        "b7b6e0a42b93c3e90872c4b2f30432567c1b9edcc87f4794e719aa035d3b0363"
+        "d90ca52d53ca56e31662598ce8f10d58af522cee71db72638aec003c81415306"
       ],
       "memoryBlobIds": [],
       "sharedState": "attached",
       "rejected": 0,
       "pending": 0,
       "tier": "new",
-      "confidence": 0.13177876031114893,
+      "confidence": 0.13177876083565376,
       "cannotSay": true
     },
     {
@@ -1032,7 +1032,7 @@
       "agent": "A",
       "host": "flaky.fides-demo.test",
       "status": 200,
-      "latencyMs": 4,
+      "latencyMs": 2,
       "checks": {
         "schemaValid": false,
         "fresh": true,
@@ -1050,16 +1050,16 @@
       "agent": "A",
       "host": "flaky.fides-demo.test",
       "status": "complete",
-      "evidenceId": "381ab15ed0b95c5a6b1cc31b9bfe48462f7ee2bf06dff24e0eece33f098ef3a3",
+      "evidenceId": "9360527c9890726ac4d0b59c7748c0706614aa79fb4ecc3be14a9c82d34be7ac",
       "verdict": "burned"
     },
     {
       "type": "challenge",
       "agent": "C",
-      "url": "http://127.0.0.1:56064/data/news",
+      "url": "http://127.0.0.1:56317/data/news",
       "host": "flaky.fides-demo.test",
       "amount": "0.01",
-      "recipient": "0x7c6fa36c5469abe8e61e2532cee920e863950972cf6b9638d1a5476a63207bb4"
+      "recipient": "0x2806ae60964d666578bf1fe731683a5df03ef52c54aa13ca4c1212e736bd8383"
     },
     {
       "type": "check",
@@ -1073,14 +1073,14 @@
         "one other reporter has a verified burn for this merchant: small payments only"
       ],
       "evidenceIds": [
-        "381ab15ed0b95c5a6b1cc31b9bfe48462f7ee2bf06dff24e0eece33f098ef3a3"
+        "9360527c9890726ac4d0b59c7748c0706614aa79fb4ecc3be14a9c82d34be7ac"
       ],
       "memoryBlobIds": [],
       "sharedState": "attached",
       "rejected": 0,
       "pending": 0,
       "tier": "new",
-      "confidence": 0.19391623721840748,
+      "confidence": 0.1939162386515785,
       "cannotSay": false
     },
     {
@@ -1111,16 +1111,16 @@
       "agent": "C",
       "host": "flaky.fides-demo.test",
       "status": "complete",
-      "evidenceId": "aef07b22286e719ba5908af80eb7f2977964157f9ec74f557069101c958ae0b1",
+      "evidenceId": "e3c51c6a6148596f912afee19f7d610b515d44f0625660999fcc1c51f39d7468",
       "verdict": "burned"
     },
     {
       "type": "challenge",
       "agent": "B",
-      "url": "http://127.0.0.1:56064/data/news",
+      "url": "http://127.0.0.1:56317/data/news",
       "host": "flaky.fides-demo.test",
       "amount": "0.01",
-      "recipient": "0x7c6fa36c5469abe8e61e2532cee920e863950972cf6b9638d1a5476a63207bb4"
+      "recipient": "0x2806ae60964d666578bf1fe731683a5df03ef52c54aa13ca4c1212e736bd8383"
     },
     {
       "type": "check",
@@ -1134,15 +1134,15 @@
         "2 independent reporters have verified burns for this merchant"
       ],
       "evidenceIds": [
-        "381ab15ed0b95c5a6b1cc31b9bfe48462f7ee2bf06dff24e0eece33f098ef3a3",
-        "aef07b22286e719ba5908af80eb7f2977964157f9ec74f557069101c958ae0b1"
+        "9360527c9890726ac4d0b59c7748c0706614aa79fb4ecc3be14a9c82d34be7ac",
+        "e3c51c6a6148596f912afee19f7d610b515d44f0625660999fcc1c51f39d7468"
       ],
       "memoryBlobIds": [],
       "sharedState": "attached",
       "rejected": 0,
       "pending": 0,
       "tier": "burned",
-      "confidence": 0.24038475706413812,
+      "confidence": 0.24038475907355636,
       "cannotSay": false
     },
     {
@@ -1154,10 +1154,10 @@
     {
       "type": "challenge",
       "agent": "A",
-      "url": "http://127.0.0.1:56065/data/signal",
+      "url": "http://127.0.0.1:56318/data/signal",
       "host": "malicious.fides-demo.test",
       "amount": "0.04",
-      "recipient": "0x793d71ed9eac4ab3187ecd0d951f56f0e91b0e1cfe6ee1bcf6aec1dbc48ce62f"
+      "recipient": "0x0752c967e2aed9135313c5a743557c70b8f7c62adf7ab16e52f428ae63a07dd2"
     },
     {
       "type": "check",
@@ -1176,7 +1176,7 @@
       "rejected": 0,
       "pending": 0,
       "tier": "new",
-      "confidence": 0.1498126254022388,
+      "confidence": 0.14981262802977832,
       "cannotSay": true
     },
     {
@@ -1188,10 +1188,10 @@
     {
       "type": "challenge",
       "agent": "B",
-      "url": "http://127.0.0.1:56065/data/signal",
+      "url": "http://127.0.0.1:56318/data/signal",
       "host": "malicious.fides-demo.test",
       "amount": "0.04",
-      "recipient": "0x793d71ed9eac4ab3187ecd0d951f56f0e91b0e1cfe6ee1bcf6aec1dbc48ce62f"
+      "recipient": "0x0752c967e2aed9135313c5a743557c70b8f7c62adf7ab16e52f428ae63a07dd2"
     },
     {
       "type": "check",
@@ -1211,7 +1211,7 @@
       "rejected": 0,
       "pending": 0,
       "tier": "new",
-      "confidence": 0.13177875493497448,
+      "confidence": 0.1317787573608093,
       "cannotSay": true
     },
     {
@@ -1223,10 +1223,10 @@
     {
       "type": "challenge",
       "agent": "B",
-      "url": "http://127.0.0.1:56064/data/news",
+      "url": "http://127.0.0.1:56317/data/news",
       "host": "flaky.fides-demo.test",
       "amount": "0.01",
-      "recipient": "0x7c6fa36c5469abe8e61e2532cee920e863950972cf6b9638d1a5476a63207bb4"
+      "recipient": "0x2806ae60964d666578bf1fe731683a5df03ef52c54aa13ca4c1212e736bd8383"
     },
     {
       "type": "check",
@@ -1265,7 +1265,7 @@
       "agent": "B",
       "host": "flaky.fides-demo.test",
       "status": 200,
-      "latencyMs": 3,
+      "latencyMs": 2,
       "checks": {
         "schemaValid": false,
         "fresh": true,
@@ -1283,7 +1283,7 @@
       "agent": "B",
       "host": "flaky.fides-demo.test",
       "status": "partial",
-      "evidenceId": "5b417c84e6b2c32e7c2a71eaa60b7209663d673f35a9cdcf0fba2216f0885b65",
+      "evidenceId": "f2a41d3c46634c4329ac4eb9490b8c3058d357a9b22f88809cdf1413de21365c",
       "verdict": "burned"
     },
     {

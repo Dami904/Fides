@@ -76,7 +76,7 @@ export function Simulation({ api }: { api: FidesApi }) {
       <div className="kpis">
         <div><b className="green">{b.burns - a.burns}<span className="muted"> of {b.burns}</span></b><span>burns avoided so far</span></div>
         <div><b className="green">{b.burns ? `${Math.round((100 * (b.burns - a.burns)) / b.burns)}%` : '0%'}</b><span>fewer burns with the record</span></div>
-        <div><b>{goodRefused}</b><span>good merchants refused</span></div>
+        <div><b>{goodRefused}</b><span>times a good merchant was refused</span></div>
         <div><b>{round}<span className="muted">/{rounds}</span></b><span>round</span></div>
       </div>
       <div className="controls">
@@ -115,7 +115,7 @@ export function Simulation({ api }: { api: FidesApi }) {
           </tbody>
         </table>
       </details>
-      <footer className="note">Recorded simulation, seed {sim.seed}. Settlement is simulated; the engine, the signed evidence and the checks are real. Over three seeds the totals are 6 burns with the shared record and 44 without.</footer>
+      <footer className="note">{api.mode === 'live' ? 'Simulation run when this server started' : 'Recorded simulation'}, seed {sim.seed}. Settlement is simulated; the engine, the signed evidence and the checks are real. Over three seeds (<code>pnpm sim</code>) the totals are 6 burns with the shared record and 44 without, and no good merchant refused.</footer>
     </>
   );
 }

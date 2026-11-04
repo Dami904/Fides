@@ -4,7 +4,7 @@ import { Chip, Stamp, useLoad } from '../components';
 import { href, short, usd } from '../lib';
 
 const STEPS: [string, string, string][] = [
-  ['01', 'Check', 'Before an agent pays a merchant, it asks Fides. Seven rules weigh its own history and the shared record: budget, payout address, price spikes, verified burns, similar incidents, tier.'],
+  ['01', 'Check', 'Before an agent pays a merchant, it asks Fides. Seven rules weigh its own history and the shared record: budget, payout address, price spikes, burns other agents reported, its own burns, similar incidents at other merchants, and tier.'],
   ['02', 'Pay, ask or refuse', 'The answer comes with its reasons and the exact records it relied on. Too little history is "cannot say", and the agent asks a person instead of guessing.'],
   ['03', 'Report', 'After paying, the agent signs what it got. The hash is anchored on Sui, the payment is checked through Tatum, and the record joins the shared memory on Walrus.'],
 ];
@@ -53,7 +53,7 @@ const FAQ: [string, string][] = [
   ['Can a merchant fake good reports, or a rival fake bad ones?', 'Every record must be signed by its reporter, anchored on Sui by the same key, and backed by a real payment. Each reporter\'s influence is capped. Forged records are shown and never counted.'],
   ['What happens to a new merchant with no history?', 'Fides says "cannot say" and the agent asks a person. It never turns missing data into a guess in either direction.'],
   ['What if the shared record is down?', 'That is reported as unreachable, not as "no reports". The agent falls back to its own history and will not pay on its own.'],
-  ['Is any data deleted when an agent is detached?', 'No. Detaching removes the agent\'s access to the shared record. Nothing is deleted.'],
+  ['Is any data deleted when an agent is detached?', 'No. Detaching removes the agent\'s access to the shared record. Nothing is deleted. What it reports while detached is kept, and written to the shared record once it is attached again.'],
 ];
 
 const SCREENS: [string, string, string][] = [
@@ -113,7 +113,7 @@ export function Home({ api }: { api: FidesApi }) {
         <section className="figures" aria-label="Results from the recorded simulation">
           <div><b>{s.shared.burns}<span> vs {s.detached.burns}</span></b><span>burns with and without the shared record</span></div>
           <div><b className="green">{s.detached.burns ? Math.round((100 * avoided) / s.detached.burns) : 0}%</b><span>of burns avoided in this run</span></div>
-          <div><b>{goodRefused}</b><span>good merchants refused</span></div>
+          <div><b>{goodRefused}</b><span>times a good merchant was refused</span></div>
           <div><b>5</b><span>checks on every record, at read time</span></div>
         </section>
       )}
@@ -159,14 +159,19 @@ export function Home({ api }: { api: FidesApi }) {
       </section>
 
       <section className="block honest">
-        <div className="block-head"><span className="eyebrow">What you are looking at</span><h2>Recorded, and labelled as such</h2></div>
-        <p className="muted">These pages replay a recorded run of the real engine: the verdicts, signatures and checks are the engine's own output. Settlement in this run is simulated. The same engine has run on Sui testnet with real payments; the label at the top right says what is real on each page.</p>
+        <div className="block-head"><span className="eyebrow">What you are looking at</span><h2>{api.mode === 'live' ? 'A fresh run, labelled as such' : 'Recorded, and labelled as such'}</h2></div>
+        <p className="muted">
+          {api.mode === 'live'
+            ? `These pages show the run the engine made when this server started, and Re-verify checks records now. Settlement in this run: ${api.honesty().items.find((i) => i.key === 'Settlement')?.value ?? 'see the label'}.`
+            : "These pages replay a recorded run of the real engine: the verdicts, signatures and checks are the engine's own output. Settlement in this run is simulated."}{' '}
+          The same engine has also run on Sui testnet and Sui mainnet with real USDC payments. The label at the top right says what is real on each page.
+        </p>
         {s && <p className="muted tiny mono">simulation seed {s.seed} · {s.shared.config.agents} agents · {s.shared.config.rounds} rounds · run {short(s.generatedAt, 10)}</p>}
       </section>
 
       <section className="final-cta">
         <h2>Watch one agent learn from another's loss.</h2>
-        <p className="muted">Agent A gets burned. Agent B has never met the merchant, reads A's signed record, and refuses.</p>
+        <p className="muted">Agents A and C get burned. Agent B has never met the merchant, reads their signed records, and refuses.</p>
         <div className="cta"><a className="btn primary" href={href.split}>Open the A / B split</a><a className="btn ghost" href={href.simulation}>See the simulation</a></div>
       </section>
     </main>

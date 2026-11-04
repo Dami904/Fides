@@ -37,7 +37,7 @@ export interface SimConfig {
   fides?: Partial<FidesConfig>;
 }
 
-export const DEFAULT_SIM: SimConfig = { agents: 20, rounds: 12, seed: 1, mode: 'shared', pApprove: 0.8, turnAtRound: 6, flakyRate: 0.4, maxLatencyMs: 150, lateMs: 400 };
+export const DEFAULT_SIM: SimConfig = { agents: 20, rounds: 12, seed: 1, mode: 'shared', pApprove: 0.8, turnAtRound: 6, flakyRate: 0.4, maxLatencyMs: 400, lateMs: 1500 };
 
 export interface SimEvent {
   round: number;

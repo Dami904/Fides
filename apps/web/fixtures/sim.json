@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-11-04T16:22:05.769Z",
+  "generatedAt": "2026-11-04T17:08:42.090Z",
   "seed": 1,
   "shared": {
     "config": {
@@ -10,8 +10,8 @@
       "pApprove": 0.8,
       "turnAtRound": 6,
       "flakyRate": 0.4,
-      "maxLatencyMs": 150,
-      "lateMs": 400
+      "maxLatencyMs": 400,
+      "lateMs": 1500
     },
     "burns": 2,
     "paid": 174,
@@ -3161,8 +3161,8 @@
       "pApprove": 0.8,
       "turnAtRound": 6,
       "flakyRate": 0.4,
-      "maxLatencyMs": 150,
-      "lateMs": 400
+      "maxLatencyMs": 400,
+      "lateMs": 1500
     },
     "burns": 17,
     "paid": 192,
