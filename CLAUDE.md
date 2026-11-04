@@ -33,7 +33,7 @@ No em dashes in docs or user-facing copy. Direct, plain language.
 pnpm install
 pnpm test                        # all tests, no network, no keys (live tests need FIDES_LIVE=1, slow ones FIDES_SLOW=1)
 pnpm typecheck                   # tsc -b over every package and app
-pnpm check:secrets               # scan staged files for key-like strings
+pnpm check:secrets               # scan staged files for key-like strings (check:secrets:all scans every tracked file, as CI does)
 
 pnpm merchants                   # the three mock merchants on 127.0.0.1:4101-4103
 pnpm demo                        # the scripted demo, simulated, no network
@@ -47,10 +47,11 @@ pnpm day1:mainnet:run            # spends cents: one MPP payment and one anchor 
 ```
 
 ```bash
-pnpm mockups                     # the four UI mockups on http://127.0.0.1:4400/ (open /mockups/index.html)
+pnpm web                         # the UI (React and Vite) on fixtures; pnpm web:build builds it
+pnpm mockups                     # the four early UI mockups on http://127.0.0.1:4400/ (open /mockups/index.html)
 pnpm fixtures                    # re-export the real demo and simulation data the mockups read (apps/web/fixtures)
 ```
 
-Run a single package's tests with `node node_modules/vitest/vitest.mjs run packages/core`. `apps/web` holds the UI mockups (static HTML, dark technical style, built on real fixtures); the production UI is not built yet.
+Run a single package's tests with `node node_modules/vitest/vitest.mjs run packages/core`. `apps/web` holds the UI: a React app (landing page, decision feed and detail, A/B split, merchants, evidence with Re-verify, simulation) built against the `FidesApi` interface and running on recorded fixtures from the real engine. It is not connected to live data yet. The static mockups in `apps/web/mockups` came first and are kept for reference.
 
 Where things are: the engine is `packages/core`, the loop is `packages/sdk` (`fides.check` and `fides.report`), the network is picked by `FIDES_NETWORK` through `packages/chain/networks.json`. `docs/ASSUMPTIONS.md` is the log of what is verified and what is not: update it whenever something unverified is relied on.
