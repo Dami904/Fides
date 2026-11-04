@@ -68,6 +68,13 @@ console.log(`  USDC ${fmt(usdc, 6)}  (needs at least ${fmt(MIN_USDC, 6)})`);
 if (sui < MIN_SUI) problems.push(`Agent A needs about ${fmt(MIN_SUI - sui, 9)} more SUI on mainnet (send 0.2 SUI to ${agentA})`);
 if (usdc < MIN_USDC) problems.push(`Agent A needs about ${fmt(MIN_USDC - usdc, 6)} more Sui mainnet USDC (send 1 USDC to ${agentA})`);
 
+// Spending twice is the one mistake this script can make: refuse --yes once mainnet results exist.
+const deployed = JSON.parse(readFileSync(root + 'packages/move/deployments.json', 'utf8')).mainnet;
+const logged = existsSync(root + 'docs/DAY1.md') && readFileSync(root + 'docs/DAY1.md', 'utf8').includes('## Mainnet runs');
+if (deployed) console.log(`mainnet anchor already published: package ${deployed.packageId}`);
+if (logged) console.log('docs/DAY1.md already has a "Mainnet runs" section');
+if (go && (deployed || logged)) problems.push('mainnet checks 4 and 5 already ran. Running again would pay and publish twice. Remove the mainnet entry from packages/move/deployments.json and the section from docs/DAY1.md first if that is really wanted');
+
 const dry = run('compile the anchor and check the publisher (no spend)', 'packages/move/publish.mjs', ['mainnet', '--dry']);
 if (!dry.ok) problems.push('the Move anchor did not compile; see output above');
 

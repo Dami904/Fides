@@ -67,5 +67,9 @@ if (receipt) {
   const r = JSON.parse(Buffer.from(receipt, 'base64url').toString());
   console.log('PAYMENT_DIGEST', r.reference);
 }
+// Set the code and let Node exit by itself: process.exit straight after a gRPC call can trip a libuv assertion on
+// Windows and exit 127, which would make a good payment look failed. The timer only fires if something keeps the
+// process alive.
+process.exitCode = res.status === 200 ? 0 : 1;
 server.close();
-process.exit(res.status === 200 ? 0 : 1);
+setTimeout(() => process.exit(), 1000).unref();
