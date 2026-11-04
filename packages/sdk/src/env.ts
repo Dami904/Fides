@@ -8,6 +8,7 @@ import { createMemwalBackend, memwalConfigFromEnv, SharedRecord, type MemoryBack
 import { openState } from '@fides/state';
 import { SuiAnchorer } from './anchor.js';
 import { Fides } from './fides.js';
+import { jsonLogger, type Logger } from './log.js';
 
 export interface FidesFromEnvOptions {
   /** SQLite file. Defaults to FIDES_DB_PATH_<AGENT>, then ./fides-<agent>.sqlite. ":memory:" for tests. */
@@ -16,6 +17,8 @@ export interface FidesFromEnvOptions {
   memory?: MemoryBackend;
   /** Override engine thresholds (calibration). The daily cap still comes from FIDES_DAILY_CAP_USD. */
   config?: Partial<FidesConfig>;
+  /** Structured logs. Default: JSON lines on stderr when FIDES_LOG=json, otherwise none. */
+  log?: Logger;
 }
 
 /**
@@ -45,5 +48,6 @@ export function fidesFromEnv(env: Record<string, string | undefined>, agent: str
     agentId: agent,
     anchorPackageId: packageId,
     networkName: `sui-${network.name}`,
+    ...(o.log ? { log: o.log } : env.FIDES_LOG === 'json' ? { log: jsonLogger() } : {}),
   });
 }

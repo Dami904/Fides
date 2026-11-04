@@ -24,6 +24,7 @@ import { buildSituationQuery, type RecalledReport, type SharedRecord, type Share
 import type { AnchorEvent } from '@fides/chain';
 import type { EvidenceRow, FidesState } from '@fides/state';
 import type { Anchorer } from './anchor.js';
+import { silentLogger, type Logger } from './log.js';
 import { ReportVerifier, reportTimeMs, type ChainApi, type IngestResult } from './verifier.js';
 
 export type { ChainApi } from './verifier.js';
@@ -41,6 +42,8 @@ export interface FidesDeps {
   /** Written into evidence as payment.network, for example "sui-mainnet". */
   networkName: string;
   now?: () => number;
+  /** Structured logs for payments, claims, reports and verification. Silent by default. */
+  log?: Logger;
 }
 
 export interface Outcome {
@@ -166,10 +169,13 @@ export class Fides {
   private d: FidesDeps;
   private now: () => number;
   private verifier: ReportVerifier;
+  /** The structured logger (silent unless one was given). Callers around the payment, like the agent, log through it too. */
+  readonly log: Logger;
 
   constructor(deps: FidesDeps) {
     this.d = deps;
     this.now = deps.now ?? (() => Date.now());
+    this.log = deps.log ?? silentLogger;
     this.verifier = new ReportVerifier({ state: deps.state, chain: deps.chain, anchorPackageId: deps.anchorPackageId, maxEvidenceBytes: deps.config.maxEvidenceBytes });
   }
 
@@ -209,7 +215,9 @@ export class Fides {
    * Nothing is lost: the spend is already counted. Evidence for it exists only once retryUnreported() succeeds.
    */
   queueUnreported(o: Outcome, error: string): void {
-    this.d.state.queueUnreported(o.idempotencyKey ?? `tx:${o.txDigest}`, JSON.stringify(o), error, this.now());
+    const key = o.idempotencyKey ?? `tx:${o.txDigest}`;
+    this.d.state.queueUnreported(key, JSON.stringify(o), error, this.now());
+    this.log({ level: 'warn', op: 'report.queued', msg: 'paid but not fully reported, queued for retry', key, host: o.merchantHost, txDigest: o.txDigest, err: error });
   }
 
   /** Payments waiting to be reported. */
@@ -227,14 +235,17 @@ export class Fides {
           // Still not anchored or not shared: keep it queued, with the step that failed.
           const why = [r.steps.anchor.error, r.steps.memory.error, r.steps.memory.skipped].filter(Boolean).join('; ') || 'report only partly written';
           this.d.state.queueUnreported(q.key, JSON.stringify(q.outcome), why, this.now());
+          this.log({ level: 'warn', op: 'report.retry', msg: 'still only partly reported, kept queued', key: q.key, evidenceId: r.evidenceId, txDigest: q.outcome.txDigest, err: why });
           out.push({ key: q.key, reported: false, error: why });
           continue;
         }
         this.d.state.clearUnreported(q.key);
+        this.log({ level: 'info', op: 'report.retry', msg: 'queued payment reported', key: q.key, evidenceId: r.evidenceId, txDigest: q.outcome.txDigest });
         out.push({ key: q.key, reported: true });
       } catch (e) {
         const msg = (e as Error).message;
         this.d.state.queueUnreported(q.key, JSON.stringify(q.outcome), msg, this.now());
+        this.log({ level: 'warn', op: 'report.retry', msg: 'retry failed, kept queued', key: q.key, txDigest: q.outcome.txDigest, err: msg });
         out.push({ key: q.key, reported: false, error: msg });
       }
     }
@@ -244,6 +255,7 @@ export class Fides {
   /** Release a reserved spend whose payment certainly never happened. */
   release(idempotencyKey: string): void {
     this.d.state.settle(idempotencyKey, 'failed');
+    this.log({ level: 'info', op: 'claim.released', msg: 'no payment was made, spend released', key: idempotencyKey });
   }
 
   /**
@@ -253,6 +265,7 @@ export class Fides {
    */
   markUnknown(idempotencyKey: string): void {
     this.d.state.settle(idempotencyKey, 'unknown');
+    this.log({ level: 'error', op: 'payment.unknown', msg: 'payment outcome unknown, spend kept: reconcile against the chain', key: idempotencyKey });
   }
 
   /** Payments whose outcome is not known yet, oldest first: reconcile each against the chain. */
@@ -289,9 +302,15 @@ export class Fides {
       rejected.push(...recall.rejected);
       const known = new Map(state.listEvidence(host).map((r) => [r.evidenceId, r]));
       for (const rep of recall.forHost) {
-        const r = await this.ingest(rep, host, known.get(rep.header.sha256), now);
-        if (r.kind === 'rejected') rejected.push({ blobId: rep.blobId, evidenceId: rep.header.sha256, reason: r.reason });
-        else if (r.kind === 'pending') pending++;
+        const before = known.get(rep.header.sha256);
+        const r = await this.ingest(rep, host, before, now);
+        if (r.kind === 'rejected') {
+          rejected.push({ blobId: rep.blobId, evidenceId: rep.header.sha256, reason: r.reason });
+          if (before?.status !== 'rejected') this.log({ level: 'warn', op: 'evidence.rejected', msg: 'shared report failed verification', host, evidenceId: rep.header.sha256, err: r.reason });
+        } else if (r.kind === 'pending') {
+          pending++;
+          this.log({ level: 'warn', op: 'evidence.pending', msg: 'shared report could not be checked yet', host, evidenceId: rep.header.sha256, err: r.reason });
+        }
       }
     }
 
@@ -491,7 +510,10 @@ export class Fides {
         steps.memory = { ok: false, error: (e as Error).message };
       }
     }
-    return { evidenceId, status: steps.anchor.ok && steps.memory.ok ? 'complete' : 'partial', steps };
+    const status = steps.anchor.ok && steps.memory.ok ? 'complete' : 'partial';
+    const err = [steps.anchor.error, steps.memory.error].filter(Boolean).join('; ') || undefined;
+    this.log({ level: status === 'complete' ? 'info' : 'warn', op: 'report.done', msg: `report ${status}`, key: claimKey, host, evidenceId, txDigest: o.txDigest, ...(err ? { err } : {}) });
+    return { evidenceId, status, steps };
   }
 
   // ------------------------------------------------------------------ lookup

@@ -163,6 +163,7 @@ describe('reporting retries only while finality lags', () => {
       release: () => undefined,
       queueUnreported: (_o: unknown, e: string) => queued.push(e),
       lookup: () => ({ pinnedPayTo: null }),
+      log: () => undefined,
       report: async () => {
         const e = errors[calls++];
         if (e) throw new Error(e);

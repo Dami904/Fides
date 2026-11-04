@@ -4,3 +4,4 @@ export { ReportVerifier, NO_ANCHOR, RECHECK_AFTER_MS, reportTimeMs, duplicateRea
 export * from './env.js';
 export * from './response.js';
 export * as testing from './testing.js';
+export { jsonLogger, silentLogger, type Logger, type LogEvent } from './log.js';

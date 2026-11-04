@@ -196,6 +196,7 @@ export class PayingAgent {
       return fail(`payment outcome unknown, spend kept until reconciled: ${(e as Error).message}`, host, { decision: v.decision, approved, check });
     }
     this.emit({ type: 'paid', agent, host, txDigest });
+    this.o.fides.log({ level: 'info', op: 'payment.sent', msg: `${agent} paid ${challenge.amount}`, key, host, txDigest });
 
     // 5. The paid request, with a deadline. No answer in time is a failure to deliver, not an error.
     const t0 = this.o.now();
@@ -206,8 +207,9 @@ export class PayingAgent {
       status = res.status;
       const text = await res.text();
       bodyText = res.status === 200 ? text : null;
-    } catch {
-      bodyText = null; // timed out or connection lost after paying
+    } catch (e) {
+      bodyText = null; // timed out or connection lost after paying: judged below as a failure to deliver
+      this.o.fides.log({ level: 'warn', op: 'response.failed', msg: 'no answer after paying', key, host, txDigest, err: (e as Error).message });
     }
     const latencyMs = this.o.now() - t0;
 

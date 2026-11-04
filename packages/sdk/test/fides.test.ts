@@ -5,6 +5,7 @@ import { formatMemory } from '@fides/memory';
 import { assessMerchant, loadConfig } from '@fides/core';
 import { agreedPayTo, classifyBurn, derivePatterns, ReportError } from '../src/fides.js';
 import { reportTimeMs } from '../src/verifier.js';
+import { jsonLogger } from '../src/log.js';
 import { burned, makeAgent, newWorld, MERCHANT_HOST, PAYTO, T0, USDC, type Agent, type World } from '../src/testing.js';
 
 const cfg = loadConfig({ dailyCapUsd: '5' });
@@ -679,6 +680,37 @@ describe('one payment, one report, dated no later than the payment', () => {
     expect(reportTimeMs('2026-10-01T00:00:00.000Z', { timestamp: '2026-10-01T00:00:05.000Z' })).toBe(Date.parse('2026-10-01T00:00:00.000Z'));
     expect(reportTimeMs('2026-10-01T00:00:00.000Z', { timestamp: null })).toBe(Date.parse('2026-10-01T00:00:00.000Z'));
     expect(reportTimeMs('2026-10-01T00:00:00.000Z', undefined)).toBe(Date.parse('2026-10-01T00:00:00.000Z'));
+  });
+});
+
+describe('structured logs', () => {
+  it('log the money and evidence paths as JSON lines, with no key material', async () => {
+    const w = newWorld();
+    const lines: string[] = [];
+    const a = makeAgent(w, 'A', {}, { log: jsonLogger((l) => lines.push(l)) });
+    const b = makeAgent(w, 'B', {}, { log: jsonLogger((l) => lines.push(l)) });
+    a.fides.approve(a.input(), 'k1');
+    a.fides.markUnknown('k1');
+    w.memory.down = true;
+    const o = a.pay(10_000n, { checks: burned });
+    const r = await a.fides.report(o);
+    a.fides.queueUnreported(o, 'relayer down');
+    w.memory.inject('not a fides report at all'); // ignored by the parser, not logged
+    const evil = new Ed25519Keypair();
+    const forged = await signEvidence({ schema: 'fides.evidence/v1', issuedAt: new Date(T0).toISOString(), reporter: { agentId: 'evil', suiAddress: evil.toSuiAddress() }, merchant: { host: MERCHANT_HOST, payTo: PAYTO }, payment: { txDigest: 'FAKETX', amount: '10000', asset: USDC, quotedAmount: '10000', network: 'sui-mainnet' }, exchange: { requestHash: 'aa'.repeat(32), responseHash: 'bb'.repeat(32), responseBytes: 1, latencyMs: 1 }, checks: burned, verdict: 'burned', burnKind: 'junk', finality: { checkpoint: '1', verifiedVia: 'tatum' } }, evil);
+    w.memory.down = false;
+    w.memory.inject(formatMemory(forged.evidence, []).text);
+    await b.fides.check(b.input());
+    await b.fides.check(b.input()); // a known rejection is not logged again
+
+    const events = lines.map((l) => JSON.parse(l) as { level: string; op: string; key?: string; evidenceId?: string; err?: string });
+    expect(events.map((e) => e.op)).toEqual(['payment.unknown', 'report.done', 'report.queued', 'evidence.rejected']);
+    expect(events[0]).toMatchObject({ level: 'error', key: 'k1' });
+    expect(events[1]).toMatchObject({ level: 'warn', evidenceId: r.evidenceId, err: 'relayer down' });
+    expect(events[3]).toMatchObject({ evidenceId: forged.digest });
+    expect(events[3]!.err).toMatch(/no anchor event/);
+    const all = lines.join('');
+    for (const secret of [a.key.getSecretKey(), b.key.getSecretKey(), evil.getSecretKey()]) expect(all).not.toContain(secret);
   });
 });
 

@@ -14,7 +14,7 @@ Built and tested; runs on **Sui testnet**. The mainnet runs (real USDC, the 10+ 
 
 | | |
 |---|---|
-| Tests | 359 pass, 10 skipped (live network tests and two slow simulation tests, run on request), typecheck clean |
+| Tests | 366 pass, 10 skipped (live network tests and two slow simulation tests, run on request), typecheck clean |
 | UI | `pnpm web` opens the four screens (React, on recorded fixtures); `pnpm mockups` serves the static design mockups |
 | Real on-chain run | the full demo on Sui testnet: real MPP USDC payments, Tatum verification, Sui anchors. Output: [`docs/evidence/demo-live-testnet.txt`](docs/evidence/demo-live-testnet.txt) |
 | Measured result | 20 agents, 6 merchants (2 bad): **12 burns with the shared record, 44 without** (73% avoided), no good merchant refused. [`docs/evidence/simulation.txt`](docs/evidence/simulation.txt) |
@@ -23,7 +23,7 @@ Built and tested; runs on **Sui testnet**. The mainnet runs (real USDC, the 10+ 
 
 ```bash
 pnpm install                 # Node 22 or newer, pnpm 11
-pnpm test                    # 359 tests, no network, no keys
+pnpm test                    # 366 tests, no network, no keys
 pnpm demo                    # the whole story, simulated: seconds, free
 pnpm sim                     # 20 agents x 6 merchants, with and without the shared record
 ```
@@ -234,14 +234,14 @@ Trust tiers come from verified outcomes, weighted by the reporter's own track re
 | `state` | 16 | atomic claims across connections, idempotency, the pinned address, rejections kept visible |
 | `memory` | 28 | the write rule, exact-host filtering, look-alike hosts, header/evidence mismatch, the three states |
 | `chain` | 35 | rate limiting and retries, key never in a URL or error, injection refused, finality, anchor paging |
-| `sdk` | 66 | the whole check/report loop, forgeries, pending vs rejected, partial failures and retries, rule 6 end to end |
+| `sdk` | 71 | the whole check/report loop, forgeries, pending vs rejected, partial failures and retries, rule 6 end to end |
 | `tools`, `mcp` | 37 | the three tools, every vendor's tool shapes, MCP over memory, stdio and HTTP, auth and origin checks, rate limit and deadline |
 | `merchants` | 26 | each merchant's behaviour, the address swap on the real MPP gate |
 | `agent` | 18 | the buy loop, timeouts, refused and unknown payments, a merchant naming another host, reporting retries, the full demo |
 | `registry` | 28 | verification, forged records, tampered storage, outages, rate limits, page safety |
 | `sim` | 4 | repeatability, and (on request) the result |
 | `web` | 25 | the UI's logic and its API on fixtures: attempts, the board per round, the split view's three states, Re-verify, a forged record |
-| **Total** | **369** | 359 run by default |
+| **Total** | **376** | 366 run by default |
 
 Live tests (a real relayer, Tatum testnet, real payments) run only with `FIDES_LIVE=1`. Everything else uses a simulated world: a fake ledger, in-process memory, real signatures, real HTTP between agents and merchants, the real engine. The headline demo and the live tests use real payments and a real chain; nothing in them is faked except where stated under [staged versus real](#staged-versus-real).
 
@@ -333,7 +333,7 @@ pnpm registry                     # lookup page and API on http://127.0.0.1:4200
 pnpm --filter @fides/mcp start    # MCP over stdio (add -- --http, with FIDES_MCP_TOKEN, for HTTP)
 ```
 
-For a real run you need, in `.env`: `FIDES_DAILY_CAP_USD`, `SUI_PRIVATE_KEY_A` / `_B` / `_C` / `_MERCHANTS`, `TATUM_TESTNET_API_KEY` (and `TATUM_MAINNET_API_KEY`), and for the real shared memory `MEMWAL_ACCOUNT_ID` and `MEMWAL_KEY_A` / `_B`. `packages/evidence/gen-wallets.mjs` generates wallet keys. Then:
+For a real run you need, in `.env`: `FIDES_DAILY_CAP_USD`, `SUI_PRIVATE_KEY_A` / `_B` / `_C` / `_MERCHANTS`, `TATUM_TESTNET_API_KEY` (and `TATUM_MAINNET_API_KEY`), and for the real shared memory `MEMWAL_ACCOUNT_ID` and `MEMWAL_KEY_A` / `_B`. `packages/evidence/gen-wallets.mjs` generates wallet keys. `FIDES_LOG=json` adds structured logs on stderr, one JSON object per line, for payments, claims, reports, retries and rejected evidence. Then:
 
 ```bash
 pnpm demo:live                          # real testnet payments, memory in-process

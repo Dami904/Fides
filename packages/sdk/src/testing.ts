@@ -7,6 +7,7 @@ import { openState } from '@fides/state';
 import type { AnchorEvent } from '@fides/chain';
 import { Fides, type ChainApi, type Outcome } from './fides.js';
 import type { Anchorer } from './anchor.js';
+import type { Logger } from './log.js';
 
 export const USDC = '0xa1ec7fc00a6f40db9693ad1415d0c193ad3906494428cf252621037bd7117e29::usdc::USDC';
 export const PKG = '0x' + '1e'.repeat(32);
@@ -119,7 +120,7 @@ export interface Agent {
   pay: (amount?: bigint, over?: Partial<Outcome> & { payToOnChain?: string }) => Outcome;
 }
 
-export function makeAgent(world: World, name: string, cfgOver: Partial<FidesConfig> = {}): Agent {
+export function makeAgent(world: World, name: string, cfgOver: Partial<FidesConfig> = {}, opts: { log?: Logger } = {}): Agent {
   const key = new Ed25519Keypair();
   const address = key.toSuiAddress();
   const state = openState(':memory:');
@@ -136,6 +137,7 @@ export function makeAgent(world: World, name: string, cfgOver: Partial<FidesConf
     anchorPackageId: PKG,
     networkName: 'sui-mainnet',
     now: () => world.clock.now,
+    ...(opts.log ? { log: opts.log } : {}),
   });
   return {
     name,
