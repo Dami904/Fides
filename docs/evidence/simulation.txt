@@ -1,0 +1,21 @@
+﻿Simulation: 20 agents, 6 merchants (4 good, 1 flaky, 1 malicious), 12 rounds, 3 seeds. Settlement simulated.
+
+seed 1 shared   burns   5  paid 178  refused  51  asked  85
+seed 1 detached burns  17  paid 192  refused   9  asked 231
+seed 2 shared   burns   4  paid 173  refused  50  asked  91
+seed 2 detached burns  14  paid 193  refused   8  asked 232
+seed 3 shared   burns   3  paid 171  refused  53  asked  93
+seed 3 detached burns  13  paid 184  refused  16  asked 224
+
+                      with shared record   without
+  burns                     12                44
+  paid calls               522               569
+  refused                  154                33
+  ...of which good           0                 0   (the cost of caution)
+  asked a person           269               687
+  lost to burns (USDC)    0.12              0.44
+
+The shared record avoided 32 of 44 burns (73%).
+
+Rules that decided checks, with the record: tier 315, similar-incident 229, shared-burns 85, address 69, shared-burn 21, own-history 1
+Rules that decided checks, without it:     tier 651, own-history 35, address 34

@@ -10,7 +10,7 @@ Results of SPEC section 15. Record what was tried, what happened, and the fallba
 | 4 | End-to-end MPP payment on Sui | testnet done | See "Check 4" below. Mainnet payment still to do. |
 | 5 | Publish Move anchor, emit event, read back via Tatum | testnet done | See "Check 5" below. Mainnet publish still to do. |
 | 6 | Sign and verify an evidence record | done | Offline. See below. Run: `node packages/evidence/day1-check6-signing.mjs` |
-| 7 | Hackathon rules: mainnet for Agent Payments award, how memories are counted | partial | See "Check 7" below. The linked Event Rules page was not readable. |
+| 7 | Hackathon rules: mainnet for Agent Payments award, how memories are counted | done | See "Check 7" below. Event Rules read in Chrome on 2026-10-28. Both questions are unanswered by the rules; decisions recorded. |
 | 8 | Fund a small test wallet | todo | |
 
 ## Findings without credentials (2026-10-25, npm registry)
@@ -81,7 +81,10 @@ Results of SPEC section 15. Record what was tried, what happened, and the fallba
 - Agent Payments award text: "x402 or MPP, settled on Sui". It does not say mainnet or testnet. Only the Walrus Memory writes are stated as Mainnet. Decision: settle on mainnet anyway (cents), so the answer does not matter.
 - "10 memories": the FAQ says "10+ writes". The unit is not defined (each `remember`, each analyzed fact, per account). Decision: produce well over 10 separate `remember` writes from real runs, and ask in Discord office hours.
 - Form needs the Tatum account ID and `MEMWAL_AGENT_ID`.
-- The Event Rules page content was not shown by the fetch. Read it by hand before submitting.
+- Event Rules read in full (2026-10-28, via the "Event Rules" button in the footer of the vercel site; the Tatum landing page embeds that site and exposes no text). Confirmed: same requirements, tracks, prizes, judging weights and deadline as above. Nothing in the rules names a network for payments or for Tatum, and nothing defines how the 10 memories are counted. So both questions stay open and the decisions above stand (mainnet payments, many separate `remember` writes, ask in Discord).
+- The submission form fields are exactly: email, Discord handle, LinkedIn, how you heard, first Web3 project, Tatum ID, SUI address, Account ID (SUI), `MEMWAL_AGENT_ID`, project description, 2 to 3 minute demo video, GitHub repo, experience with Walrus, experience with the Tatum AI Builder. The Tatum landing page says `MEMWAL_AGENT_ID` is the public key under "Delegate keys" in the mainnet Walrus Memory dashboard.
+- Other rules to respect: one submission per person; 18+ and not in a sanctioned jurisdiction; original work advanced during the build window; the winner must confirm by email and give a USDC-capable wallet within 14 days of the announcement; entrants license the Sponsors to demo and showcase the submission. The rules preamble still describes a "feedback and form platform" goal that does not match the tracks, as noted before; it looks like leftover boilerplate and the tracks and submission requirements are what apply.
+- Smart Agents for Real Life track text, from the rules: "Agents that monitor inboxes, expenses, habits, or workflows. Portable memory means they pick up where they left off across tools and sessions." Examples: research agent with source trust scores, expense watchdog with long term memory, workflow bots that learn escalation rules. This matches the spec.
 
 ## Tooling (2026-10-26)
 

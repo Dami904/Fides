@@ -2,4 +2,130 @@
 
 Log anything relied on that is not yet verified. Remove an entry once verified and recorded in DAY1.md.
 
-- (none yet)
+## Decision engine (packages/core), all starting values to calibrate with the simulation
+
+- **Reporter weighting makes tiers slow.** Weights multiply each outcome, and a reporter with few verified reports counts for little (`log2(1+n)/log2(21)`). With the spec thresholds a merchant needs roughly 6 clean reports from experienced reporters to be `established`, and 16 to be `trusted`. Demo agents A and B have few reports, so most demo merchants stay `new` (ASK). Revisit weights or thresholds in the simulation (SPEC section 11) before the demo, and say so in the README if left as is.
+- **Per-reporter influence cap** (`reporterInfluenceCap`, default 3 weighted outcomes per merchant) is my choice. The spec asks for a cap but gives no number. With it, a single reporter can never make a merchant `established`.
+- **`burnedTierMinWeight` (0.5)**: weighted burn mass at which the tier becomes `burned`. One fresh burn from an experienced reporter is enough. Recovery is only by decay (half-life 14 days, window 30 days). The spec says "slow recovery" without a mechanism.
+- **One verified burn from another reporter** gives `PAY_CAPPED` up to `burnCapAmount` (0.05) and `ASK` above it. The spec allows either; I chose the capped option. A capped payment is only allowed if the quoted price is under the cap (it never pays part of a price).
+- **Own burns**: one is `ASK`, two or more is `REFUSE` (`ownBurnRefuseCount`). The spec says "REFUSE or ASK".
+- **Rule 4 counts only other reporters.** The agent's own reports go through rule 5. Reporters are distinct Sui addresses; clusters of addresses owned by one party are not detected (SPEC section 18).
+- **Similar-incident matching (rule 6)** uses short pattern tags stored with a burn narrative (`new_merchant`, `clean_streak`, `price_up_after_clean_streak`) matched against tags derived from the current situation. The tag set is my starting design, not from the spec. `similarityMaxDistance` is 0.45, provisional. Measured 2026-10-28 on the mainnet relayer with the real wrapper (4 memories in `fides-day1`, 2 of them Fides reports): a situation-shaped query (`buildSituationQuery`) against Fides reports gave 0.361 to 0.374; a short natural question gave 0.499 to 0.524; plain-text test memories gave 0.568 to 0.654; unrelated text gave 0.888 to 0.950. So 0.45 separates structured matches from the rest, but only for queries built the same way, and only on 2 reports. Re-measure with the real merchants and the simulation's incidents before the demo (SPEC day 3).
+- **Confidence** is `effN / (effN + 3)` where `effN` is the weighted outcome count: 0 with no evidence, rising towards 1. It is a measure of how much evidence backs the tier, not a probability. The self-grading stretch goal would need to check it against outcomes.
+- **Amounts are USDC with 6 decimals** and 1 USDC counts as 1 USD for the daily cap. The engine rejects anything that is not a plain decimal with at most 6 places.
+- **Price spike uses own paid history only** (median of what this agent paid), as in the spec. A first payment has no typical price, so no spike check.
+- **Shared record unreachable** hides other agents' reports (so a merchant they vouched for is not paid) and, as a second layer, turns any PAY into ASK. It never softens a REFUSE.
+
+## State (packages/state)
+
+- **`node:sqlite` instead of `better-sqlite3`.** The spec suggested better-sqlite3 but said to change it if needed. pnpm 11 blocks native build scripts by default, and Node 22.13+ ships `node:sqlite` with no flag. It prints an ExperimentalWarning on some Node versions. Vite/Vitest do not know it yet, so it is loaded through `createRequire`.
+- **Atomicity is tested two ways**: sequential over-cap with two connections, and a writer held inside `BEGIN IMMEDIATE` blocking the second. There is no test that fires truly parallel processes at the same file.
+- **Amounts stored as text** (raw integers) to stay exact beyond 2^53.
+
+## Evidence (packages/evidence)
+
+- **Canonical JSON** is sorted keys, UTF-16 code unit order, `JSON.stringify` string escaping, no whitespace. It is close to RFC 8785 but not identical (number formatting is irrelevant because floats are rejected). Another implementation must match this, and the README must say so.
+- **Records must already be canonical** when fetched: pretty-printed or reordered bytes are rejected at the format step, so the signed bytes are unambiguous.
+- **`payment.asset` is the full coin type string** and `payment.amount` is raw units. The spec leaves both open. The payment check requires the merchant's `payTo` to have received at least the stated amount of that coin in that transaction.
+- **Signature**: Sui personal-message signature (`signPersonalMessage` / `verifyPersonalMessageSignature`), verified in day 1 check 6.
+- **Event `vector<u8>` fields come back base64 from Tatum GraphQL**, so the anchor reader must decode them before comparing with the hex digest (day 1 check 5).
+
+## Walrus Memory wrapper (packages/memory)
+
+- **Memory text format** (`[fides.memory/v1] host=... | payTo=... | verdict=... | ... | sha256=...`, a sentence, then `EVIDENCE <canonical json>`) is my design. The header exists so recall results can be post-filtered by exact host. It is written by any delegate, so it is untrusted: the wrapper checks that the header agrees with the evidence under it and that the header sha256 matches the stored bytes, and reports (does not drop) anything that fails. The engine believes nothing until `verifyEvidence` passes.
+- **Writes are idempotent** on the evidence digest (the SDK's `idempotencyKey`), tested against a fake relayer only. Not tested live that the real relayer de-duplicates a retried write.
+- **Write latency**: two concurrent writes landed in 41 s on mainnet (2026-10-28). `report()` must wait for the job and must not sit on the payment path. A relayer write can fail after acceptance; the wrapper surfaces that as an error.
+- **Detach is a mode on the client** (`setMode('detached')`), nothing is deleted. Detached means no reads and no writes to the shared record; the agent's own reports stay in its local evidence index.
+- **Two namespaces exist on the account**: `fides-day1` (throwaway test data, including non-Fides plain test memories and two live test reports with fake payments) and `merchants` (for real runs). Test memories cannot be deleted. They are labelled and ignored by the wrapper (reported as rejected).
+
+## Chain reader (packages/chain), Tatum GraphQL
+
+- **Verified live on testnet (2026-10-28), read-only:** the check 4 payment reads back final with sender, amount and recipient; the check 5 anchor event reads back by type filter and by `findAnchor` with a `sender` filter; GraphQL variables work; `last`/`before` paging works; balances and the latest checkpoint read.
+- **Not verified on mainnet yet:** the same reads against the mainnet gateway (the mainnet endpoint answered checkpoint, events and a transaction lookup in check 3, but not with the new reader code, and there is no Fides anchor on mainnet yet).
+- **A malformed digest is a loud GraphQL error** ("Expected digest to be 32B"), not null. A well formed digest that does not exist returns null. The reader treats them differently on purpose.
+- **Event order within a `last:` page** is assumed ascending, and the reader reverses it to give newest first. Only one event existed when tested, so the order is unproven. `findAnchor` does not depend on it.
+- **Anchor lookup by evidence hash is a scan** (events cannot be filtered by field): newest first, filtered by the reporter's address when known, default 10 pages of 50, and it throws rather than returning "not found" when the scan is cut short. The local evidence index is the fast path; the scan is the public, tamper-evident one. Cost against the free plan's 3 requests per second grows with the number of anchors.
+- **Final transactions are cached** for the life of the process (a transaction in a checkpoint never changes). Pending ones are never cached.
+- **Rate limit**: one queue, 400 ms spacing, retries on 429 and 5xx with backoff, honouring Retry-After. Not load tested against the real limit.
+- **Finality** here means "the transaction appears in a checkpoint" (`effects.checkpoint` is set), which is what Sui calls finality. Tatum reports it through the same field.
+
+## SDK (packages/sdk)
+
+- **Verified live (2026-10-28, mixed rehearsal):** Agent A reported the real check 4 payment through the SDK: verified through Tatum testnet, signed, anchored on Sui testnet, written to Walrus Memory. It took 39 s. Agent B, with fresh state, then checked the merchant in 5.8 s: it recalled A's report, found the anchor and the payment through Tatum, verified all five steps, and answered PAY_CAPPED citing A's evidence id. A forged report written into the same shared namespace (signed by a throwaway key, never anchored) was shown as rejected ("no anchor event found") and did not change B's answer. The rehearsal is mixed on purpose: chain on testnet, memory on the mainnet relayer in the throwaway `fides-day1` namespace, because the staging relayer's certificate is broken. It wrote 2 more permanent test memories there.
+- **Not verified:** the same flow on mainnet (needs funding, see `scripts/day1-mainnet.mjs`); Walrus Memory write failures after acceptance in the live path; many reports at once against the 3 requests per second limit (each new report costs about two Tatum requests, so ten new reports cost about 8 s at the 400 ms spacing).
+- **Trust on first use for the payout address.** The first address seen for a host is pinned, by `check()` or by `report()`. A merchant that is malicious from its first response is never flagged by this; only a later change is. The pin is never updated silently.
+- **`report()` registers every verified payment** as a paid claim (keyed by the claim key, or by `tx:<digest>` if none), so today's spend and the typical-price history are right even when the agent never reserved through `check()`. The cap cannot undo a payment that already happened.
+- **Order of writes in `report()`**: verify payment, local record, Sui anchor, then Walrus Memory. The anchor goes first so a reader never sees a memory it cannot check. If the anchor fails no memory is written. A retry with the same Outcome (same `issuedAt`) runs only the missing steps. Whether a memory was written is not stored locally, so a retry always re-sends it (idempotent on the evidence digest).
+- **Pending is not rejected.** A Tatum failure, or a payment not yet final, while verifying a shared report leaves it pending: it is not stored, not believed, and re-tried on the next check. While anything is pending, a PAY or PAY_CAPPED becomes ASK ("cannot rule out a burn"). A report with no anchor event is stored as rejected and re-checked after 5 minutes (indexing can lag).
+- **Detached agents still anchor.** The Sui anchor is public and is written even when the shared memory is detached; only the Walrus Memory read and write are switched off.
+- **Demo script gap (SPEC section 17, step 3):** one verified burn from another agent gives PAY_CAPPED (or ASK above the cap), not a refusal. B refuses only with two independent reporters (`burnRefuseMinReporters`) or when the price is above the cap. For the demo either make the flaky merchant's price exceed the cap (ASK), use a third reporting agent (REFUSE), or lower `burnRefuseMinReporters` to 1 and say so. Decide before building the demo agents.
+
+## Mock merchants (apps/merchants)
+
+- **Verified live (2026-10-28, testnet):** over real HTTP with real MPP payments, the good merchant delivered an on-schema fresh response and Tatum confirmed its payment (0.01 USDC from Agent A to the merchants wallet); the flaky merchant took a real payment and returned junk (forced); the malicious merchant's 402 moved from 0.01 to the merchants wallet to 0.04 to a different address after `POST /admin/turn-malicious`. Nothing was paid to the malicious merchant. `pnpm merchants` starts all three on ports 4101 to 4103 (loopback only).
+- **Not verified:** the flaky timeout over real HTTP with a real client (covered with a fake clock only); the same on mainnet.
+- **Merchant identity is a logical host** (`good.fides-demo.test`, ...), not the URL, because evidence and memory headers only allow a plain hostname (no port). Agents learn it from `/.well-known/fides-schema.json` or the config. A real deployment would need a way to bind a hostname to the payee that the spec does not define.
+- **Failures happen only after payment.** An unpaid request is always a fast 402, so a "burn" always means money was taken. A "timeout" answers after a long delay (default 15 s) rather than never, so the server does not hold connections open; an agent's timeout decides `onTime`.
+- **The malicious merchant** may turn only after `goodCalls` (default 5) paid calls unless `?force=1`; this is my reading of "behaves well for N calls, then on demand". After the turn it still delivers a valid response; the attack is the address and the 4x price. Its new address is derived from the merchants key (a wallet we control), so nothing is lost.
+- **One MPP instance per recipient.** `@suimpp/mpp` fixes the recipient at creation, and its verification checks that recipient, so the gate keeps one instance per address and shares one digest store. This is how the swap works; a digest cannot be redeemed across instances.
+- **Admin endpoints** (turn, force a failure mode, reset, state) are unauthenticated unless `MERCHANT_ADMIN_TOKEN` is set. They listen on 127.0.0.1 only. Do not expose these servers.
+- **The merchants verify payments through the package's default fullnode**, not Tatum (Tatum's gRPC host cannot be used, see DAY1.md). Tatum verifies on the agent's side.
+- **Response checking lives in the SDK** (`checkResponse`, `evaluateExchange`): it compares a response with the merchant's published schema and returns the five evidence checks. Deterministic; no LLM.
+
+## Agents and the demo (apps/agent)
+
+- **Verified live (2026-10-28, testnet):** `pnpm demo:live` ran all six steps of SPEC section 17 with real MPP payments, real Tatum verification and real Sui testnet anchors, memory kept in-process, and every expectation held. `pnpm demo` runs the same script fully simulated (fast, no network) and is also a test.
+- **Not verified:** the demo on mainnet; with the real Walrus Memory relayer end to end (`--memory=live`, permanent writes); the Re-verify and forged-record steps against the real relayer (done in the SDK live test only).
+- **One burn caps, two refuse.** In step 3 agent C, told about A's single burn, is allowed a capped payment and is burned anyway (0.01). B refuses only once two independent reporters exist. This follows SPEC section 7 rule 4. The demo needs the third agent C for that reason; with only A and B the refusal does not happen.
+- **Agents never pay on their own authority when Fides says ASK.** The ask policy defaults to declining; the demo's policy approves, standing in for a person. REFUSE is never overridden.
+- **B's pinned address and typical price come from verified shared reports** (SDK change). A merchant that is malicious from its first response, to an agent with no shared reports, is still not flagged by the address rule.
+- **Clock skew.** Evidence dated up to 5 minutes ahead of an agent's clock still counts (`maxClockSkewMs`). Found because the simulated Fides clock was frozen while agents used real time: fresh reports looked "from the future" and were silently dropped. Evidence dated further ahead is still ignored.
+- **Reporting is retried a few times** (default 6, 2 s apart) only while Tatum says the payment does not exist or is not final yet; any other error is reported at once. Bounded, not polling.
+- **A payment made but not reported** (for example Tatum stays down) is returned as `reportError` and logged as an error event. The spend is still counted, but no evidence exists for it until reported. There is no background retry yet.
+- **Not demonstrated: rule 6 (similar-incident recall).** The engine and SDK have it and test it, but no demo step shows a decision changed by a recalled memory of a different merchant, which the definition of done requires. It needs a merchant that already looks established (reporter weights make that slow with default thresholds), so it belongs with the simulation and its threshold calibration.
+- **Testnet wallets**: agent C (`SUI_PRIVATE_KEY_C`) and funding of B and C from A are testnet only (`packages/move/fund-testnet-agents.mjs` refuses mainnet). On mainnet B and C need real USDC and gas.
+
+## Simulation (apps/sim), measured 2026-10-28, `pnpm sim`
+
+- **Setup:** 20 agents, 6 merchants (4 good, 1 flaky at 40%, 1 malicious that turns at round 6), 12 rounds, 3 seeds, settlement simulated (fake ledger, in-process memory), everything else real (agent loop, engine, signed evidence, read-time verification, merchants over HTTP). A person approves an ASK 80% of the time.
+- **Result, with and without the shared record:** burns 12 vs 44 (73% avoided); lost 0.12 vs 0.44 USDC; refused 154 vs 33, none of them on a good merchant; asked a person 269 vs 687. Paid calls 522 vs 569.
+- **The shared record also removes interruptions:** with it, good merchants were paid automatically 93 times (seed 1); without it, never (156 asks), because one agent's own reports can never reach the established tier (per-reporter cap).
+- **Sensitive to volume.** With 12 agents and 8 rounds nobody reached the established tier, so no automatic payments. Trust needs enough independent reporters, and the reporter weighting makes it slow (see the engine section). The demo's three agents never reach it. This is the main thing to calibrate (thresholds, `reporterWeightSaturation`, `reporterInfluenceCap`) before saying anything about "learning over time".
+- **Burns that remain with the record (12) include the malicious merchant after its turn**, when a person approves an ASK about the changed address. That is the weak link: an ASK approved by a person who says yes 80% of the time. A stricter policy for address changes would close it; not tried.
+- **Rule 6 (similar-incident recall) contributed nothing measurable here**: with it off the burn counts were identical. All it did was relabel asks that new merchants already got. The in-process memory returns one fixed distance for everything, so the sim cannot say how well rule 6 works with real embeddings (real structured-query distances are in the memory section). Rule 6 is demonstrated end to end, with cited memory ids, in `packages/sdk/test/fides.test.ts` ("rule 6 end to end"), with the engine's thresholds eased so merchants become established.
+- **Limits of the model:** merchants are never slandered (no false burns), no Sybil reporters, no merchant that washes its own reputation (SPEC section 20), reporters are honest. The result shows the mechanism works against honest reports; it says nothing about adversarial ones.
+- **Not repeatable bit for bit across machines** if timing differs: the late-answer failure relies on a 150 ms agent deadline against a 400 ms delay. Same seed gave identical runs on this machine.
+
+## Registry and lookup page (apps/registry), `pnpm registry`
+
+- **Verified:** with the simulated world (28 tests) and by starting the real CLI and fetching the page, health and a merchant over HTTP. **Not verified:** against the real Walrus Memory relayer and Tatum together, and not under real load. Run it with `--memory=fake` for an empty record, or without for the real relayer.
+- **It is a verifying mirror, not a source of truth.** It recalls reports, checks each one the way an agent does, keeps content-addressed copies of the bytes, and lets anyone re-run the checks (`/v1/evidence/:sha/verify`). Anyone can verify a copy against its id (the sha256) and against Sui without trusting the registry. It holds no key that can pay, writes nothing to the chain or to memory, and fetches no URL taken from data: only the configured Tatum gateway and relayer.
+- **Recall is fuzzy, so a lookup can miss reports.** The registry asks the relayer for up to 50 memories by meaning and sorts by exact host in code. A merchant with more reports than that, or reports the semantic search ranks low, can be incomplete. The Sui anchor events are the exact index; the registry does not yet enumerate them by merchant. Say so in the README.
+- **A lookup is not an unreachable shared record answered as empty.** First lookup during an outage is HTTP 502 saying nothing can be said; later ones return the old answer marked `stale`. A report that could not be checked (Tatum down) is `pending` and not counted.
+- **Abuse limits** (starting values): per client, a burst of 20 and 0.5 requests per second back; a merchant lookup or re-verify costs 5; at most 4 of those run at once (503 with Retry-After otherwise); a refresh is reused for 60 s and concurrent lookups of one merchant share one run. Malformed input is turned away at the cheap cost, before it can spend the heavy one. The client address is the socket address unless `TRUST_PROXY=1`. In-memory counters: they reset on restart and are per process.
+- **The page** is plain on purpose and is replaced by the designed UI. It writes everything with `textContent` (evidence text comes from strangers), has no inline script, and is served with a Content-Security-Policy that forbids it. Tests assert both.
+- **The registry's SQLite file** (`FIDES_REGISTRY_DB`, default `./fides-registry.sqlite`) holds copies of public evidence only. It is gitignored.
+- **It reads shared memory with `MEMWAL_KEY_REGISTRY`, else agent A's key.** Neither is private data; both are delegates of the shared account. A dedicated read-only identity is not possible: delegates can write.
+
+## Threshold sensitivity (apps/sim/src/sweep.ts), measured 2026-10-29
+
+Shared record on, 20 agents, 6 merchants, 12 rounds, seeds 1 to 3, settlement simulated (output in `docs/evidence/sweep.txt`):
+
+| setting | burns | auto-paid good | asked a person | good refused |
+|---|---|---|---|---|
+| defaults | 12 | 273 | 269 | 0 |
+| reporter weight saturates at 5 reports (default 20) | 12 | 320 | 208 | 0 |
+| one reporter may count up to 5 (default 3) | 12 | 273 | 269 | 0 |
+| established needs Wilson above 0.4 (default 0.6) | 13 | 344 | 168 | 0 |
+| all three | 13 | 389 | 115 | 0 |
+
+- **Easier thresholds trade safety for convenience:** many more automatic payments and fewer questions for a person, at the cost of one more burn over three seeds (a small difference, three seeds). No default was changed: the simulation has honest reporters only, so it flatters the easy settings (nobody slanders a merchant or washes its reputation).
+- **The influence cap alone changed nothing** here: no single reporter reached it.
+- **The Wilson lower bound for "established" is the lever that matters most:** it sets how many clean outcomes a merchant needs before agents stop asking.
+- The choice of defaults is the owner's, and should be made with the adversarial cases in mind, which this run does not cover.
+
+## Network
+
+- **Mainnet runs are scripted but not yet executed**: `node scripts/day1-mainnet.mjs` (preflight) and `--yes` (spend). The mainnet USDC type comes from `@suimpp/mpp`; the script fails if `networks.json` disagrees. Not yet verified on mainnet: that Agent A's mainnet USDC (from an exchange or wallet, as coin objects) can be spent by the package's `send_funds` payment, and the gas cost of publishing the anchor.
+- **Publishing needs the Sui CLI only to compile.** If the CLI is missing, `packages/move/publish.mjs` fails; the compiled bytecode is not committed.
+- **Walrus Memory staging relayer** has a TLS certificate for the wrong host (checked 2026-10-28). Testnet memory work is not possible until that is fixed; memory work uses mainnet.

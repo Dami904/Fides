@@ -29,4 +29,28 @@ No em dashes in docs or user-facing copy. Direct, plain language.
 
 ## Commands
 
-To be filled in once the repo is scaffolded (install, test, run merchants, run agent, run sim, run web).
+```bash
+pnpm install
+pnpm test                        # all tests, no network, no keys (live tests need FIDES_LIVE=1, slow ones FIDES_SLOW=1)
+pnpm typecheck                   # tsc -b over every package and app
+pnpm check:secrets               # scan staged files for key-like strings
+
+pnpm merchants                   # the three mock merchants on 127.0.0.1:4101-4103
+pnpm demo                        # the scripted demo, simulated, no network
+pnpm demo:live                   # the same on Sui testnet with real payments (-- --memory=live writes real memories)
+pnpm sim                         # the simulation (-- --seeds=5 --agents=20 --rounds=12 --no-rule6)
+pnpm registry                    # verifying registry and lookup page on 127.0.0.1:4200 (-- --memory=fake for an empty record)
+pnpm --filter @fides/mcp start   # MCP over stdio (-- --http with FIDES_MCP_TOKEN for HTTP)
+
+pnpm day1:mainnet                # mainnet preflight, spends nothing
+pnpm day1:mainnet:run            # spends cents: one MPP payment and one anchor publish on mainnet
+```
+
+```bash
+pnpm mockups                     # the four UI mockups on http://127.0.0.1:4400/ (open /mockups/index.html)
+pnpm fixtures                    # re-export the real demo and simulation data the mockups read (apps/web/fixtures)
+```
+
+Run a single package's tests with `node node_modules/vitest/vitest.mjs run packages/core`. `apps/web` holds the UI mockups (static HTML, dark technical style, built on real fixtures); the production UI is not built yet.
+
+Where things are: the engine is `packages/core`, the loop is `packages/sdk` (`fides.check` and `fides.report`), the network is picked by `FIDES_NETWORK` through `packages/chain/networks.json`. `docs/ASSUMPTIONS.md` is the log of what is verified and what is not: update it whenever something unverified is relied on.

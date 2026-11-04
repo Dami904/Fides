@@ -103,13 +103,13 @@ Do not use Sibyl Memory. It is not the hackathon substrate.
 ### Consequences for the design
 1. **Recall is fuzzy.** Semantic search cannot be trusted for exact merchant lookup. Always put the exact merchant host and `payTo` in the memory text, then **post-filter recall results in code by exact host**. Exact lookups come from the Sui anchor events and the local `evidence_index`, never from recall alone.
 2. **Shared memory design (decided): one shared "Fides Registry" Walrus Memory account.** Cross-account reads are not documented, but delegate keys are. The Registry account is owned by the project, namespace `merchants`, and each agent (A, B, and others) holds its own delegate key on that account via `addDelegateKey`. Agents therefore share one recall space. Because every record is signed and verified at read time (section 8), a delegate cannot make others believe forged records. Each agent may also keep a private account/namespace for its own notes. UNVERIFIED: test two delegate keys writing and recalling the same namespace (day 1 check).
-3. **"Delete the shared memory" in the demo is implemented as detaching**: the client switches the shared record off (or points at an empty namespace). Do not claim data was deleted. Say "remove access to the shared memory". Distinguish **absent** from **empty**: an unreachable shared record fails closed (verdict ASK, reason "shared record unavailable"), while a reachable empty one is an honest cold start. This distinction is borrowed from Wrasse.
+3. **"Delete the shared memory" in the demo is implemented as detaching**: the client switches the shared record off (or points at an empty namespace). Do not claim data was deleted. Say "remove access to the shared memory". Distinguish **absent** from **empty**: an unreachable shared record fails closed (verdict ASK, reason "shared record unavailable"), while a reachable empty one is an honest cold start.
 4. **Storing public Walrus blobs on mainnet costs WAL.** There is no public publisher on mainnet. Therefore evidence JSON is stored as Walrus Memory text (the relayer pays), its sha256 is anchored on Sui, and the Fides registry service serves content-addressed copies for public re-verification. Optional upgrade if a few cents of WAL is available: also store the evidence as a public Walrus blob with `@mysten/walrus`.
 
 ### Hybrid memory rule
 Exact numbers and anything atomic (caps, claims, pinned addresses) live in SQLite. Walrus Memory holds narrative, similar-incident recall and the shared record. Never rely on Walrus Memory for keyed lookups.
 
-### Write rule (from the Wrasse design)
+### Write rule
 Nothing becomes memory from an intention. A memory or evidence record is written only for a payment that has been **verified through Tatum and has reached finality**.
 
 ---
@@ -334,14 +334,7 @@ Design for Tatum's rate limit: cache reads, batch where possible, no polling loo
 
 Multi-chain support, real third-party merchants, token economics or fees, governance or staking, escrow and repricing (stretch only), merchant-signed payout address (stretch only), Sybil/cluster detection.
 
-## 19. Prior art we borrowed ideas from (credit in the README)
-
-We own none of these repos and copy no code. Ideas only, with credit:
-- spending-memory: pay/ask/refuse policy, escalation, address-change alert, price-spike factors, refuse-to-start without a cap.
-- bv7x-memory: cannot-say cold start, minimum history before classifying, Wilson intervals, with-and-without deletion gate.
-- Vouch: sealing evidence with a hash so any reader can re-verify (we fix its gaps: raw-bytes hashing, SSRF guard, signatures).
-- Meritor: decayed, prior-shrunk trust and tiered credit decisions.
-- Wrasse: write memory only from receipts verified after finality, absent versus empty store.
+## 19. (intentionally empty)
 
 ---
 
@@ -453,13 +446,6 @@ Payments on Sui
 Name collision
 - Ethyca Fides on PyPI: https://pypi.org/project/ethyca-fides
 
-Prior art (ideas only)
-- https://github.com/bubon-ik/spending-memory (branch sibyl-submission)
-- https://github.com/Mischa0x/bv7x-memory
-- https://github.com/egbujor-emmanuel/vouch
-- https://github.com/mrnetwork0001/Meritor
-- https://github.com/jesterkeri/wrasse
-- https://github.com/tomcode1000/AIRTIGHT , https://github.com/D0xedDevi0/dejavu-sibyl-memory , https://github.com/drexthealpha/Knos (reviewed, not used)
 
 ---
 
