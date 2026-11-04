@@ -3,8 +3,9 @@
   "private": true,
   "version": "0.0.0",
   "type": "module",
+  "packageManager": "pnpm@11.21.0",
   "engines": {
-    "node": ">=22"
+    "node": ">=22.13"
   },
   "scripts": {
     "test": "vitest run",
@@ -12,6 +13,7 @@
     "web": "pnpm --filter @fides/web dev",
     "web:build": "pnpm --filter @fides/web build",
     "check:secrets": "node scripts/check-secrets.mjs",
+    "check:secrets:all": "node scripts/check-secrets.mjs --all",
     "merchants": "tsx apps/merchants/src/run.ts",
     "mockups": "node apps/web/scripts/serve-mockups.mjs",
     "fixtures": "tsx apps/web/scripts/export-fixtures.ts",
