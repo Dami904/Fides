@@ -219,7 +219,7 @@ export class FidesState {
       .prepare(
         `INSERT INTO evidence_index (evidence_id, merchant, reporter, sha256, tx_digest, anchor_tx, verdict, burn_kind, issued_at, status, reject_reason, verified_at, pay_to, amount)
          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-         ON CONFLICT (evidence_id) DO UPDATE SET status = excluded.status, reject_reason = excluded.reject_reason, verified_at = excluded.verified_at, anchor_tx = excluded.anchor_tx, pay_to = excluded.pay_to, amount = excluded.amount`,
+         ON CONFLICT (evidence_id) DO UPDATE SET status = excluded.status, issued_at = excluded.issued_at, tx_digest = excluded.tx_digest, verdict = excluded.verdict, burn_kind = excluded.burn_kind, reject_reason = excluded.reject_reason, verified_at = excluded.verified_at, anchor_tx = excluded.anchor_tx, pay_to = excluded.pay_to, amount = excluded.amount`,
       )
       .run(e.evidenceId, e.merchant.toLowerCase(), e.reporter, e.sha256, e.txDigest, e.anchorTx, e.verdict, e.burnKind, e.issuedAtMs, e.status, e.rejectReason, e.verifiedAt, e.payTo ?? null, e.amountRaw ?? null);
   }
@@ -244,6 +244,14 @@ export class FidesState {
       payTo: (r.pay_to as string | null) ?? null,
       amountRaw: (r.amount as string | null) ?? null,
     }));
+  }
+
+  /** The verified record a reporter already has for a payment, or null. One payment counts once, whatever the host. */
+  verifiedForPayment(reporter: string, txDigest: string): EvidenceRow | null {
+    const r = this.db
+      .prepare("SELECT evidence_id FROM evidence_index WHERE status = 'verified' AND lower(reporter) = lower(?) AND tx_digest = ? ORDER BY issued_at LIMIT 1")
+      .get(reporter, txDigest) as { evidence_id: string } | undefined;
+    return r ? this.getEvidence(r.evidence_id) : null;
   }
 
   /** One evidence row by its id (the sha256 of its bytes), or null. */

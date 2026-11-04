@@ -24,7 +24,7 @@ import { buildSituationQuery, type RecalledReport, type SharedRecord, type Share
 import type { AnchorEvent } from '@fides/chain';
 import type { EvidenceRow, FidesState } from '@fides/state';
 import type { Anchorer } from './anchor.js';
-import { ReportVerifier, type ChainApi, type IngestResult } from './verifier.js';
+import { ReportVerifier, reportTimeMs, type ChainApi, type IngestResult } from './verifier.js';
 
 export type { ChainApi } from './verifier.js';
 
@@ -403,13 +403,16 @@ export class Fides {
       .reduce((s, c) => s + c.amount, 0n);
     if (received < BigInt(o.amount)) throw new ReportError(`payTo received ${received}, the outcome states ${o.amount}`);
 
+    const issuedAt = o.issuedAt ?? new Date(now).toISOString();
+    const dup = state.verifiedForPayment(this.address, o.txDigest);
+
     const burnKind = classifyBurn(o.checks, o.burnKind);
     const prior = assessMerchant(state.listEvidence(host, 'verified').map(toItem), state.verifiedCounts(), now, config);
     const patterns = o.patterns ?? derivePatterns(prior, burnKind);
 
     const body: EvidenceBody = {
       schema: 'fides.evidence/v1',
-      issuedAt: o.issuedAt ?? new Date(now).toISOString(),
+      issuedAt,
       reporter: { agentId: this.d.agentId, suiAddress: this.address },
       merchant: { host, payTo: o.payTo },
       payment: { txDigest: o.txDigest, amount: o.amount, asset: o.asset, quotedAmount: o.quotedAmount, network: this.d.networkName },
@@ -421,6 +424,8 @@ export class Fides {
     };
     const sealed = await signEvidence(body, this.d.signer);
     const evidenceId = sealed.digest;
+    // One payment, one report. A retry must pass the same Outcome (same issuedAt), which gives the same evidence id.
+    if (dup && dup.evidenceId !== evidenceId) throw new ReportError(`payment ${o.txDigest} is already reported as evidence ${dup.evidenceId}: retry with the same issuedAt`);
 
     // 2. Local record first: our own exact state never depends on the network steps below.
     const existing = state.listEvidence(host).find((r) => r.evidenceId === evidenceId);
@@ -433,7 +438,7 @@ export class Fides {
       anchorTx,
       verdict: body.verdict,
       burnKind: body.burnKind,
-      issuedAtMs: Date.parse(body.issuedAt),
+      issuedAtMs: reportTimeMs(body.issuedAt, pay),
       status: 'verified',
       rejectReason: null,
       verifiedAt: now,

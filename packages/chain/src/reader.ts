@@ -20,6 +20,7 @@ interface TxData {
     sender: { address: string } | null;
     effects: {
       status: string;
+      timestamp: string | null;
       checkpoint: { sequenceNumber: number } | null;
       balanceChanges: { nodes: { owner: { address: string } | null; amount: string; coinType: { repr: string } }[] };
     };
@@ -39,7 +40,7 @@ export class TatumChainReader implements ChainReader {
     const hit = this.finalCache.get(digest);
     if (hit) return hit;
     const d = await this.client.query<TxData>(
-      `query($d: String!) { transaction(digest: $d) { sender { address } effects { status checkpoint { sequenceNumber } balanceChanges { nodes { owner { address } amount coinType { repr } } } } } }`,
+      `query($d: String!) { transaction(digest: $d) { sender { address } effects { status timestamp checkpoint { sequenceNumber } balanceChanges { nodes { owner { address } amount coinType { repr } } } } } }`,
       { d: digest },
     );
     const t = d.transaction;
@@ -48,6 +49,7 @@ export class TatumChainReader implements ChainReader {
       sender: t.sender?.address ?? '',
       status: t.effects.status,
       checkpoint: t.effects.checkpoint?.sequenceNumber ?? null,
+      timestamp: t.effects.timestamp ?? null,
       changes: t.effects.balanceChanges.nodes.map((n) => ({ owner: n.owner?.address, amount: BigInt(n.amount), coinType: n.coinType.repr })),
     };
     if (facts.checkpoint !== null) this.finalCache.set(digest, facts); // only a checkpointed transaction is final

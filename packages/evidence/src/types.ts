@@ -41,6 +41,8 @@ export interface PaymentFacts {
   status: string;
   /** null means not yet final. */
   checkpoint: string | number | null;
+  /** Chain time of the transaction (ISO), when the reader provides it. Bounds how fresh a report about it can claim to be. */
+  timestamp?: string | null;
   changes: { owner: string | undefined; amount: bigint; coinType: string }[];
 }
 
@@ -62,6 +64,8 @@ export interface VerifyResult {
   reason?: string;
   steps: VerifyStep[];
   evidence?: Evidence;
+  /** The payment facts step 5 checked, when it passed. */
+  payment?: PaymentFacts;
   /** sha256 of the fetched bytes, also the evidence id. */
   digest: string;
 }

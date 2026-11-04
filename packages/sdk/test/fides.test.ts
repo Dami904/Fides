@@ -4,6 +4,7 @@ import { signEvidence, type EvidenceBody } from '@fides/evidence';
 import { formatMemory } from '@fides/memory';
 import { assessMerchant, loadConfig } from '@fides/core';
 import { agreedPayTo, classifyBurn, derivePatterns, ReportError } from '../src/fides.js';
+import { reportTimeMs } from '../src/verifier.js';
 import { burned, makeAgent, newWorld, MERCHANT_HOST, PAYTO, T0, USDC, type Agent, type World } from '../src/testing.js';
 
 const cfg = loadConfig({ dailyCapUsd: '5' });
@@ -611,6 +612,73 @@ describe('a burn counts only if the reporter paid the merchant', () => {
     expect(agreedPayTo([row('a', PAYTO, 1), row('b', PAYTO, 2), row('x', SELF, 9), row('x', SELF, 10)])).toBe(PAYTO);
     expect(agreedPayTo([row('a', PAYTO, 1), row('x', SELF, 9)])).toBe(SELF); // a tie goes to the newest
     expect(agreedPayTo([])).toBeNull();
+  });
+});
+
+describe('one payment, one report, dated no later than the payment', () => {
+  const DAY = 86_400_000;
+  /** A second, valid record for a payment, signed and anchored by its real reporter, written straight to the shared record. */
+  const resign = async (w: World, a: Agent, txDigest: string, issuedAtMs: number) => {
+    const body: EvidenceBody = {
+      schema: 'fides.evidence/v1',
+      issuedAt: new Date(issuedAtMs).toISOString(),
+      reporter: { agentId: a.name, suiAddress: a.address },
+      merchant: { host: MERCHANT_HOST, payTo: PAYTO },
+      payment: { txDigest, amount: '10000', asset: USDC, quotedAmount: '10000', network: 'sui-mainnet' },
+      exchange: { requestHash: 'aa'.repeat(32), responseHash: 'bb'.repeat(32), responseBytes: 1, latencyMs: 1 },
+      checks: burned,
+      verdict: 'burned',
+      burnKind: 'junk',
+      finality: { checkpoint: '1', verifiedVia: 'tatum' },
+    };
+    const sealed = await signEvidence(body, a.key);
+    w.ledger.anchors.push({ evidenceSha256: sealed.digest, sender: a.address, payTxDigest: txDigest, verdict: 'burned', merchant: MERCHANT_HOST, eventTxDigest: 'RS' + sealed.digest.slice(0, 6), timestamp: '' });
+    w.memory.inject(formatMemory(sealed.evidence, []).text);
+    return sealed.digest;
+  };
+
+  it('the same payment signed twice by its reporter counts once; the copy is rejected and shown', async () => {
+    const w = newWorld();
+    const [a, b] = [makeAgent(w, 'A'), makeAgent(w, 'B')];
+    const tx = a.pay().txDigest;
+    const first = await resign(w, a, tx, w.clock.now);
+    const copy = await resign(w, a, tx, w.clock.now + 1000);
+    w.clock.now += 2000;
+    const r = await b.fides.check(b.input());
+    expect(r.verdict.citations.evidenceIds).toEqual([first]);
+    expect(r.rejected).toHaveLength(1);
+    expect(r.rejected[0]!.reason).toBe(`duplicate: this reporter already reported the same payment as evidence ${first}`);
+    expect(b.fides.lookup(MERCHANT_HOST).evidence.find((e) => e.evidenceId === copy)).toMatchObject({ status: 'rejected' });
+  });
+
+  it('report() refuses a second record for a payment, and a retry with the same outcome still works', async () => {
+    const w = newWorld();
+    const a = makeAgent(w, 'A');
+    const o = a.pay(10_000n, { checks: burned });
+    const r = await a.fides.report(o);
+    expect((await a.fides.report(o)).evidenceId).toBe(r.evidenceId); // same issuedAt: the same record, nothing new
+    await expect(a.fides.report({ ...o, issuedAt: new Date(w.clock.now + 5000).toISOString() })).rejects.toThrow(
+      `payment ${o.txDigest} is already reported as evidence ${r.evidenceId}: retry with the same issuedAt`,
+    );
+  });
+
+  it('an old payment reported as new is dated by its payment, and falls outside the window', async () => {
+    const w = newWorld();
+    const [a, b] = [makeAgent(w, 'A'), makeAgent(w, 'B')];
+    const tx = a.pay().txDigest;
+    const paidAt = w.clock.now - 60 * DAY;
+    w.ledger.payments.get(tx)!.timestamp = new Date(paidAt).toISOString(); // the chain says it is 60 days old
+    const id = await resign(w, a, tx, w.clock.now); // the reporter says it is new
+    const r = await b.fides.check(b.input());
+    expect(b.fides.lookup(MERCHANT_HOST).evidence.find((e) => e.evidenceId === id)).toMatchObject({ status: 'verified', issuedAtMs: paidAt });
+    expect(r.verdict.citations.evidenceIds).toEqual([]); // older than the 30 day window: not counted
+  });
+
+  it('reportTimeMs takes the earlier of the signed time and the payment time', () => {
+    expect(reportTimeMs('2026-11-01T00:00:00.000Z', { timestamp: '2026-10-01T00:00:00.000Z' })).toBe(Date.parse('2026-10-01T00:00:00.000Z'));
+    expect(reportTimeMs('2026-10-01T00:00:00.000Z', { timestamp: '2026-10-01T00:00:05.000Z' })).toBe(Date.parse('2026-10-01T00:00:00.000Z'));
+    expect(reportTimeMs('2026-10-01T00:00:00.000Z', { timestamp: null })).toBe(Date.parse('2026-10-01T00:00:00.000Z'));
+    expect(reportTimeMs('2026-10-01T00:00:00.000Z', undefined)).toBe(Date.parse('2026-10-01T00:00:00.000Z'));
   });
 });
 

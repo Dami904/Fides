@@ -248,6 +248,7 @@ Live tests (a real relayer, Tatum testnet, real payments) run only with `FIDES_L
 ## Engineering decisions
 
 - **Hash the fetched bytes, never a re-serialised object.** Records must already be canonical JSON, so what was signed is unambiguous. Pretty-printed or reordered bytes are rejected.
+- **One payment counts once, and is as old as the payment.** A reporter who re-signs the same payment gets a duplicate that is rejected and shown. A report is dated by the earlier of its signed time and the payment's chain time, so an old payment cannot be passed off as fresh.
 - **The reporter signs, and the anchor must come from the same address.** A copied payment digest in someone else's report fails because the payment's sender is not the reporter.
 - **Fail loudly.** A failed lookup is an error or a pending state, never "no ratings". An unreachable shared record is a different state from an empty one.
 - **Nobody can change the anchor's code.** The publish transaction hands the upgrade capability straight to Sui's `make_immutable`, so no key, including the agent key that publishes, can upgrade the module later. (The testnet package predates this and is still upgradeable by Agent A.)

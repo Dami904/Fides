@@ -9,6 +9,7 @@ import {
   type Anchor,
   type ChainReader,
   type Evidence,
+  type PaymentFacts,
   type VerifyResult,
   type VerifyStep,
 } from './types.js';
@@ -67,7 +68,7 @@ export async function* verifyEvidenceSteps(
   anchor: Anchor,
   chain: ChainReader,
   opts: { maxBytes: number },
-): AsyncGenerator<VerifyStep, Evidence | undefined> {
+): AsyncGenerator<VerifyStep, { evidence: Evidence; payment: PaymentFacts } | undefined> {
   const step = (name: VerifyStep['name'], ok: boolean, detail: string): VerifyStep => ({ name, ok, detail });
 
   // 1. Format: size, UTF-8 JSON, well formed, and in canonical form (so the signed bytes are unambiguous).
@@ -145,7 +146,7 @@ export async function* verifyEvidenceSteps(
     return undefined;
   }
   yield step('payment', true, `final in checkpoint ${pay.checkpoint}, sender is the reporter, ${received} paid to ${evidence.merchant.payTo}`);
-  return evidence;
+  return { evidence, payment: pay };
 }
 
 export async function verifyEvidence(
@@ -166,5 +167,5 @@ export async function verifyEvidence(
   if (failed || !next.value) {
     return { ok: false, rejectedAt: failed?.name, reason: failed?.detail, steps, digest };
   }
-  return { ok: true, steps, evidence: next.value, digest };
+  return { ok: true, steps, evidence: next.value.evidence, payment: next.value.payment, digest };
 }

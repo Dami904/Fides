@@ -120,6 +120,7 @@ const tx = (over: Record<string, unknown> = {}) => ({
     sender: { address: '0xaaa' },
     effects: {
       status: 'SUCCESS',
+      timestamp: '2026-10-28T13:42:57.509Z',
       checkpoint: { sequenceNumber: 400173491 },
       balanceChanges: { nodes: [{ owner: { address: '0xaaa' }, amount: '-10000', coinType: { repr: '0xusdc::usdc::USDC' } }, { owner: { address: '0xbbb' }, amount: '10000', coinType: { repr: '0xusdc::usdc::USDC' } }] },
     },
@@ -128,12 +129,13 @@ const tx = (over: Record<string, unknown> = {}) => ({
 });
 
 describe('getPayment (finality and payment facts)', () => {
-  it('maps sender, status, checkpoint and balance changes', async () => {
+  it('maps sender, status, checkpoint, chain time and balance changes', async () => {
     const { reader } = rig([ok(tx())]);
     expect(await reader.getPayment('ABC123')).toEqual({
       sender: '0xaaa',
       status: 'SUCCESS',
       checkpoint: 400173491,
+      timestamp: '2026-10-28T13:42:57.509Z',
       changes: [
         { owner: '0xaaa', amount: -10000n, coinType: '0xusdc::usdc::USDC' },
         { owner: '0xbbb', amount: 10000n, coinType: '0xusdc::usdc::USDC' },
