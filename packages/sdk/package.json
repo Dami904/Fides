@@ -1,0 +1,16 @@
+{
+  "name": "@fides/sdk",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "main": "src/index.ts",
+  "types": "src/index.ts",
+  "dependencies": {
+    "@fides/chain": "workspace:*",
+    "@fides/core": "workspace:*",
+    "@fides/evidence": "workspace:*",
+    "@fides/memory": "workspace:*",
+    "@fides/state": "workspace:*",
+    "@mysten/sui": "^2.37.0"
+  }
+}
