@@ -14,7 +14,7 @@ Built and tested; runs on **Sui testnet**. The mainnet runs (real USDC, the 10+ 
 
 | | |
 |---|---|
-| Tests | 375 pass, 10 skipped (live network tests and two slow simulation tests, run on request), typecheck clean |
+| Tests | 383 pass, 10 skipped (live network tests and two slow simulation tests, run on request), typecheck clean |
 | UI | `pnpm web` opens the four screens (React, on recorded fixtures); `pnpm mockups` serves the static design mockups |
 | Real on-chain run | the full demo on Sui testnet: real MPP USDC payments, Tatum verification, Sui anchors. Output: [`docs/evidence/demo-live-testnet.txt`](docs/evidence/demo-live-testnet.txt) |
 | Measured result | 20 agents, 6 merchants (2 bad): **12 burns with the shared record, 44 without** (73% avoided), no good merchant refused. [`docs/evidence/simulation.txt`](docs/evidence/simulation.txt) |
@@ -23,7 +23,7 @@ Built and tested; runs on **Sui testnet**. The mainnet runs (real USDC, the 10+ 
 
 ```bash
 pnpm install                 # Node 22 or newer, pnpm 11
-pnpm test                    # 375 tests, no network, no keys
+pnpm test                    # 383 tests, no network, no keys
 pnpm demo                    # the whole story, simulated: seconds, free
 pnpm sim                     # 20 agents x 6 merchants, with and without the shared record
 ```
@@ -240,8 +240,8 @@ Trust tiers come from verified outcomes, weighted by the reporter's own track re
 | `agent` | 18 | the buy loop, timeouts, refused and unknown payments, a merchant naming another host, reporting retries, the full demo |
 | `registry` | 28 | verification, forged records, tampered storage, outages, rate limits, page safety |
 | `sim` | 4 | repeatability, and (on request) the result |
-| `web` | 26 | the UI's logic and its API on fixtures: attempts, the board per round, the split view's three states, Re-verify, a forged record |
-| **Total** | **385** | 375 run by default |
+| `web` | 34 | every screen rendered, the UI's logic and its API on fixtures: attempts, the board per round, the split view's three states, Re-verify, a forged record |
+| **Total** | **393** | 383 run by default |
 
 Live tests (a real relayer, Tatum testnet, real payments) run only with `FIDES_LIVE=1`. Everything else uses a simulated world: a fake ledger, in-process memory, real signatures, real HTTP between agents and merchants, the real engine. The headline demo and the live tests use real payments and a real chain; nothing in them is faked except where stated under [staged versus real](#staged-versus-real).
 
@@ -284,7 +284,7 @@ Read this before trusting any number.
 - **What still gets through:** in the simulation, 12 burns remain with the record, partly the malicious merchant after its turn, when a person approves an ASK about the changed address.
 - **The model adapters (OpenAI, Anthropic, Gemini, OpenRouter) are checked against the vendors' documentation, not against live APIs.** The MCP server is verified with a real MCP client. There is no TLS in front of the HTTP MCP server; put one there.
 - **The Walrus Memory relayer sees plaintext** (it encrypts with Seal after reading). Nothing private is stored: evidence is public by design. There is no documented delete, so "detach" means Fides stops using the record. The testnet staging relayer's certificate is broken (checked 2026-10-28).
-- **The UI is not connected to live data yet.** Its pages run on fixtures recorded from the engine, and a label in the header says so on every page. The React components are tested only through their data layer, not rendered in a test; they were checked by hand in a browser.
+- **The UI is not connected to live data yet.** Its pages run on fixtures recorded from the engine, and a label in the header says so on every page. Every screen is rendered with React in a test (happy-dom) on those fixtures, including Re-verify running its five checks; the look was checked by hand in a browser.
 - **Self-grading is measured in the simulation, where every merchant is ours.** With the shared record, when Fides paid without asking the answer was clean 97% of the time (288 of 297, three seeds); at the established and trusted tiers, 276 of 276. Without the record Fides never paid on its own, so there is nothing to grade. Those numbers come from honest simulated reporters and mock merchants, so they say the rules work as designed, not how they fare against real adversaries. A real agent grades itself with `fides.selfGrade()` once it passes `decisionId` to `report()` (the reference agent does); refusals are never graded, because nobody learns what would have happened.
 - **Not built:** the mainnet runs, a live API for the UI.
 
