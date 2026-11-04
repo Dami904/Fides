@@ -57,7 +57,7 @@ if (!args.includes('--yes')) {
     B: h.makeAgent('B', () => approveNext),
     C: h.makeAgent('C', () => approveNext),
   };
-  const results: { t: Trial; r: BuyResult }[] = [];
+  const results: { t: Trial; r: BuyResult; late: number }[] = [];
   try {
     console.log(`Fides trials on ${h.network}, real Walrus Memory. ${TRIALS.length} trials.`);
     for (const [i, t] of TRIALS.entries()) {
@@ -68,22 +68,25 @@ if (!args.includes('--yes')) {
       approveNext = t.approve ?? true;
       const r = await who.agent.buy(h.merchants[t.merchant].resource);
       who.fides.setSharedRecord('attached');
-      results.push({ t, r });
+      // A report made while detached is held back; it reaches the shared record once the agent is attached again.
+      const late = t.shared === 'detached' ? (await who.agent.retryUnreported()).filter((x) => x.reported).length : 0;
+      results.push({ t, r, late });
       const conf = r.check ? ` tier ${r.check.verdict.tier}${r.check.verdict.cannotSay ? ', cannot say' : ''}` : '';
       console.log(`\n${String(i + 1).padStart(2)}. ${t.circumstance}${conf}`);
       console.log('    ' + describeBuy(r));
+      if (late) console.log('    held while detached, written to the shared record after attaching again');
     }
   } finally {
     await h.close();
   }
   const paid = results.filter((x) => x.r.paid);
   const burned = paid.filter((x) => !Object.values(x.r.exchange!.checks).every(Boolean));
-  const reported = results.filter((x) => x.r.receipt?.status === 'complete');
+  const reported = results.filter((x) => x.r.receipt?.status === 'complete' || x.late > 0);
   const byDecision: Record<string, number> = {};
   for (const { r } of results) byDecision[r.decision ?? 'error'] = (byDecision[r.decision ?? 'error'] ?? 0) + 1;
   console.log(`\nSummary: ${results.length} trials. Decisions: ${Object.entries(byDecision).map(([k, v]) => `${k} ${v}`).join(', ')}.`);
   console.log(`Paid ${paid.length} (burned ${burned.length}), reports written to the shared record ${reported.length}, not paid ${results.length - paid.length}.`);
-  const notReported = paid.filter((x) => x.r.receipt?.status !== 'complete');
+  const notReported = paid.filter((x) => x.r.receipt?.status !== 'complete' && !x.late);
   if (notReported.length) console.log(`Paid but not reported: ${notReported.map((x) => `${x.t.who}->${x.t.merchant} (${x.r.reportError ?? x.r.receipt?.status})`).join(', ')}`);
   process.exitCode = notReported.length || results.some((x) => x.r.decision === null) ? 1 : 0;
 }

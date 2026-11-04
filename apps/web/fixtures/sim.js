@@ -1,5 +1,5 @@
 window.FIDES_SIM = {
-  "generatedAt": "2026-11-04T14:25:51.492Z",
+  "generatedAt": "2026-11-04T16:22:05.769Z",
   "seed": 1,
   "shared": {
     "config": {
@@ -13,21 +13,21 @@ window.FIDES_SIM = {
       "maxLatencyMs": 150,
       "lateMs": 400
     },
-    "burns": 5,
-    "paid": 178,
-    "refused": 51,
+    "burns": 2,
+    "paid": 174,
+    "refused": 54,
     "refusedGood": 0,
-    "asked": 85,
-    "lostRaw": "50000",
+    "asked": 88,
+    "lostRaw": "20000",
     "burnsByMerchant": {
-      "flaky1.fides-sim.test": 5
+      "flaky1.fides-sim.test": 2
     },
     "rules": {
-      "tier": 97,
-      "similar-incident": 84,
-      "shared-burn": 8,
-      "shared-burns": 34,
-      "address": 17
+      "tier": 95,
+      "similar-incident": 87,
+      "shared-burn": 4,
+      "shared-burns": 38,
+      "address": 16
     },
     "events": [
       {
@@ -490,12 +490,12 @@ window.FIDES_SIM = {
         "agent": "agent10",
         "merchant": "flaky1.fides-sim.test",
         "kind": "flaky",
-        "decision": "PAY_CAPPED",
+        "decision": "REFUSE",
         "tier": "new",
         "rules": [
-          "shared-burn"
+          "shared-burns"
         ],
-        "paid": true,
+        "paid": false,
         "burned": false
       },
       {
@@ -504,7 +504,7 @@ window.FIDES_SIM = {
         "merchant": "flaky1.fides-sim.test",
         "kind": "flaky",
         "decision": "REFUSE",
-        "tier": "burned",
+        "tier": "new",
         "rules": [
           "shared-burns"
         ],
@@ -514,19 +514,6 @@ window.FIDES_SIM = {
       {
         "round": 2,
         "agent": "agent6",
-        "merchant": "good2.fides-sim.test",
-        "kind": "good",
-        "decision": "ASK",
-        "tier": "new",
-        "rules": [
-          "similar-incident"
-        ],
-        "paid": true,
-        "burned": false
-      },
-      {
-        "round": 2,
-        "agent": "agent18",
         "merchant": "good2.fides-sim.test",
         "kind": "good",
         "decision": "ASK",
@@ -539,6 +526,19 @@ window.FIDES_SIM = {
       },
       {
         "round": 2,
+        "agent": "agent18",
+        "merchant": "good2.fides-sim.test",
+        "kind": "good",
+        "decision": "ASK",
+        "tier": "new",
+        "rules": [
+          "similar-incident"
+        ],
+        "paid": true,
+        "burned": false
+      },
+      {
+        "round": 2,
         "agent": "agent5",
         "merchant": "good1.fides-sim.test",
         "kind": "good",
@@ -672,13 +672,13 @@ window.FIDES_SIM = {
         "agent": "agent6",
         "merchant": "flaky1.fides-sim.test",
         "kind": "flaky",
-        "decision": "PAY_CAPPED",
+        "decision": "REFUSE",
         "tier": "burned",
         "rules": [
-          "shared-burn"
+          "shared-burns"
         ],
-        "paid": true,
-        "burned": true
+        "paid": false,
+        "burned": false
       },
       {
         "round": 3,
@@ -751,7 +751,7 @@ window.FIDES_SIM = {
         "merchant": "flaky1.fides-sim.test",
         "kind": "flaky",
         "decision": "REFUSE",
-        "tier": "burned",
+        "tier": "new",
         "rules": [
           "shared-burns"
         ],
@@ -790,7 +790,7 @@ window.FIDES_SIM = {
         "merchant": "flaky1.fides-sim.test",
         "kind": "flaky",
         "decision": "REFUSE",
-        "tier": "burned",
+        "tier": "new",
         "rules": [
           "shared-burns"
         ],
@@ -855,7 +855,7 @@ window.FIDES_SIM = {
         "merchant": "flaky1.fides-sim.test",
         "kind": "flaky",
         "decision": "REFUSE",
-        "tier": "burned",
+        "tier": "new",
         "rules": [
           "shared-burns"
         ],
@@ -1011,7 +1011,7 @@ window.FIDES_SIM = {
         "merchant": "flaky1.fides-sim.test",
         "kind": "flaky",
         "decision": "REFUSE",
-        "tier": "burned",
+        "tier": "new",
         "rules": [
           "shared-burns"
         ],
@@ -1179,13 +1179,13 @@ window.FIDES_SIM = {
         "agent": "agent10",
         "merchant": "flaky1.fides-sim.test",
         "kind": "flaky",
-        "decision": "PAY_CAPPED",
+        "decision": "REFUSE",
         "tier": "burned",
         "rules": [
-          "shared-burn"
+          "shared-burns"
         ],
-        "paid": true,
-        "burned": true
+        "paid": false,
+        "burned": false
       },
       {
         "round": 5,
@@ -1270,30 +1270,17 @@ window.FIDES_SIM = {
         "agent": "agent20",
         "merchant": "malicious1.fides-sim.test",
         "kind": "malicious",
-        "decision": "PAY",
-        "tier": "established",
+        "decision": "ASK",
+        "tier": "new",
         "rules": [
-          "tier"
+          "similar-incident"
         ],
-        "paid": true,
+        "paid": false,
         "burned": false
       },
       {
         "round": 5,
         "agent": "agent15",
-        "merchant": "malicious1.fides-sim.test",
-        "kind": "malicious",
-        "decision": "PAY",
-        "tier": "established",
-        "rules": [
-          "tier"
-        ],
-        "paid": true,
-        "burned": false
-      },
-      {
-        "round": 5,
-        "agent": "agent4",
         "merchant": "good3.fides-sim.test",
         "kind": "good",
         "decision": "ASK",
@@ -1306,7 +1293,7 @@ window.FIDES_SIM = {
       },
       {
         "round": 5,
-        "agent": "agent16",
+        "agent": "agent4",
         "merchant": "flaky1.fides-sim.test",
         "kind": "flaky",
         "decision": "REFUSE",
@@ -1315,6 +1302,19 @@ window.FIDES_SIM = {
           "shared-burns"
         ],
         "paid": false,
+        "burned": false
+      },
+      {
+        "round": 5,
+        "agent": "agent16",
+        "merchant": "good3.fides-sim.test",
+        "kind": "good",
+        "decision": "ASK",
+        "tier": "new",
+        "rules": [
+          "similar-incident"
+        ],
+        "paid": true,
         "burned": false
       },
       {
@@ -1332,85 +1332,7 @@ window.FIDES_SIM = {
       },
       {
         "round": 6,
-        "agent": "agent15",
-        "merchant": "flaky1.fides-sim.test",
-        "kind": "flaky",
-        "decision": "REFUSE",
-        "tier": "burned",
-        "rules": [
-          "shared-burns"
-        ],
-        "paid": false,
-        "burned": false
-      },
-      {
-        "round": 6,
-        "agent": "agent14",
-        "merchant": "good1.fides-sim.test",
-        "kind": "good",
-        "decision": "ASK",
-        "tier": "new",
-        "rules": [
-          "similar-incident"
-        ],
-        "paid": true,
-        "burned": false
-      },
-      {
-        "round": 6,
-        "agent": "agent3",
-        "merchant": "good1.fides-sim.test",
-        "kind": "good",
-        "decision": "ASK",
-        "tier": "new",
-        "rules": [
-          "similar-incident"
-        ],
-        "paid": true,
-        "burned": false
-      },
-      {
-        "round": 6,
-        "agent": "agent18",
-        "merchant": "good3.fides-sim.test",
-        "kind": "good",
-        "decision": "ASK",
-        "tier": "new",
-        "rules": [
-          "similar-incident"
-        ],
-        "paid": true,
-        "burned": false
-      },
-      {
-        "round": 6,
-        "agent": "agent4",
-        "merchant": "malicious1.fides-sim.test",
-        "kind": "malicious",
-        "decision": "REFUSE",
-        "tier": "established",
-        "rules": [
-          "address"
-        ],
-        "paid": false,
-        "burned": false
-      },
-      {
-        "round": 6,
         "agent": "agent13",
-        "merchant": "good4.fides-sim.test",
-        "kind": "good",
-        "decision": "PAY",
-        "tier": "established",
-        "rules": [
-          "tier"
-        ],
-        "paid": true,
-        "burned": false
-      },
-      {
-        "round": 6,
-        "agent": "agent9",
         "merchant": "good2.fides-sim.test",
         "kind": "good",
         "decision": "PAY",
@@ -1423,7 +1345,59 @@ window.FIDES_SIM = {
       },
       {
         "round": 6,
-        "agent": "agent8",
+        "agent": "agent20",
+        "merchant": "good1.fides-sim.test",
+        "kind": "good",
+        "decision": "ASK",
+        "tier": "new",
+        "rules": [
+          "similar-incident"
+        ],
+        "paid": true,
+        "burned": false
+      },
+      {
+        "round": 6,
+        "agent": "agent12",
+        "merchant": "good3.fides-sim.test",
+        "kind": "good",
+        "decision": "ASK",
+        "tier": "new",
+        "rules": [
+          "similar-incident"
+        ],
+        "paid": true,
+        "burned": false
+      },
+      {
+        "round": 6,
+        "agent": "agent1",
+        "merchant": "malicious1.fides-sim.test",
+        "kind": "malicious",
+        "decision": "REFUSE",
+        "tier": "established",
+        "rules": [
+          "address"
+        ],
+        "paid": false,
+        "burned": false
+      },
+      {
+        "round": 6,
+        "agent": "agent16",
+        "merchant": "good4.fides-sim.test",
+        "kind": "good",
+        "decision": "PAY",
+        "tier": "established",
+        "rules": [
+          "tier"
+        ],
+        "paid": true,
+        "burned": false
+      },
+      {
+        "round": 6,
+        "agent": "agent2",
         "merchant": "good2.fides-sim.test",
         "kind": "good",
         "decision": "PAY",
@@ -1437,12 +1411,12 @@ window.FIDES_SIM = {
       {
         "round": 6,
         "agent": "agent11",
-        "merchant": "good3.fides-sim.test",
+        "merchant": "good2.fides-sim.test",
         "kind": "good",
-        "decision": "ASK",
-        "tier": "new",
+        "decision": "PAY",
+        "tier": "established",
         "rules": [
-          "similar-incident"
+          "tier"
         ],
         "paid": true,
         "burned": false
@@ -1462,34 +1436,21 @@ window.FIDES_SIM = {
       },
       {
         "round": 6,
-        "agent": "agent1",
+        "agent": "agent6",
+        "merchant": "good3.fides-sim.test",
+        "kind": "good",
+        "decision": "ASK",
+        "tier": "new",
+        "rules": [
+          "similar-incident"
+        ],
+        "paid": true,
+        "burned": false
+      },
+      {
+        "round": 6,
+        "agent": "agent9",
         "merchant": "good4.fides-sim.test",
-        "kind": "good",
-        "decision": "PAY",
-        "tier": "established",
-        "rules": [
-          "tier"
-        ],
-        "paid": true,
-        "burned": false
-      },
-      {
-        "round": 6,
-        "agent": "agent10",
-        "merchant": "good3.fides-sim.test",
-        "kind": "good",
-        "decision": "PAY",
-        "tier": "established",
-        "rules": [
-          "tier"
-        ],
-        "paid": true,
-        "burned": false
-      },
-      {
-        "round": 6,
-        "agent": "agent16",
-        "merchant": "good3.fides-sim.test",
         "kind": "good",
         "decision": "PAY",
         "tier": "established",
@@ -1514,7 +1475,33 @@ window.FIDES_SIM = {
       },
       {
         "round": 6,
-        "agent": "agent20",
+        "agent": "agent8",
+        "merchant": "good3.fides-sim.test",
+        "kind": "good",
+        "decision": "PAY",
+        "tier": "established",
+        "rules": [
+          "tier"
+        ],
+        "paid": true,
+        "burned": false
+      },
+      {
+        "round": 6,
+        "agent": "agent14",
+        "merchant": "good3.fides-sim.test",
+        "kind": "good",
+        "decision": "PAY",
+        "tier": "established",
+        "rules": [
+          "tier"
+        ],
+        "paid": true,
+        "burned": false
+      },
+      {
+        "round": 6,
+        "agent": "agent3",
         "merchant": "good2.fides-sim.test",
         "kind": "good",
         "decision": "PAY",
@@ -1527,7 +1514,7 @@ window.FIDES_SIM = {
       },
       {
         "round": 6,
-        "agent": "agent2",
+        "agent": "agent18",
         "merchant": "good1.fides-sim.test",
         "kind": "good",
         "decision": "ASK",
@@ -1540,7 +1527,7 @@ window.FIDES_SIM = {
       },
       {
         "round": 6,
-        "agent": "agent12",
+        "agent": "agent10",
         "merchant": "flaky1.fides-sim.test",
         "kind": "flaky",
         "decision": "REFUSE",
@@ -1553,11 +1540,11 @@ window.FIDES_SIM = {
       },
       {
         "round": 6,
-        "agent": "agent6",
+        "agent": "agent4",
         "merchant": "malicious1.fides-sim.test",
         "kind": "malicious",
         "decision": "REFUSE",
-        "tier": "established",
+        "tier": "new",
         "rules": [
           "address"
         ],
@@ -1591,8 +1578,21 @@ window.FIDES_SIM = {
         "burned": false
       },
       {
+        "round": 6,
+        "agent": "agent15",
+        "merchant": "good4.fides-sim.test",
+        "kind": "good",
+        "decision": "PAY",
+        "tier": "established",
+        "rules": [
+          "tier"
+        ],
+        "paid": true,
+        "burned": false
+      },
+      {
         "round": 7,
-        "agent": "agent14",
+        "agent": "agent13",
         "merchant": "flaky1.fides-sim.test",
         "kind": "flaky",
         "decision": "REFUSE",
@@ -1605,20 +1605,7 @@ window.FIDES_SIM = {
       },
       {
         "round": 7,
-        "agent": "agent19",
-        "merchant": "flaky1.fides-sim.test",
-        "kind": "flaky",
-        "decision": "REFUSE",
-        "tier": "burned",
-        "rules": [
-          "shared-burns"
-        ],
-        "paid": false,
-        "burned": false
-      },
-      {
-        "round": 7,
-        "agent": "agent9",
+        "agent": "agent18",
         "merchant": "good1.fides-sim.test",
         "kind": "good",
         "decision": "ASK",
@@ -1631,7 +1618,7 @@ window.FIDES_SIM = {
       },
       {
         "round": 7,
-        "agent": "agent10",
+        "agent": "agent8",
         "merchant": "good4.fides-sim.test",
         "kind": "good",
         "decision": "PAY",
@@ -1644,7 +1631,7 @@ window.FIDES_SIM = {
       },
       {
         "round": 7,
-        "agent": "agent7",
+        "agent": "agent9",
         "merchant": "flaky1.fides-sim.test",
         "kind": "flaky",
         "decision": "REFUSE",
@@ -1657,8 +1644,60 @@ window.FIDES_SIM = {
       },
       {
         "round": 7,
-        "agent": "agent2",
+        "agent": "agent6",
         "merchant": "good4.fides-sim.test",
+        "kind": "good",
+        "decision": "PAY",
+        "tier": "established",
+        "rules": [
+          "tier"
+        ],
+        "paid": true,
+        "burned": false
+      },
+      {
+        "round": 7,
+        "agent": "agent1",
+        "merchant": "good4.fides-sim.test",
+        "kind": "good",
+        "decision": "PAY",
+        "tier": "established",
+        "rules": [
+          "tier"
+        ],
+        "paid": true,
+        "burned": false
+      },
+      {
+        "round": 7,
+        "agent": "agent14",
+        "merchant": "flaky1.fides-sim.test",
+        "kind": "flaky",
+        "decision": "REFUSE",
+        "tier": "burned",
+        "rules": [
+          "shared-burns"
+        ],
+        "paid": false,
+        "burned": false
+      },
+      {
+        "round": 7,
+        "agent": "agent3",
+        "merchant": "good4.fides-sim.test",
+        "kind": "good",
+        "decision": "PAY",
+        "tier": "established",
+        "rules": [
+          "tier"
+        ],
+        "paid": true,
+        "burned": false
+      },
+      {
+        "round": 7,
+        "agent": "agent10",
+        "merchant": "good3.fides-sim.test",
         "kind": "good",
         "decision": "PAY",
         "tier": "established",
@@ -1671,19 +1710,19 @@ window.FIDES_SIM = {
       {
         "round": 7,
         "agent": "agent15",
-        "merchant": "good4.fides-sim.test",
+        "merchant": "good1.fides-sim.test",
         "kind": "good",
-        "decision": "PAY",
-        "tier": "established",
+        "decision": "ASK",
+        "tier": "new",
         "rules": [
-          "tier"
+          "similar-incident"
         ],
         "paid": true,
         "burned": false
       },
       {
         "round": 7,
-        "agent": "agent4",
+        "agent": "agent5",
         "merchant": "flaky1.fides-sim.test",
         "kind": "flaky",
         "decision": "REFUSE",
@@ -1697,6 +1736,32 @@ window.FIDES_SIM = {
       {
         "round": 7,
         "agent": "agent11",
+        "merchant": "good2.fides-sim.test",
+        "kind": "good",
+        "decision": "PAY",
+        "tier": "established",
+        "rules": [
+          "tier"
+        ],
+        "paid": true,
+        "burned": false
+      },
+      {
+        "round": 7,
+        "agent": "agent17",
+        "merchant": "good2.fides-sim.test",
+        "kind": "good",
+        "decision": "PAY",
+        "tier": "established",
+        "rules": [
+          "tier"
+        ],
+        "paid": true,
+        "burned": false
+      },
+      {
+        "round": 7,
+        "agent": "agent7",
         "merchant": "good4.fides-sim.test",
         "kind": "good",
         "decision": "PAY",
@@ -1709,7 +1774,7 @@ window.FIDES_SIM = {
       },
       {
         "round": 7,
-        "agent": "agent16",
+        "agent": "agent2",
         "merchant": "good3.fides-sim.test",
         "kind": "good",
         "decision": "PAY",
@@ -1722,7 +1787,46 @@ window.FIDES_SIM = {
       },
       {
         "round": 7,
-        "agent": "agent6",
+        "agent": "agent16",
+        "merchant": "good4.fides-sim.test",
+        "kind": "good",
+        "decision": "PAY",
+        "tier": "established",
+        "rules": [
+          "tier"
+        ],
+        "paid": true,
+        "burned": false
+      },
+      {
+        "round": 7,
+        "agent": "agent19",
+        "merchant": "flaky1.fides-sim.test",
+        "kind": "flaky",
+        "decision": "REFUSE",
+        "tier": "burned",
+        "rules": [
+          "shared-burns"
+        ],
+        "paid": false,
+        "burned": false
+      },
+      {
+        "round": 7,
+        "agent": "agent4",
+        "merchant": "good1.fides-sim.test",
+        "kind": "good",
+        "decision": "ASK",
+        "tier": "new",
+        "rules": [
+          "similar-incident"
+        ],
+        "paid": true,
+        "burned": false
+      },
+      {
+        "round": 7,
+        "agent": "agent20",
         "merchant": "good1.fides-sim.test",
         "kind": "good",
         "decision": "ASK",
@@ -1747,34 +1851,8 @@ window.FIDES_SIM = {
         "burned": false
       },
       {
-        "round": 7,
-        "agent": "agent1",
-        "merchant": "good2.fides-sim.test",
-        "kind": "good",
-        "decision": "PAY",
-        "tier": "established",
-        "rules": [
-          "tier"
-        ],
-        "paid": true,
-        "burned": false
-      },
-      {
-        "round": 7,
-        "agent": "agent18",
-        "merchant": "good2.fides-sim.test",
-        "kind": "good",
-        "decision": "PAY",
-        "tier": "established",
-        "rules": [
-          "tier"
-        ],
-        "paid": true,
-        "burned": false
-      },
-      {
-        "round": 7,
-        "agent": "agent8",
+        "round": 8,
+        "agent": "agent15",
         "merchant": "good4.fides-sim.test",
         "kind": "good",
         "decision": "PAY",
@@ -1786,46 +1864,20 @@ window.FIDES_SIM = {
         "burned": false
       },
       {
-        "round": 7,
-        "agent": "agent3",
-        "merchant": "good3.fides-sim.test",
-        "kind": "good",
-        "decision": "PAY",
-        "tier": "established",
-        "rules": [
-          "tier"
-        ],
-        "paid": true,
-        "burned": false
-      },
-      {
-        "round": 7,
-        "agent": "agent17",
-        "merchant": "good4.fides-sim.test",
-        "kind": "good",
-        "decision": "PAY",
-        "tier": "established",
-        "rules": [
-          "tier"
-        ],
-        "paid": true,
-        "burned": false
-      },
-      {
-        "round": 7,
-        "agent": "agent20",
-        "merchant": "flaky1.fides-sim.test",
-        "kind": "flaky",
+        "round": 8,
+        "agent": "agent16",
+        "merchant": "malicious1.fides-sim.test",
+        "kind": "malicious",
         "decision": "REFUSE",
-        "tier": "burned",
+        "tier": "established",
         "rules": [
-          "shared-burns"
+          "address"
         ],
         "paid": false,
         "burned": false
       },
       {
-        "round": 7,
+        "round": 8,
         "agent": "agent5",
         "merchant": "good1.fides-sim.test",
         "kind": "good",
@@ -1838,47 +1890,8 @@ window.FIDES_SIM = {
         "burned": false
       },
       {
-        "round": 7,
-        "agent": "agent13",
-        "merchant": "good2.fides-sim.test",
-        "kind": "good",
-        "decision": "PAY",
-        "tier": "established",
-        "rules": [
-          "tier"
-        ],
-        "paid": true,
-        "burned": false
-      },
-      {
-        "round": 8,
-        "agent": "agent1",
-        "merchant": "good1.fides-sim.test",
-        "kind": "good",
-        "decision": "PAY",
-        "tier": "established",
-        "rules": [
-          "tier"
-        ],
-        "paid": true,
-        "burned": false
-      },
-      {
         "round": 8,
         "agent": "agent18",
-        "merchant": "malicious1.fides-sim.test",
-        "kind": "malicious",
-        "decision": "REFUSE",
-        "tier": "established",
-        "rules": [
-          "address"
-        ],
-        "paid": false,
-        "burned": false
-      },
-      {
-        "round": 8,
-        "agent": "agent19",
         "merchant": "good2.fides-sim.test",
         "kind": "good",
         "decision": "PAY",
@@ -1891,59 +1904,7 @@ window.FIDES_SIM = {
       },
       {
         "round": 8,
-        "agent": "agent8",
-        "merchant": "good4.fides-sim.test",
-        "kind": "good",
-        "decision": "PAY",
-        "tier": "established",
-        "rules": [
-          "tier"
-        ],
-        "paid": true,
-        "burned": false
-      },
-      {
-        "round": 8,
-        "agent": "agent10",
-        "merchant": "malicious1.fides-sim.test",
-        "kind": "malicious",
-        "decision": "REFUSE",
-        "tier": "established",
-        "rules": [
-          "address"
-        ],
-        "paid": false,
-        "burned": false
-      },
-      {
-        "round": 8,
-        "agent": "agent14",
-        "merchant": "good1.fides-sim.test",
-        "kind": "good",
-        "decision": "PAY",
-        "tier": "established",
-        "rules": [
-          "tier"
-        ],
-        "paid": true,
-        "burned": false
-      },
-      {
-        "round": 8,
-        "agent": "agent2",
-        "merchant": "good2.fides-sim.test",
-        "kind": "good",
-        "decision": "PAY",
-        "tier": "established",
-        "rules": [
-          "tier"
-        ],
-        "paid": true,
-        "burned": false
-      },
-      {
-        "round": 8,
-        "agent": "agent17",
+        "agent": "agent7",
         "merchant": "good2.fides-sim.test",
         "kind": "good",
         "decision": "PAY",
@@ -1969,7 +1930,7 @@ window.FIDES_SIM = {
       },
       {
         "round": 8,
-        "agent": "agent12",
+        "agent": "agent14",
         "merchant": "flaky1.fides-sim.test",
         "kind": "flaky",
         "decision": "REFUSE",
@@ -1982,7 +1943,7 @@ window.FIDES_SIM = {
       },
       {
         "round": 8,
-        "agent": "agent6",
+        "agent": "agent20",
         "merchant": "good1.fides-sim.test",
         "kind": "good",
         "decision": "PAY",
@@ -1995,7 +1956,7 @@ window.FIDES_SIM = {
       },
       {
         "round": 8,
-        "agent": "agent9",
+        "agent": "agent8",
         "merchant": "good4.fides-sim.test",
         "kind": "good",
         "decision": "PAY",
@@ -2008,7 +1969,7 @@ window.FIDES_SIM = {
       },
       {
         "round": 8,
-        "agent": "agent13",
+        "agent": "agent9",
         "merchant": "malicious1.fides-sim.test",
         "kind": "malicious",
         "decision": "REFUSE",
@@ -2021,8 +1982,34 @@ window.FIDES_SIM = {
       },
       {
         "round": 8,
-        "agent": "agent7",
+        "agent": "agent3",
         "merchant": "good4.fides-sim.test",
+        "kind": "good",
+        "decision": "PAY",
+        "tier": "established",
+        "rules": [
+          "tier"
+        ],
+        "paid": true,
+        "burned": false
+      },
+      {
+        "round": 8,
+        "agent": "agent6",
+        "merchant": "good3.fides-sim.test",
+        "kind": "good",
+        "decision": "PAY",
+        "tier": "established",
+        "rules": [
+          "tier"
+        ],
+        "paid": true,
+        "burned": false
+      },
+      {
+        "round": 8,
+        "agent": "agent10",
+        "merchant": "good3.fides-sim.test",
         "kind": "good",
         "decision": "PAY",
         "tier": "established",
@@ -2035,32 +2022,6 @@ window.FIDES_SIM = {
       {
         "round": 8,
         "agent": "agent4",
-        "merchant": "good3.fides-sim.test",
-        "kind": "good",
-        "decision": "PAY",
-        "tier": "established",
-        "rules": [
-          "tier"
-        ],
-        "paid": true,
-        "burned": false
-      },
-      {
-        "round": 8,
-        "agent": "agent15",
-        "merchant": "good3.fides-sim.test",
-        "kind": "good",
-        "decision": "PAY",
-        "tier": "established",
-        "rules": [
-          "tier"
-        ],
-        "paid": true,
-        "burned": false
-      },
-      {
-        "round": 8,
-        "agent": "agent16",
         "merchant": "flaky1.fides-sim.test",
         "kind": "flaky",
         "decision": "REFUSE",
@@ -2073,7 +2034,7 @@ window.FIDES_SIM = {
       },
       {
         "round": 8,
-        "agent": "agent3",
+        "agent": "agent1",
         "merchant": "flaky1.fides-sim.test",
         "kind": "flaky",
         "decision": "REFUSE",
@@ -2086,7 +2047,7 @@ window.FIDES_SIM = {
       },
       {
         "round": 8,
-        "agent": "agent5",
+        "agent": "agent12",
         "merchant": "malicious1.fides-sim.test",
         "kind": "malicious",
         "decision": "REFUSE",
@@ -2099,8 +2060,60 @@ window.FIDES_SIM = {
       },
       {
         "round": 8,
-        "agent": "agent20",
+        "agent": "agent13",
         "merchant": "good2.fides-sim.test",
+        "kind": "good",
+        "decision": "PAY",
+        "tier": "established",
+        "rules": [
+          "tier"
+        ],
+        "paid": true,
+        "burned": false
+      },
+      {
+        "round": 8,
+        "agent": "agent2",
+        "merchant": "good3.fides-sim.test",
+        "kind": "good",
+        "decision": "PAY",
+        "tier": "established",
+        "rules": [
+          "tier"
+        ],
+        "paid": true,
+        "burned": false
+      },
+      {
+        "round": 8,
+        "agent": "agent17",
+        "merchant": "flaky1.fides-sim.test",
+        "kind": "flaky",
+        "decision": "REFUSE",
+        "tier": "burned",
+        "rules": [
+          "shared-burns"
+        ],
+        "paid": false,
+        "burned": false
+      },
+      {
+        "round": 8,
+        "agent": "agent19",
+        "merchant": "good2.fides-sim.test",
+        "kind": "good",
+        "decision": "PAY",
+        "tier": "established",
+        "rules": [
+          "tier"
+        ],
+        "paid": true,
+        "burned": false
+      },
+      {
+        "round": 9,
+        "agent": "agent11",
+        "merchant": "good3.fides-sim.test",
         "kind": "good",
         "decision": "PAY",
         "tier": "established",
@@ -2125,72 +2138,20 @@ window.FIDES_SIM = {
       },
       {
         "round": 9,
-        "agent": "agent17",
-        "merchant": "good3.fides-sim.test",
-        "kind": "good",
-        "decision": "PAY",
-        "tier": "established",
-        "rules": [
-          "tier"
-        ],
-        "paid": true,
-        "burned": false
-      },
-      {
-        "round": 9,
-        "agent": "agent13",
-        "merchant": "good4.fides-sim.test",
-        "kind": "good",
-        "decision": "PAY",
-        "tier": "established",
-        "rules": [
-          "tier"
-        ],
-        "paid": true,
-        "burned": false
-      },
-      {
-        "round": 9,
-        "agent": "agent4",
-        "merchant": "good3.fides-sim.test",
-        "kind": "good",
-        "decision": "PAY",
-        "tier": "established",
-        "rules": [
-          "tier"
-        ],
-        "paid": true,
-        "burned": false
-      },
-      {
-        "round": 9,
-        "agent": "agent3",
-        "merchant": "good2.fides-sim.test",
-        "kind": "good",
-        "decision": "PAY",
-        "tier": "established",
-        "rules": [
-          "tier"
-        ],
-        "paid": true,
-        "burned": false
-      },
-      {
-        "round": 9,
-        "agent": "agent19",
-        "merchant": "good2.fides-sim.test",
-        "kind": "good",
-        "decision": "PAY",
-        "tier": "established",
-        "rules": [
-          "tier"
-        ],
-        "paid": true,
-        "burned": false
-      },
-      {
-        "round": 9,
         "agent": "agent18",
+        "merchant": "good2.fides-sim.test",
+        "kind": "good",
+        "decision": "PAY",
+        "tier": "established",
+        "rules": [
+          "tier"
+        ],
+        "paid": true,
+        "burned": false
+      },
+      {
+        "round": 9,
+        "agent": "agent10",
         "merchant": "good3.fides-sim.test",
         "kind": "good",
         "decision": "PAY",
@@ -2203,7 +2164,7 @@ window.FIDES_SIM = {
       },
       {
         "round": 9,
-        "agent": "agent11",
+        "agent": "agent1",
         "merchant": "good2.fides-sim.test",
         "kind": "good",
         "decision": "PAY",
@@ -2216,7 +2177,7 @@ window.FIDES_SIM = {
       },
       {
         "round": 9,
-        "agent": "agent1",
+        "agent": "agent16",
         "merchant": "good1.fides-sim.test",
         "kind": "good",
         "decision": "PAY",
@@ -2229,8 +2190,47 @@ window.FIDES_SIM = {
       },
       {
         "round": 9,
-        "agent": "agent9",
+        "agent": "agent15",
         "merchant": "good1.fides-sim.test",
+        "kind": "good",
+        "decision": "PAY",
+        "tier": "established",
+        "rules": [
+          "tier"
+        ],
+        "paid": true,
+        "burned": false
+      },
+      {
+        "round": 9,
+        "agent": "agent8",
+        "merchant": "good3.fides-sim.test",
+        "kind": "good",
+        "decision": "PAY",
+        "tier": "trusted",
+        "rules": [
+          "tier"
+        ],
+        "paid": true,
+        "burned": false
+      },
+      {
+        "round": 9,
+        "agent": "agent6",
+        "merchant": "good2.fides-sim.test",
+        "kind": "good",
+        "decision": "PAY",
+        "tier": "trusted",
+        "rules": [
+          "tier"
+        ],
+        "paid": true,
+        "burned": false
+      },
+      {
+        "round": 9,
+        "agent": "agent19",
+        "merchant": "good4.fides-sim.test",
         "kind": "good",
         "decision": "PAY",
         "tier": "established",
@@ -2243,7 +2243,7 @@ window.FIDES_SIM = {
       {
         "round": 9,
         "agent": "agent20",
-        "merchant": "good3.fides-sim.test",
+        "merchant": "good4.fides-sim.test",
         "kind": "good",
         "decision": "PAY",
         "tier": "established",
@@ -2255,7 +2255,20 @@ window.FIDES_SIM = {
       },
       {
         "round": 9,
-        "agent": "agent6",
+        "agent": "agent17",
+        "merchant": "flaky1.fides-sim.test",
+        "kind": "flaky",
+        "decision": "REFUSE",
+        "tier": "burned",
+        "rules": [
+          "shared-burns"
+        ],
+        "paid": false,
+        "burned": false
+      },
+      {
+        "round": 9,
+        "agent": "agent3",
         "merchant": "good2.fides-sim.test",
         "kind": "good",
         "decision": "PAY",
@@ -2269,7 +2282,20 @@ window.FIDES_SIM = {
       {
         "round": 9,
         "agent": "agent2",
-        "merchant": "good4.fides-sim.test",
+        "merchant": "good3.fides-sim.test",
+        "kind": "good",
+        "decision": "PAY",
+        "tier": "established",
+        "rules": [
+          "tier"
+        ],
+        "paid": true,
+        "burned": false
+      },
+      {
+        "round": 9,
+        "agent": "agent4",
+        "merchant": "good2.fides-sim.test",
         "kind": "good",
         "decision": "PAY",
         "tier": "trusted",
@@ -2281,8 +2307,21 @@ window.FIDES_SIM = {
       },
       {
         "round": 9,
-        "agent": "agent5",
-        "merchant": "good4.fides-sim.test",
+        "agent": "agent9",
+        "merchant": "good1.fides-sim.test",
+        "kind": "good",
+        "decision": "PAY",
+        "tier": "established",
+        "rules": [
+          "tier"
+        ],
+        "paid": true,
+        "burned": false
+      },
+      {
+        "round": 9,
+        "agent": "agent13",
+        "merchant": "good3.fides-sim.test",
         "kind": "good",
         "decision": "PAY",
         "tier": "trusted",
@@ -2295,6 +2334,19 @@ window.FIDES_SIM = {
       {
         "round": 9,
         "agent": "agent7",
+        "merchant": "good1.fides-sim.test",
+        "kind": "good",
+        "decision": "PAY",
+        "tier": "established",
+        "rules": [
+          "tier"
+        ],
+        "paid": true,
+        "burned": false
+      },
+      {
+        "round": 9,
+        "agent": "agent5",
         "merchant": "flaky1.fides-sim.test",
         "kind": "flaky",
         "decision": "REFUSE",
@@ -2308,84 +2360,6 @@ window.FIDES_SIM = {
       {
         "round": 9,
         "agent": "agent12",
-        "merchant": "good2.fides-sim.test",
-        "kind": "good",
-        "decision": "PAY",
-        "tier": "established",
-        "rules": [
-          "tier"
-        ],
-        "paid": true,
-        "burned": false
-      },
-      {
-        "round": 9,
-        "agent": "agent16",
-        "merchant": "good3.fides-sim.test",
-        "kind": "good",
-        "decision": "PAY",
-        "tier": "established",
-        "rules": [
-          "tier"
-        ],
-        "paid": true,
-        "burned": false
-      },
-      {
-        "round": 9,
-        "agent": "agent10",
-        "merchant": "good2.fides-sim.test",
-        "kind": "good",
-        "decision": "PAY",
-        "tier": "trusted",
-        "rules": [
-          "tier"
-        ],
-        "paid": true,
-        "burned": false
-      },
-      {
-        "round": 9,
-        "agent": "agent8",
-        "merchant": "good1.fides-sim.test",
-        "kind": "good",
-        "decision": "PAY",
-        "tier": "established",
-        "rules": [
-          "tier"
-        ],
-        "paid": true,
-        "burned": false
-      },
-      {
-        "round": 9,
-        "agent": "agent15",
-        "merchant": "good3.fides-sim.test",
-        "kind": "good",
-        "decision": "PAY",
-        "tier": "established",
-        "rules": [
-          "tier"
-        ],
-        "paid": true,
-        "burned": false
-      },
-      {
-        "round": 10,
-        "agent": "agent9",
-        "merchant": "good2.fides-sim.test",
-        "kind": "good",
-        "decision": "PAY",
-        "tier": "trusted",
-        "rules": [
-          "tier"
-        ],
-        "paid": true,
-        "burned": false
-      },
-      {
-        "round": 10,
-        "agent": "agent4",
         "merchant": "flaky1.fides-sim.test",
         "kind": "flaky",
         "decision": "REFUSE",
@@ -2398,20 +2372,7 @@ window.FIDES_SIM = {
       },
       {
         "round": 10,
-        "agent": "agent15",
-        "merchant": "flaky1.fides-sim.test",
-        "kind": "flaky",
-        "decision": "REFUSE",
-        "tier": "burned",
-        "rules": [
-          "shared-burns"
-        ],
-        "paid": false,
-        "burned": false
-      },
-      {
-        "round": 10,
-        "agent": "agent1",
+        "agent": "agent6",
         "merchant": "malicious1.fides-sim.test",
         "kind": "malicious",
         "decision": "REFUSE",
@@ -2424,7 +2385,7 @@ window.FIDES_SIM = {
       },
       {
         "round": 10,
-        "agent": "agent6",
+        "agent": "agent1",
         "merchant": "good3.fides-sim.test",
         "kind": "good",
         "decision": "PAY",
@@ -2437,7 +2398,7 @@ window.FIDES_SIM = {
       },
       {
         "round": 10,
-        "agent": "agent18",
+        "agent": "agent12",
         "merchant": "good1.fides-sim.test",
         "kind": "good",
         "decision": "PAY",
@@ -2450,7 +2411,7 @@ window.FIDES_SIM = {
       },
       {
         "round": 10,
-        "agent": "agent7",
+        "agent": "agent3",
         "merchant": "flaky1.fides-sim.test",
         "kind": "flaky",
         "decision": "REFUSE",
@@ -2463,7 +2424,20 @@ window.FIDES_SIM = {
       },
       {
         "round": 10,
-        "agent": "agent14",
+        "agent": "agent15",
+        "merchant": "good4.fides-sim.test",
+        "kind": "good",
+        "decision": "PAY",
+        "tier": "established",
+        "rules": [
+          "tier"
+        ],
+        "paid": true,
+        "burned": false
+      },
+      {
+        "round": 10,
+        "agent": "agent4",
         "merchant": "good4.fides-sim.test",
         "kind": "good",
         "decision": "PAY",
@@ -2472,6 +2446,123 @@ window.FIDES_SIM = {
           "tier"
         ],
         "paid": true,
+        "burned": false
+      },
+      {
+        "round": 10,
+        "agent": "agent18",
+        "merchant": "good2.fides-sim.test",
+        "kind": "good",
+        "decision": "PAY",
+        "tier": "trusted",
+        "rules": [
+          "tier"
+        ],
+        "paid": true,
+        "burned": false
+      },
+      {
+        "round": 10,
+        "agent": "agent11",
+        "merchant": "malicious1.fides-sim.test",
+        "kind": "malicious",
+        "decision": "REFUSE",
+        "tier": "established",
+        "rules": [
+          "address"
+        ],
+        "paid": false,
+        "burned": false
+      },
+      {
+        "round": 10,
+        "agent": "agent10",
+        "merchant": "good4.fides-sim.test",
+        "kind": "good",
+        "decision": "PAY",
+        "tier": "trusted",
+        "rules": [
+          "tier"
+        ],
+        "paid": true,
+        "burned": false
+      },
+      {
+        "round": 10,
+        "agent": "agent9",
+        "merchant": "good4.fides-sim.test",
+        "kind": "good",
+        "decision": "PAY",
+        "tier": "trusted",
+        "rules": [
+          "tier"
+        ],
+        "paid": true,
+        "burned": false
+      },
+      {
+        "round": 10,
+        "agent": "agent7",
+        "merchant": "good3.fides-sim.test",
+        "kind": "good",
+        "decision": "PAY",
+        "tier": "trusted",
+        "rules": [
+          "tier"
+        ],
+        "paid": true,
+        "burned": false
+      },
+      {
+        "round": 10,
+        "agent": "agent14",
+        "merchant": "malicious1.fides-sim.test",
+        "kind": "malicious",
+        "decision": "REFUSE",
+        "tier": "established",
+        "rules": [
+          "address"
+        ],
+        "paid": false,
+        "burned": false
+      },
+      {
+        "round": 10,
+        "agent": "agent5",
+        "merchant": "flaky1.fides-sim.test",
+        "kind": "flaky",
+        "decision": "REFUSE",
+        "tier": "burned",
+        "rules": [
+          "shared-burns"
+        ],
+        "paid": false,
+        "burned": false
+      },
+      {
+        "round": 10,
+        "agent": "agent19",
+        "merchant": "malicious1.fides-sim.test",
+        "kind": "malicious",
+        "decision": "REFUSE",
+        "tier": "established",
+        "rules": [
+          "address"
+        ],
+        "paid": false,
+        "burned": false
+      },
+      {
+        "round": 10,
+        "agent": "agent16",
+        "merchant": "malicious1.fides-sim.test",
+        "kind": "malicious",
+        "decision": "REFUSE",
+        "tier": "established",
+        "rules": [
+          "address"
+        ],
+        "paid": false,
         "burned": false
       },
       {
@@ -2489,60 +2580,21 @@ window.FIDES_SIM = {
       },
       {
         "round": 10,
-        "agent": "agent12",
-        "merchant": "good2.fides-sim.test",
+        "agent": "agent20",
+        "merchant": "good1.fides-sim.test",
         "kind": "good",
         "decision": "PAY",
-        "tier": "trusted",
+        "tier": "established",
         "rules": [
           "tier"
         ],
         "paid": true,
-        "burned": false
-      },
-      {
-        "round": 10,
-        "agent": "agent10",
-        "merchant": "malicious1.fides-sim.test",
-        "kind": "malicious",
-        "decision": "REFUSE",
-        "tier": "established",
-        "rules": [
-          "address"
-        ],
-        "paid": false,
         "burned": false
       },
       {
         "round": 10,
         "agent": "agent17",
         "merchant": "good4.fides-sim.test",
-        "kind": "good",
-        "decision": "PAY",
-        "tier": "trusted",
-        "rules": [
-          "tier"
-        ],
-        "paid": true,
-        "burned": false
-      },
-      {
-        "round": 10,
-        "agent": "agent8",
-        "merchant": "good4.fides-sim.test",
-        "kind": "good",
-        "decision": "PAY",
-        "tier": "trusted",
-        "rules": [
-          "tier"
-        ],
-        "paid": true,
-        "burned": false
-      },
-      {
-        "round": 10,
-        "agent": "agent19",
-        "merchant": "good3.fides-sim.test",
         "kind": "good",
         "decision": "PAY",
         "tier": "trusted",
@@ -2555,6 +2607,19 @@ window.FIDES_SIM = {
       {
         "round": 10,
         "agent": "agent2",
+        "merchant": "good3.fides-sim.test",
+        "kind": "good",
+        "decision": "PAY",
+        "tier": "trusted",
+        "rules": [
+          "tier"
+        ],
+        "paid": true,
+        "burned": false
+      },
+      {
+        "round": 10,
+        "agent": "agent8",
         "merchant": "malicious1.fides-sim.test",
         "kind": "malicious",
         "decision": "REFUSE",
@@ -2566,46 +2631,20 @@ window.FIDES_SIM = {
         "burned": false
       },
       {
-        "round": 10,
-        "agent": "agent16",
-        "merchant": "flaky1.fides-sim.test",
-        "kind": "flaky",
-        "decision": "REFUSE",
-        "tier": "burned",
-        "rules": [
-          "shared-burns"
-        ],
-        "paid": false,
-        "burned": false
-      },
-      {
-        "round": 10,
-        "agent": "agent3",
-        "merchant": "malicious1.fides-sim.test",
-        "kind": "malicious",
-        "decision": "REFUSE",
+        "round": 11,
+        "agent": "agent19",
+        "merchant": "good1.fides-sim.test",
+        "kind": "good",
+        "decision": "PAY",
         "tier": "established",
         "rules": [
-          "address"
+          "tier"
         ],
-        "paid": false,
+        "paid": true,
         "burned": false
       },
       {
-        "round": 10,
-        "agent": "agent20",
-        "merchant": "malicious1.fides-sim.test",
-        "kind": "malicious",
-        "decision": "REFUSE",
-        "tier": "established",
-        "rules": [
-          "address"
-        ],
-        "paid": false,
-        "burned": false
-      },
-      {
-        "round": 10,
+        "round": 11,
         "agent": "agent5",
         "merchant": "good4.fides-sim.test",
         "kind": "good",
@@ -2618,12 +2657,12 @@ window.FIDES_SIM = {
         "burned": false
       },
       {
-        "round": 10,
-        "agent": "agent11",
-        "merchant": "good1.fides-sim.test",
+        "round": 11,
+        "agent": "agent1",
+        "merchant": "good4.fides-sim.test",
         "kind": "good",
         "decision": "PAY",
-        "tier": "established",
+        "tier": "trusted",
         "rules": [
           "tier"
         ],
@@ -2633,23 +2672,10 @@ window.FIDES_SIM = {
       {
         "round": 11,
         "agent": "agent8",
-        "merchant": "flaky1.fides-sim.test",
-        "kind": "flaky",
-        "decision": "REFUSE",
-        "tier": "burned",
-        "rules": [
-          "shared-burns"
-        ],
-        "paid": false,
-        "burned": false
-      },
-      {
-        "round": 11,
-        "agent": "agent4",
-        "merchant": "good1.fides-sim.test",
+        "merchant": "good2.fides-sim.test",
         "kind": "good",
         "decision": "PAY",
-        "tier": "established",
+        "tier": "trusted",
         "rules": [
           "tier"
         ],
@@ -2658,7 +2684,7 @@ window.FIDES_SIM = {
       },
       {
         "round": 11,
-        "agent": "agent11",
+        "agent": "agent4",
         "merchant": "malicious1.fides-sim.test",
         "kind": "malicious",
         "decision": "REFUSE",
@@ -2671,7 +2697,20 @@ window.FIDES_SIM = {
       },
       {
         "round": 11,
-        "agent": "agent7",
+        "agent": "agent9",
+        "merchant": "flaky1.fides-sim.test",
+        "kind": "flaky",
+        "decision": "REFUSE",
+        "tier": "burned",
+        "rules": [
+          "shared-burns"
+        ],
+        "paid": false,
+        "burned": false
+      },
+      {
+        "round": 11,
+        "agent": "agent17",
         "merchant": "good1.fides-sim.test",
         "kind": "good",
         "decision": "PAY",
@@ -2684,8 +2723,60 @@ window.FIDES_SIM = {
       },
       {
         "round": 11,
-        "agent": "agent12",
+        "agent": "agent16",
+        "merchant": "flaky1.fides-sim.test",
+        "kind": "flaky",
+        "decision": "REFUSE",
+        "tier": "burned",
+        "rules": [
+          "shared-burns"
+        ],
+        "paid": false,
+        "burned": false
+      },
+      {
+        "round": 11,
+        "agent": "agent14",
+        "merchant": "good1.fides-sim.test",
+        "kind": "good",
+        "decision": "PAY",
+        "tier": "established",
+        "rules": [
+          "tier"
+        ],
+        "paid": true,
+        "burned": false
+      },
+      {
+        "round": 11,
+        "agent": "agent13",
+        "merchant": "good3.fides-sim.test",
+        "kind": "good",
+        "decision": "PAY",
+        "tier": "trusted",
+        "rules": [
+          "tier"
+        ],
+        "paid": true,
+        "burned": false
+      },
+      {
+        "round": 11,
+        "agent": "agent10",
         "merchant": "good4.fides-sim.test",
+        "kind": "good",
+        "decision": "PAY",
+        "tier": "trusted",
+        "rules": [
+          "tier"
+        ],
+        "paid": true,
+        "burned": false
+      },
+      {
+        "round": 11,
+        "agent": "agent12",
+        "merchant": "good3.fides-sim.test",
         "kind": "good",
         "decision": "PAY",
         "tier": "trusted",
@@ -2698,32 +2789,6 @@ window.FIDES_SIM = {
       {
         "round": 11,
         "agent": "agent2",
-        "merchant": "good4.fides-sim.test",
-        "kind": "good",
-        "decision": "PAY",
-        "tier": "trusted",
-        "rules": [
-          "tier"
-        ],
-        "paid": true,
-        "burned": false
-      },
-      {
-        "round": 11,
-        "agent": "agent20",
-        "merchant": "good2.fides-sim.test",
-        "kind": "good",
-        "decision": "PAY",
-        "tier": "trusted",
-        "rules": [
-          "tier"
-        ],
-        "paid": true,
-        "burned": false
-      },
-      {
-        "round": 11,
-        "agent": "agent19",
         "merchant": "malicious1.fides-sim.test",
         "kind": "malicious",
         "decision": "REFUSE",
@@ -2736,89 +2801,11 @@ window.FIDES_SIM = {
       },
       {
         "round": 11,
-        "agent": "agent17",
-        "merchant": "flaky1.fides-sim.test",
-        "kind": "flaky",
-        "decision": "REFUSE",
-        "tier": "burned",
-        "rules": [
-          "shared-burns"
-        ],
-        "paid": false,
-        "burned": false
-      },
-      {
-        "round": 11,
-        "agent": "agent16",
+        "agent": "agent18",
         "merchant": "good1.fides-sim.test",
         "kind": "good",
         "decision": "PAY",
         "tier": "established",
-        "rules": [
-          "tier"
-        ],
-        "paid": true,
-        "burned": false
-      },
-      {
-        "round": 11,
-        "agent": "agent13",
-        "merchant": "flaky1.fides-sim.test",
-        "kind": "flaky",
-        "decision": "REFUSE",
-        "tier": "burned",
-        "rules": [
-          "shared-burns"
-        ],
-        "paid": false,
-        "burned": false
-      },
-      {
-        "round": 11,
-        "agent": "agent15",
-        "merchant": "good1.fides-sim.test",
-        "kind": "good",
-        "decision": "PAY",
-        "tier": "established",
-        "rules": [
-          "tier"
-        ],
-        "paid": true,
-        "burned": false
-      },
-      {
-        "round": 11,
-        "agent": "agent5",
-        "merchant": "good3.fides-sim.test",
-        "kind": "good",
-        "decision": "PAY",
-        "tier": "trusted",
-        "rules": [
-          "tier"
-        ],
-        "paid": true,
-        "burned": false
-      },
-      {
-        "round": 11,
-        "agent": "agent1",
-        "merchant": "good4.fides-sim.test",
-        "kind": "good",
-        "decision": "PAY",
-        "tier": "trusted",
-        "rules": [
-          "tier"
-        ],
-        "paid": true,
-        "burned": false
-      },
-      {
-        "round": 11,
-        "agent": "agent9",
-        "merchant": "good3.fides-sim.test",
-        "kind": "good",
-        "decision": "PAY",
-        "tier": "trusted",
         "rules": [
           "tier"
         ],
@@ -2828,46 +2815,7 @@ window.FIDES_SIM = {
       {
         "round": 11,
         "agent": "agent6",
-        "merchant": "malicious1.fides-sim.test",
-        "kind": "malicious",
-        "decision": "REFUSE",
-        "tier": "established",
-        "rules": [
-          "address"
-        ],
-        "paid": false,
-        "burned": false
-      },
-      {
-        "round": 11,
-        "agent": "agent10",
-        "merchant": "good1.fides-sim.test",
-        "kind": "good",
-        "decision": "PAY",
-        "tier": "trusted",
-        "rules": [
-          "tier"
-        ],
-        "paid": true,
-        "burned": false
-      },
-      {
-        "round": 11,
-        "agent": "agent14",
         "merchant": "good3.fides-sim.test",
-        "kind": "good",
-        "decision": "PAY",
-        "tier": "trusted",
-        "rules": [
-          "tier"
-        ],
-        "paid": true,
-        "burned": false
-      },
-      {
-        "round": 11,
-        "agent": "agent18",
-        "merchant": "good1.fides-sim.test",
         "kind": "good",
         "decision": "PAY",
         "tier": "trusted",
@@ -2880,6 +2828,19 @@ window.FIDES_SIM = {
       {
         "round": 11,
         "agent": "agent3",
+        "merchant": "good1.fides-sim.test",
+        "kind": "good",
+        "decision": "PAY",
+        "tier": "trusted",
+        "rules": [
+          "tier"
+        ],
+        "paid": true,
+        "burned": false
+      },
+      {
+        "round": 11,
+        "agent": "agent7",
         "merchant": "malicious1.fides-sim.test",
         "kind": "malicious",
         "decision": "REFUSE",
@@ -2888,76 +2849,102 @@ window.FIDES_SIM = {
           "address"
         ],
         "paid": false,
+        "burned": false
+      },
+      {
+        "round": 11,
+        "agent": "agent20",
+        "merchant": "flaky1.fides-sim.test",
+        "kind": "flaky",
+        "decision": "REFUSE",
+        "tier": "burned",
+        "rules": [
+          "shared-burns"
+        ],
+        "paid": false,
+        "burned": false
+      },
+      {
+        "round": 11,
+        "agent": "agent11",
+        "merchant": "malicious1.fides-sim.test",
+        "kind": "malicious",
+        "decision": "REFUSE",
+        "tier": "established",
+        "rules": [
+          "address"
+        ],
+        "paid": false,
+        "burned": false
+      },
+      {
+        "round": 11,
+        "agent": "agent15",
+        "merchant": "good2.fides-sim.test",
+        "kind": "good",
+        "decision": "PAY",
+        "tier": "trusted",
+        "rules": [
+          "tier"
+        ],
+        "paid": true,
+        "burned": false
+      },
+      {
+        "round": 12,
+        "agent": "agent1",
+        "merchant": "good3.fides-sim.test",
+        "kind": "good",
+        "decision": "PAY",
+        "tier": "trusted",
+        "rules": [
+          "tier"
+        ],
+        "paid": true,
+        "burned": false
+      },
+      {
+        "round": 12,
+        "agent": "agent15",
+        "merchant": "good3.fides-sim.test",
+        "kind": "good",
+        "decision": "PAY",
+        "tier": "trusted",
+        "rules": [
+          "tier"
+        ],
+        "paid": true,
+        "burned": false
+      },
+      {
+        "round": 12,
+        "agent": "agent20",
+        "merchant": "flaky1.fides-sim.test",
+        "kind": "flaky",
+        "decision": "REFUSE",
+        "tier": "burned",
+        "rules": [
+          "shared-burns"
+        ],
+        "paid": false,
+        "burned": false
+      },
+      {
+        "round": 12,
+        "agent": "agent18",
+        "merchant": "good4.fides-sim.test",
+        "kind": "good",
+        "decision": "PAY",
+        "tier": "trusted",
+        "rules": [
+          "tier"
+        ],
+        "paid": true,
         "burned": false
       },
       {
         "round": 12,
         "agent": "agent4",
-        "merchant": "good3.fides-sim.test",
-        "kind": "good",
-        "decision": "PAY",
-        "tier": "trusted",
-        "rules": [
-          "tier"
-        ],
-        "paid": true,
-        "burned": false
-      },
-      {
-        "round": 12,
-        "agent": "agent18",
-        "merchant": "malicious1.fides-sim.test",
-        "kind": "malicious",
-        "decision": "REFUSE",
-        "tier": "established",
-        "rules": [
-          "address"
-        ],
-        "paid": false,
-        "burned": false
-      },
-      {
-        "round": 12,
-        "agent": "agent3",
-        "merchant": "good3.fides-sim.test",
-        "kind": "good",
-        "decision": "PAY",
-        "tier": "trusted",
-        "rules": [
-          "tier"
-        ],
-        "paid": true,
-        "burned": false
-      },
-      {
-        "round": 12,
-        "agent": "agent7",
-        "merchant": "good3.fides-sim.test",
-        "kind": "good",
-        "decision": "PAY",
-        "tier": "trusted",
-        "rules": [
-          "tier"
-        ],
-        "paid": true,
-        "burned": false
-      },
-      {
-        "round": 12,
-        "agent": "agent14",
-        "merchant": "good3.fides-sim.test",
-        "kind": "good",
-        "decision": "PAY",
-        "tier": "trusted",
-        "rules": [
-          "tier"
-        ],
-        "paid": true,
-        "burned": false
-      },
-      {
-        "round": 12,
-        "agent": "agent20",
         "merchant": "flaky1.fides-sim.test",
         "kind": "flaky",
         "decision": "REFUSE",
@@ -2970,33 +2957,7 @@ window.FIDES_SIM = {
       },
       {
         "round": 12,
-        "agent": "agent19",
-        "merchant": "good4.fides-sim.test",
-        "kind": "good",
-        "decision": "PAY",
-        "tier": "trusted",
-        "rules": [
-          "tier"
-        ],
-        "paid": true,
-        "burned": false
-      },
-      {
-        "round": 12,
-        "agent": "agent6",
-        "merchant": "flaky1.fides-sim.test",
-        "kind": "flaky",
-        "decision": "PAY_CAPPED",
-        "tier": "burned",
-        "rules": [
-          "shared-burn"
-        ],
-        "paid": true,
-        "burned": true
-      },
-      {
-        "round": 12,
-        "agent": "agent13",
+        "agent": "agent11",
         "merchant": "malicious1.fides-sim.test",
         "kind": "malicious",
         "decision": "REFUSE",
@@ -3009,7 +2970,7 @@ window.FIDES_SIM = {
       },
       {
         "round": 12,
-        "agent": "agent1",
+        "agent": "agent17",
         "merchant": "flaky1.fides-sim.test",
         "kind": "flaky",
         "decision": "REFUSE",
@@ -3035,7 +2996,7 @@ window.FIDES_SIM = {
       },
       {
         "round": 12,
-        "agent": "agent5",
+        "agent": "agent3",
         "merchant": "good4.fides-sim.test",
         "kind": "good",
         "decision": "PAY",
@@ -3048,7 +3009,7 @@ window.FIDES_SIM = {
       },
       {
         "round": 12,
-        "agent": "agent15",
+        "agent": "agent10",
         "merchant": "good1.fides-sim.test",
         "kind": "good",
         "decision": "PAY",
@@ -3061,59 +3022,7 @@ window.FIDES_SIM = {
       },
       {
         "round": 12,
-        "agent": "agent10",
-        "merchant": "good3.fides-sim.test",
-        "kind": "good",
-        "decision": "PAY",
-        "tier": "trusted",
-        "rules": [
-          "tier"
-        ],
-        "paid": true,
-        "burned": false
-      },
-      {
-        "round": 12,
-        "agent": "agent12",
-        "merchant": "good3.fides-sim.test",
-        "kind": "good",
-        "decision": "PAY",
-        "tier": "trusted",
-        "rules": [
-          "tier"
-        ],
-        "paid": true,
-        "burned": false
-      },
-      {
-        "round": 12,
-        "agent": "agent17",
-        "merchant": "good2.fides-sim.test",
-        "kind": "good",
-        "decision": "PAY",
-        "tier": "trusted",
-        "rules": [
-          "tier"
-        ],
-        "paid": true,
-        "burned": false
-      },
-      {
-        "round": 12,
-        "agent": "agent11",
-        "merchant": "good3.fides-sim.test",
-        "kind": "good",
-        "decision": "PAY",
-        "tier": "trusted",
-        "rules": [
-          "tier"
-        ],
-        "paid": true,
-        "burned": false
-      },
-      {
-        "round": 12,
-        "agent": "agent8",
+        "agent": "agent13",
         "merchant": "good3.fides-sim.test",
         "kind": "good",
         "decision": "PAY",
@@ -3139,8 +3048,99 @@ window.FIDES_SIM = {
       },
       {
         "round": 12,
+        "agent": "agent12",
+        "merchant": "good2.fides-sim.test",
+        "kind": "good",
+        "decision": "PAY",
+        "tier": "trusted",
+        "rules": [
+          "tier"
+        ],
+        "paid": true,
+        "burned": false
+      },
+      {
+        "round": 12,
+        "agent": "agent7",
+        "merchant": "good3.fides-sim.test",
+        "kind": "good",
+        "decision": "PAY",
+        "tier": "trusted",
+        "rules": [
+          "tier"
+        ],
+        "paid": true,
+        "burned": false
+      },
+      {
+        "round": 12,
         "agent": "agent9",
+        "merchant": "good3.fides-sim.test",
+        "kind": "good",
+        "decision": "PAY",
+        "tier": "trusted",
+        "rules": [
+          "tier"
+        ],
+        "paid": true,
+        "burned": false
+      },
+      {
+        "round": 12,
+        "agent": "agent14",
+        "merchant": "good3.fides-sim.test",
+        "kind": "good",
+        "decision": "PAY",
+        "tier": "trusted",
+        "rules": [
+          "tier"
+        ],
+        "paid": true,
+        "burned": false
+      },
+      {
+        "round": 12,
+        "agent": "agent19",
         "merchant": "good4.fides-sim.test",
+        "kind": "good",
+        "decision": "PAY",
+        "tier": "trusted",
+        "rules": [
+          "tier"
+        ],
+        "paid": true,
+        "burned": false
+      },
+      {
+        "round": 12,
+        "agent": "agent8",
+        "merchant": "good2.fides-sim.test",
+        "kind": "good",
+        "decision": "PAY",
+        "tier": "trusted",
+        "rules": [
+          "tier"
+        ],
+        "paid": true,
+        "burned": false
+      },
+      {
+        "round": 12,
+        "agent": "agent5",
+        "merchant": "good2.fides-sim.test",
+        "kind": "good",
+        "decision": "PAY",
+        "tier": "trusted",
+        "rules": [
+          "tier"
+        ],
+        "paid": true,
+        "burned": false
+      },
+      {
+        "round": 12,
+        "agent": "agent6",
+        "merchant": "good2.fides-sim.test",
         "kind": "good",
         "decision": "PAY",
         "tier": "trusted",

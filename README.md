@@ -14,16 +14,16 @@ Built and tested on **Sui testnet** and run on **Sui mainnet** (2026-11-04): the
 
 | | |
 |---|---|
-| Tests | 390 pass, 11 skipped (live network tests, Gemini included, and two slow simulation tests, run on request), typecheck clean |
+| Tests | 392 pass, 11 skipped (live network tests, Gemini included, and two slow simulation tests, run on request), typecheck clean |
 | UI | `pnpm web` opens the four screens on recorded fixtures; `pnpm web:live` on a fresh run of the engine (add `-- --live` for Sui testnet); `pnpm mockups` serves the static design mockups |
 | Real on-chain run | the full demo on Sui testnet: real MPP USDC payments, Tatum verification, Sui anchors. Output: [`docs/evidence/demo-live-testnet.txt`](docs/evidence/demo-live-testnet.txt) |
-| Measured result | 20 agents, 6 merchants (2 bad): **12 burns with the shared record, 44 without** (73% avoided), no good merchant refused. [`docs/evidence/simulation.txt`](docs/evidence/simulation.txt) |
+| Measured result | 20 agents, 6 merchants (2 bad): **6 burns with the shared record, 44 without** (86% avoided), no good merchant refused. [`docs/evidence/simulation.txt`](docs/evidence/simulation.txt) |
 | Anchor module (testnet) | package `0x1e58e339d2914686089424a956b34f22997d8cf5fac477f3604d05c027ae6b4a`, events of type `<package>::anchor::Report` |
 | Not done | blog post and video |
 
 ```bash
 pnpm install                 # Node 22 or newer, pnpm 11
-pnpm test                    # 390 tests, no network, no keys
+pnpm test                    # 392 tests, no network, no keys
 pnpm demo                    # the whole story, simulated: seconds, free
 pnpm sim                     # 20 agents x 6 merchants, with and without the shared record
 ```
@@ -121,24 +121,24 @@ And the measured effect, from the simulation (verbatim):
 ```text
 Simulation: 20 agents, 6 merchants (4 good, 1 flaky, 1 malicious), 12 rounds, 3 seeds. Settlement simulated.
 
-seed 1 shared   burns   5  paid 178  refused  51  asked  85
+seed 1 shared   burns   2  paid 174  refused  54  asked  88
 seed 1 detached burns  17  paid 192  refused   9  asked 231
-seed 2 shared   burns   4  paid 173  refused  50  asked  91
+seed 2 shared   burns   2  paid 170  refused  53  asked  91
 seed 2 detached burns  14  paid 193  refused   8  asked 232
-seed 3 shared   burns   3  paid 171  refused  53  asked  93
+seed 3 shared   burns   2  paid 168  refused  56  asked  93
 seed 3 detached burns  13  paid 184  refused  16  asked 224
 
                       with shared record   without
-  burns                     12                44
-  paid calls               522               569
-  refused                  154                33
+  burns                      6                44
+  paid calls               512               569
+  refused                  163                33
   ...of which good           0                 0   (the cost of caution)
-  asked a person           269               687
-  lost to burns (USDC)    0.12              0.44
+  asked a person           272               687
+  lost to burns (USDC)    0.06              0.44
 
-The shared record avoided 32 of 44 burns (73%).
+The shared record avoided 38 of 44 burns (86%).
 
-Rules that decided checks, with the record: tier 315, similar-incident 229, shared-burns 85, address 69, shared-burn 21, own-history 1
+Rules that decided checks, with the record: tier 313, similar-incident 232, shared-burns 95, address 68, shared-burn 11, own-history 1
 Rules that decided checks, without it:     tier 651, own-history 35, address 34
 ```
 
@@ -229,7 +229,7 @@ Trust tiers come from verified outcomes, weighted by the reporter's own track re
 
 | Package | Tests | What they pin down |
 |---|---|---|
-| `core` | 59 | every rule, cannot-say, fail-closed states, Wilson, weights, decay, caps, clock skew |
+| `core` | 61 | every rule (an own burn counts toward a shared refusal), cannot-say, fail-closed states, Wilson, weights, decay, caps, clock skew |
 | `evidence` | 29 | canonical form, signature, forged and tampered records, a copied payment digest, a failed lookup |
 | `state` | 16 | atomic claims across connections, idempotency, the pinned address, rejections kept visible |
 | `memory` | 28 | the write rule, exact-host filtering, look-alike hosts, header/evidence mismatch, the three states |
@@ -241,7 +241,7 @@ Trust tiers come from verified outcomes, weighted by the reporter's own track re
 | `registry` | 30 | verification, forged records, tampered storage, outages, rate limits, page safety, anchors recall missed |
 | `sim` | 4 | repeatability, and (on request) the result |
 | `web` | 39 | every screen rendered, the UI's logic and its API on fixtures and live: attempts, the board per round, the split view's three states, Re-verify for real, a forged record, an unreachable server |
-| **Total** | **401** | 390 run by default |
+| **Total** | **403** | 392 run by default |
 
 Live tests (a real relayer, Tatum testnet, real payments) run only with `FIDES_LIVE=1`. Everything else uses a simulated world: a fake ledger, in-process memory, real signatures, real HTTP between agents and merchants, the real engine. The headline demo and the live tests use real payments and a real chain; nothing in them is faked except where stated under [staged versus real](#staged-versus-real).
 
@@ -281,11 +281,11 @@ Read this before trusting any number.
 - **Recall is fuzzy and the registry can be incomplete.** It asks for up to 50 memories by meaning and filters by host. To catch what recall misses, it also reads the newest 150 anchor events on Sui (events cannot be filtered by merchant on chain) and lists any anchored report for the merchant whose record did not come back. Those are shown but not counted: without the signed record, the signature and the payment cannot be checked. Older anchors past those pages are not scanned.
 - **Merchants verify through the default fullnode,** not Tatum, and Tatum's JSON-RPC is not served. Tatum is on the agent and registry side of verification.
 - **A merchant that is malicious from its first response, to an agent with no shared reports, is not flagged by the address rule.**
-- **What still gets through:** in the simulation, 12 burns remain with the record, partly the malicious merchant after its turn, when a person approves an ASK about the changed address.
+- **What still gets through:** in the simulation, 6 burns remain with the record, partly the malicious merchant after its turn, when a person approves an ASK about the changed address.
 - **The OpenAI, Anthropic and OpenRouter adapters are checked against the vendors' documentation, not against live APIs.** The Gemini adapter is checked live (2026-11-04): the model called `fides_check` and relayed the answer. The MCP server is verified with a real MCP client. There is no TLS in front of the HTTP MCP server; put one there.
 - **The Walrus Memory relayer sees plaintext** (it encrypts with Seal after reading). Nothing private is stored: evidence is public by design. There is no documented delete, so "detach" means Fides stops using the record. The testnet staging relayer's certificate is broken: it serves a certificate for `*.up.railway.app` (checked 2026-11-04).
 - **The UI shows one run, not a live feed.** `pnpm web:live` runs the scripted demo and the simulation when it starts and serves that run; it does not update as new payments happen. Re-verify does run now, against the chain. `pnpm web` uses recorded fixtures. A label in the header says which, on every page. Every screen is rendered with React in a test (happy-dom); the look was checked by hand in a browser.
-- **Self-grading is measured in the simulation, where every merchant is ours.** With the shared record, when Fides paid without asking the answer was clean 97% of the time (288 of 297, three seeds); at the established and trusted tiers, 276 of 276. Without the record Fides never paid on its own, so there is nothing to grade. Those numbers come from honest simulated reporters and mock merchants, so they say the rules work as designed, not how they fare against real adversaries. A real agent grades itself with `fides.selfGrade()` once it passes `decisionId` to `report()` (the reference agent does); refusals are never graded, because nobody learns what would have happened.
+- **Self-grading is measured in the simulation, where every merchant is ours.** With the shared record, when Fides paid without asking the answer was clean 99% of the time (282 of 285, three seeds); at the established and trusted tiers, 274 of 274. Without the record Fides never paid on its own, so there is nothing to grade. Those numbers come from honest simulated reporters and mock merchants, so they say the rules work as designed, not how they fare against real adversaries. A real agent grades itself with `fides.selfGrade()` once it passes `decisionId` to `report()` (the reference agent does); refusals are never graded, because nobody learns what would have happened.
 
 More detail, with how each was measured, in [`docs/ASSUMPTIONS.md`](docs/ASSUMPTIONS.md) and [`docs/DAY1.md`](docs/DAY1.md).
 

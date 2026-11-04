@@ -106,7 +106,8 @@ export function apiFrom(demo: DemoFixture, sim: SimFixture, src: ApiSource): Fid
       const bDetached = demo.steps[4]!.results[0]!;
       const chk = Object.fromEntries(demo.steps[6]!.checks.map((c) => [c.label, c.check]));
       const states: SplitView['states'] = {
-        attached: { check: chk.attached!, loss: 0, says: 'B reads the signed records, verifies each against Sui and Tatum, and sees two independent burns.', next: 'B pays nothing. Nobody has to be asked.' },
+        // B's own check in step 3, before B was ever burned: the record alone made it refuse.
+        attached: { check: demo.steps[2]!.results.find((r) => r.agent === 'B')?.check ?? chk.attached!, loss: 0, says: 'B reads the signed records, verifies each against Sui and Tatum, and sees two independent burns.', next: 'B pays nothing. Nobody has to be asked.' },
         detached: { check: bDetached.check!, loss: 0.01, says: 'B has lost access to the shared record. Nothing was deleted: B simply cannot see it.', next: 'B has no history, so it asks a person. The person approves, B pays 0.01 USDC, and the merchant returns junk.' },
         unreachable: { check: chk.unreachable!, loss: 0, says: 'The shared record cannot be reached. That is not the same as "no reports", and B does not treat it that way.', next: 'B answers from its own history only, and will not pay on its own.' },
       };

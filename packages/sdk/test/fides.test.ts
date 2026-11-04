@@ -345,16 +345,26 @@ describe('report: partial failures and retries', () => {
     expect(w.ledger.anchors).toHaveLength(1);
   });
 
-  it('detached: anchored and kept locally, but nothing is written to the shared record', async () => {
+  it('detached: anchored and kept locally, partial until attached, then written once by the retry', async () => {
     const w = newWorld();
     const a = makeAgent(w, 'A');
     a.fides.setSharedRecord('detached');
-    const r = await a.fides.report(a.pay(10_000n, { checks: burned }));
-    expect(r.status).toBe('complete');
-    expect(r.steps.memory).toEqual({ ok: true, skipped: 'detached' });
+    const outcome = a.pay(10_000n, { checks: burned });
+    const r = await a.fides.report(outcome);
+    expect(r.status).toBe('partial');
+    expect(r.steps.memory).toEqual({ ok: false, skipped: 'detached' });
     expect(w.memory.texts).toHaveLength(0);
     expect(w.ledger.anchors).toHaveLength(1);
     expect(a.fides.lookup(MERCHANT_HOST).assessment.burnCount).toBe(1);
+    a.fides.queueUnreported(outcome, 'detached');
+    // Still detached: the retry keeps it queued and writes nothing.
+    expect((await a.fides.retryUnreported())[0]).toMatchObject({ reported: false });
+    expect(w.memory.texts).toHaveLength(0);
+    a.fides.setSharedRecord('attached');
+    expect((await a.fides.retryUnreported())[0]).toMatchObject({ reported: true });
+    expect(w.memory.texts).toHaveLength(1);
+    expect(w.ledger.anchors).toHaveLength(1); // not anchored twice
+    expect(a.fides.unreported()).toHaveLength(0);
   });
 
   it('the burn kind and pattern tags follow from the checks and the merchant\'s history', async () => {

@@ -581,7 +581,9 @@ export class Fides {
     } else {
       try {
         const w = await shared.writeReport(sealed, patterns);
-        steps.memory = w.written ? { ok: true, blobId: w.blobId } : { ok: true, skipped: 'detached' };
+        // Detached: the report is anchored and kept locally, but the shared record does not have it yet. That is
+        // partial, not complete, so the caller queues it and retryUnreported() writes it once attached again.
+        steps.memory = w.written ? { ok: true, blobId: w.blobId } : { ok: false, skipped: 'detached' };
       } catch (e) {
         steps.memory = { ok: false, error: (e as Error).message };
       }

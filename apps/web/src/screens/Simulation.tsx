@@ -115,7 +115,7 @@ export function Simulation({ api }: { api: FidesApi }) {
           </tbody>
         </table>
       </details>
-      <footer className="note">Recorded simulation, seed {sim.seed}. Settlement is simulated; the engine, the signed evidence and the checks are real. Over three seeds the totals are 12 burns with the shared record and 44 without.</footer>
+      <footer className="note">Recorded simulation, seed {sim.seed}. Settlement is simulated; the engine, the signed evidence and the checks are real. Over three seeds the totals are 6 burns with the shared record and 44 without.</footer>
     </>
   );
 }

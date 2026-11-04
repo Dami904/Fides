@@ -88,18 +88,22 @@ export function decide(input: CheckInput, ctx: DecisionContext, cfg: FidesConfig
     ]);
   }
 
-  // 4. Shared record, exact: burns from other reporters.
-  const othersBurns = inWindow(evidence, ctx.nowMs, cfg).filter(
-    (e) => e.verdict === 'burned' && !sameAddress(e.reporter, ctx.selfAddress),
-  );
-  const burnReporters = [...new Set(othersBurns.map((e) => e.reporter.toLowerCase()))];
-  const burnIds = othersBurns.map((e) => e.id);
-  if (burnReporters.length >= cfg.burnRefuseMinReporters) {
-    return out('REFUSE', 'shared-burns', [`${burnReporters.length} independent reporters have verified burns for this merchant`], {
-      evidenceIds: burnIds,
+  // 4. Shared record, exact: burns from independent reporters. This agent's own verified burn counts as one of them:
+  //    it is a signed, anchored report like any other, and it may have come back from the shared record after the
+  //    agent lost its local state. One other reporter only caps the payment, and only if this agent was never burned.
+  const allBurns = inWindow(evidence, ctx.nowMs, cfg).filter((e) => e.verdict === 'burned');
+  const othersBurns = allBurns.filter((e) => !sameAddress(e.reporter, ctx.selfAddress));
+  const selfBurned = allBurns.length > othersBurns.length;
+  const othersReporters = [...new Set(othersBurns.map((e) => e.reporter.toLowerCase()))];
+  const burnReporters = othersReporters.length + (selfBurned ? 1 : 0);
+  if (othersReporters.length > 0 && burnReporters >= cfg.burnRefuseMinReporters) {
+    const ids = allBurns.map((e) => e.id);
+    return out('REFUSE', 'shared-burns', [`${burnReporters} independent reporters${selfBurned ? ', this agent among them,' : ''} have verified burns for this merchant`], {
+      evidenceIds: ids,
     });
   }
-  if (burnReporters.length === 1) {
+  const burnIds = othersBurns.map((e) => e.id);
+  if (othersReporters.length === 1 && !selfBurned) {
     const capRaw = parseAmount(cfg.burnCapAmount);
     return amount <= capRaw
       ? out('PAY_CAPPED', 'shared-burn', ['one other reporter has a verified burn for this merchant: small payments only'], {

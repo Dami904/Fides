@@ -1,9 +1,9 @@
 ﻿Fides demo on sim (sim). Agents: A, B, C. Merchants: good, flaky, malicious.
 
 == Step 1: Agent A, cold start, meets every merchant
-  A -> good.fides-demo.test: ASK (cannot say: not enough history) [tier] -> person approves -> paid -> delivered as advertised -> reported clean faae52c3 (complete)
-  A -> flaky.fides-demo.test: ASK (cannot say: not enough history) [tier] -> person approves -> paid -> delivered as advertised -> reported clean 266846be (complete)
-  A -> malicious.fides-demo.test: ASK (cannot say: not enough history) [tier] -> person approves -> paid -> delivered as advertised -> reported clean 7073c907 (complete)
+  A -> good.fides-demo.test: ASK (cannot say: not enough history) [tier] -> person approves -> paid -> delivered as advertised -> reported clean 55fa9888 (complete)
+  A -> flaky.fides-demo.test: ASK (cannot say: not enough history) [tier] -> person approves -> paid -> delivered as advertised -> reported clean d34fa371 (complete)
+  A -> malicious.fides-demo.test: ASK (cannot say: not enough history) [tier] -> person approves -> paid -> delivered as advertised -> reported clean 17f95039 (complete)
   [ok] A asks about good and cannot say yet
   [ok] A pays good once and it delivers
   [ok] A asks about flaky and cannot say yet
@@ -12,13 +12,13 @@
   [ok] A pays malicious once and it delivers
 
 == Step 2: A pays the flaky merchant again and gets junk
-  A -> flaky.fides-demo.test: ASK (cannot say: not enough history) [tier] citing 266846be -> person approves -> paid -> BURNED (schema is "wrong/v0", expected fides.news/v1; data is missing or not an object) -> reported burn d4348c48 (complete)
+  A -> flaky.fides-demo.test: ASK (cannot say: not enough history) [tier] citing d34fa371 -> person approves -> paid -> BURNED (schema is "wrong/v0", expected fides.news/v1; data is missing or not an object) -> reported burn e053d973 (complete)
   [ok] A is burned and reports a signed burn
   [ok] the burn is anchored on Sui and written to the shared record
 
 == Step 3: C is burned too; B, who has never met flaky, reads the shared record and refuses
-  C -> flaky.fides-demo.test: PAY_CAPPED [shared-burn] citing d4348c48 -> paid -> BURNED (asOf is 3600 s old, maximum is 120 s) -> reported burn b2492de0 (complete)
-  B -> flaky.fides-demo.test: REFUSE [shared-burns] citing d4348c48, b2492de0: not paid
+  C -> flaky.fides-demo.test: PAY_CAPPED [shared-burn] citing e053d973 -> paid -> BURNED (asOf is 3600 s old, maximum is 120 s) -> reported burn 94e2f2e1 (complete)
+  B -> flaky.fides-demo.test: REFUSE [shared-burns] citing e053d973, 94e2f2e1: not paid
   [ok] C is burned by the same merchant
   [ok] B refuses, citing both signed burns
   [ok] B pays nothing
@@ -32,19 +32,20 @@
   [ok] both raised an address alert
 
 == Step 5: B detaches the shared memory: no access to it, nothing deleted
-  B -> flaky.fides-demo.test: ASK (cannot say: not enough history) [tier] (shared record detached) -> person approves -> paid -> BURNED (schema is "wrong/v0", expected fides.news/v1; data is missing or not an object) -> reported burn 38028bbd (complete)
+  B -> flaky.fides-demo.test: ASK (cannot say: not enough history) [tier] (shared record detached) -> person approves -> paid -> BURNED (schema is "wrong/v0", expected fides.news/v1; data is missing or not an object) -> reported burn 09f45dde (partial)
   Detaching removes B's access to the shared record. Nothing was deleted from it.
   [ok] B no longer sees the burns: it can only ask a person
   [ok] B cites no shared records
   [ok] the person approves and B is burned: the same loss A and C had
+  [ok] once attached again, B's held burn is written to the shared record
 
 == Step 6: Re-verify a real record, then reject a forged one
   re-verify format        ok   well formed, 1076 bytes, canonical
-  re-verify hash          ok   sha256 266846be5fc0e6c12f9b32023df871f556f63e000133c87111653621515698f0 matches the Sui anchor
-  re-verify signature     ok   signed by reporter 0xa9883af80318a75e3ccfec57fef909f628c89a51679222aa38f262f4501cc0c9
+  re-verify hash          ok   sha256 d34fa3714b7d568c329c297e0947226b3efafcb0a34860ced96f8078f3f44546 matches the Sui anchor
+  re-verify signature     ok   signed by reporter 0x1816a25cd913f13e1021763c77853fe89eeee1939c792370ec1a5df883206160
   re-verify anchor-sender ok   anchor event sender equals the reporter
-  re-verify payment       ok   final in checkpoint 1002, sender is the reporter, 10000 paid to 0x050cd3e10984ab20cb269ff33ec2f511b2244a57ca761102e099e926b8ec82f3
-  forged record 11108b3e: REJECTED, no anchor event found for this evidence (it may not be indexed yet)
+  re-verify payment       ok   final in checkpoint 1002, sender is the reporter, 10000 paid to 0xb1a1ec5eb30b475563150cdfc1875a6eae7a70337d349a64f740bfe1ff28f6a8
+  forged record 8c8cd54b: REJECTED, no anchor event found for this evidence (it may not be indexed yet)
   [ok] the anchor event for the record is found on Sui
   [ok] a real record passes every step of the re-verify
   [ok] the forged record is rejected and shown

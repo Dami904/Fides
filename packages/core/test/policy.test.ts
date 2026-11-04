@@ -149,8 +149,21 @@ describe('rule 4: shared record, exact', () => {
     const v = decide(input(), ctx({ evidence: [ev('0xR1', 'burned', 40), ev('0xR2', 'burned', 40)] }), cfg);
     expect(v.rulesFired).not.toContain('shared-burns');
   });
-  it('own burns do not count as another reporter', () => {
+  it('own burns alone do not make a shared refusal: that is own history', () => {
     const v = decide(input(), ctx({ evidence: [ev(SELF, 'burned')] }), cfg);
+    expect(v.rulesFired).toEqual(['own-history']);
+  });
+  it('an own burn and one other reporter are two independent reporters: refuse, citing both', () => {
+    // Found on mainnet: an agent that lost its local state paid capped at a merchant that had burned it,
+    // because one other burn capped the payment before its own burn was looked at.
+    const v = decide(input(), ctx({ evidence: [ev(SELF, 'burned'), ev('0xR1', 'burned')] }), cfg);
+    expect(v.decision).toBe('REFUSE');
+    expect(v.rulesFired).toEqual(['shared-burns']);
+    expect(v.citations.evidenceIds).toHaveLength(2);
+  });
+  it('an own burn is never hidden by the one-other-burn cap', () => {
+    const v = decide(input(), ctx({ evidence: [ev(SELF, 'burned'), ev('0xR1', 'burned')] }), { ...cfg, burnRefuseMinReporters: 3 });
+    expect(v.decision).not.toBe('PAY_CAPPED');
     expect(v.rulesFired).toEqual(['own-history']);
   });
 });

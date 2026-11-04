@@ -140,6 +140,9 @@ export async function runDemo(h: Harness, o: { log?: (line: string) => void } = 
     expect(s, 'the person approves and B is burned: the same loss A and C had', r.paid && !Object.values(r.exchange!.checks).every(Boolean));
     s.notes.push('Detaching removes B\'s access to the shared record. Nothing was deleted from it.');
     B.fides.setSharedRecord('attached');
+    // B's burn could not reach the shared record while detached. It was kept, and is written now.
+    const retried = await B.agent.retryUnreported();
+    expect(s, "once attached again, B's held burn is written to the shared record", retried.length === 1 && retried[0]!.reported, retried.map((x) => x.error).join('; '));
   });
 
   await step(6, 'Re-verify a real record, then reject a forged one', async (s) => {
