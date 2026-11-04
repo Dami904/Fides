@@ -3,7 +3,7 @@
 import demoJson from '../fixtures/demo.json';
 import simJson from '../fixtures/sim.json';
 import { attempts, parseSteps } from './lib';
-import type { Attempt, DemoFixture, Honesty, MerchantView, SharedState, SimFixture, SplitView, Tier, VerifyStep, EvidenceItem } from './types';
+import type { Attempt, CheckResult, DemoFixture, Honesty, MerchantView, SharedState, SimFixture, SplitView, Tier, VerifyStep, EvidenceItem } from './types';
 
 export interface FidesApi {
   mode: 'fixtures' | 'live';
@@ -12,6 +12,11 @@ export interface FidesApi {
   listDecisions(): Promise<Attempt[]>;
   /** A and C on one merchant, and B's verdict with the shared record attached, detached and unreachable. */
   getSplit(): Promise<SplitView>;
+  /**
+   * Live only: ask the engine now what B would decide with the shared record in this state, instead of replaying the
+   * recorded decision. Rejects when the engine cannot do it (for example it cannot switch the real relayer off).
+   */
+  probeSplit?(state: SharedState): Promise<{ check: CheckResult; checkedAt: string }>;
   listMerchants(): Promise<string[]>;
   getMerchant(host: string): Promise<MerchantView>;
   /** One record and the merchant it is about. Rejects when no merchant holds it: an unknown id is an error, not an empty page. */
@@ -28,6 +33,8 @@ export interface ApiSource {
   verify?: (evidenceId: string) => AsyncIterable<VerifyStep>;
   /** The slowest the Re-verify animation goes: each step waits at least this long after the one before. */
   stepDelayMs?: number;
+  /** Live only: run B's check now with the shared record in the given state. */
+  probe?: (state: SharedState) => Promise<{ check: CheckResult; checkedAt: string }>;
 }
 
 export function fixturesApi(o: { stepDelayMs?: number } = {}): FidesApi {
@@ -60,6 +67,12 @@ export async function liveApi(base: string, fetchImpl: typeof fetch = fetch): Pr
   return apiFrom(demo, sim, {
     mode: 'live',
     honesty: info.honesty,
+    async probe(state) {
+      const r = await fetchImpl(`${base}/probe/${state}`);
+      const body = (await r.json().catch(() => ({}))) as { error?: string; check?: CheckResult; checkedAt?: string };
+      if (!r.ok || !body.check || !body.checkedAt) throw new Error(body.error ?? `live check failed: HTTP ${r.status}`);
+      return { check: body.check, checkedAt: body.checkedAt };
+    },
     async *verify(id) {
       const r = await fetchImpl(`${base}/verify/${encodeURIComponent(id)}`);
       if (!r.ok || !r.body) throw new Error(`re-verify failed: HTTP ${r.status} ${(await r.text()).slice(0, 200)}`);
@@ -95,6 +108,7 @@ export function apiFrom(demo: DemoFixture, sim: SimFixture, src: ApiSource): Fid
   return {
     mode: src.mode,
     honesty: () => src.honesty,
+    ...(src.probe ? { probeSplit: src.probe } : {}),
     listDecisions: async () => all,
     listMerchants: async () => [demo.merchants.flaky, demo.merchants.malicious, demo.merchants.good],
 

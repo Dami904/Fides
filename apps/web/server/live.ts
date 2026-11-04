@@ -53,7 +53,11 @@ export async function buildLiveData(h: Harness, o: { memory: 'fake' | 'live'; si
   };
 }
 
-const NO_ANCHOR = 'no anchor event found for this evidence: there is nothing on Sui to compare the hash with';
+class ProbeUnavailable extends Error {}
+const PROBE_STATES = ['attached', 'detached', 'unreachable'] as const;
+type ProbeState = (typeof PROBE_STATES)[number];
+
+const NO_ANCHOR ='no anchor event found for this evidence: there is nothing on Sui to compare the hash with';
 
 export function liveServer(h: Harness, data: LiveData): Server {
   const json = (res: ServerResponse, status: number, body: unknown) => {
@@ -86,6 +90,33 @@ export function liveServer(h: Harness, data: LiveData): Server {
     res.end();
   };
 
+  // "What would agent B decide about the flaky merchant right now, with the shared record in this state?" One probe agent
+  // is reused so what it verified is cached (each verification costs Tatum requests), and probes run one at a time
+  // because the unreachable state switches the record off for everyone. It never pays and never reports.
+  let probeAgent: ReturnType<Harness['makeAgent']> | null = null;
+  let probeQueue: Promise<unknown> = Promise.resolve();
+  const probe = (state: ProbeState): Promise<unknown> => {
+    const run = async () => {
+      probeAgent ??= h.makeAgent('B', () => false);
+      const fides = probeAgent.fides;
+      const st = await h.merchants.flaky.state();
+      const input = { ownerId: 'B', merchantHost: h.merchants.flaky.host, payTo: st.payTo, amount: st.price, asset: 'x', network: 'sui', resource: '/' };
+      if (state === 'unreachable' && !h.setMemoryDown(true)) {
+        throw new ProbeUnavailable('the shared record cannot be switched off here: this server uses the real Walrus Memory relayer');
+      }
+      try {
+        fides.setSharedRecord(state === 'detached' ? 'detached' : 'attached');
+        return { state, checkedAt: new Date().toISOString(), check: plain(await fides.check(input)) };
+      } finally {
+        fides.setSharedRecord('attached');
+        if (state === 'unreachable') h.setMemoryDown(false);
+      }
+    };
+    const next = probeQueue.then(run, run);
+    probeQueue = next.catch(() => undefined);
+    return next;
+  };
+
   return createServer(async (req: IncomingMessage, res: ServerResponse) => {
     try {
       if (req.method !== 'GET') return json(res, 405, { error: 'GET only' });
@@ -93,9 +124,18 @@ export function liveServer(h: Harness, data: LiveData): Server {
       if (path === '/api/info') return json(res, 200, { honesty: data.honesty });
       if (path === '/api/demo') return json(res, 200, data.demo);
       if (path === '/api/sim') return json(res, 200, data.sim);
+      const pr = /^\/api\/probe\/(attached|detached|unreachable)$/.exec(path);
+      if (pr) {
+        try {
+          return json(res, 200, await probe(pr[1] as ProbeState));
+        } catch (e) {
+          if (e instanceof ProbeUnavailable) return json(res, 501, { error: e.message });
+          throw e;
+        }
+      }
       const m = /^\/api\/verify\/([0-9a-f]{8,64})$/.exec(path);
       if (m) return await verify(m[1]!, res);
-      return json(res, 404, { error: 'not found: the endpoints are /api/info, /api/demo, /api/sim and /api/verify/<evidence id>' });
+      return json(res, 404, { error: 'not found: the endpoints are /api/info, /api/demo, /api/sim and /api/verify/<evidence id> and /api/probe/<attached|detached|unreachable>' });
     } catch (e) {
       // A failed lookup is an error, never "no record".
       if (!res.headersSent) json(res, 502, { error: (e as Error).message });

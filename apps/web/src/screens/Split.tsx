@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import type { FidesApi } from '../api';
 import { Chip, flagOf, Meter, PageHead, Pill, Seg, Stamp } from '../components';
 import { href, usd } from '../lib';
-import type { SharedState, SplitView } from '../types';
+import type { CheckResult, SharedState, SplitView } from '../types';
 
 const LABEL: Record<SharedState, string> = { attached: 'Attached', detached: 'Detached', unreachable: 'Unreachable' };
 const ORDER: SharedState[] = ['attached', 'detached', 'unreachable'];
@@ -12,13 +12,30 @@ export function Split({ api }: { api: FidesApi }) {
   const [error, setError] = useState<string | null>(null);
   const [state, setState] = useState<SharedState>('attached');
   const [pressed, setPressed] = useState(false);
+  // Live only: the engine's own answer for the chosen state, asked just now. Otherwise the recorded decision is shown.
+  const [live, setLive] = useState<{ state: SharedState; check?: CheckResult; at?: string; error?: string } | null>(null);
+  const [asking, setAsking] = useState(false);
 
   useEffect(() => { api.getSplit().then(setData, (e: Error) => setError(e.message)); }, [api]);
+  useEffect(() => {
+    if (!api.probeSplit || !data) return;
+    let current = true;
+    setAsking(true);
+    api.probeSplit(state).then(
+      (r) => current && (setLive({ state, check: r.check, at: r.checkedAt }), setAsking(false)),
+      (e: Error) => current && (setLive({ state, error: e.message }), setAsking(false)),
+    );
+    return () => { current = false; };
+  }, [api, state, data]);
   if (error) return <div className="notice bad">The split view could not be loaded: {error}.</div>;
   if (!data) return <p className="muted">Loading.</p>;
 
-  const s = data.states[state];
+  const recorded = data.states[state];
+  const fresh = live && live.state === state && live.check ? live.check : null;
+  const s = fresh ? { ...recorded, check: fresh } : recorded;
   const v = s.check.verdict;
+  // The recorded story only fits the recorded decision. If the live answer differs, do not describe a different outcome.
+  const sameAsRecorded = !fresh || fresh.verdict.decision === recorded.check.verdict.decision;
   const cited = new Set(v.citations.evidenceIds);
   const loss: Record<string, number> = { A: data.lossOthers.A, B: s.loss, C: data.lossOthers.C };
 
@@ -35,6 +52,11 @@ export function Split({ api }: { api: FidesApi }) {
         </div>
         <div className="says" aria-live="polite">{s.says}</div>
       </div>
+      {api.probeSplit && (
+        <p className="muted small" aria-live="polite">
+          {asking ? 'Asking the engine now...' : fresh ? `Live: the engine answered this just now (${live!.at!.slice(11, 19)} UTC), not a recording.` : live?.state === state && live.error ? `Live check not available for this state (${live.error}). Showing the recorded decision.` : ''}
+        </p>
+      )}
 
       <div className="split">
         <section aria-label="Who got there first">
@@ -75,7 +97,7 @@ export function Split({ api }: { api: FidesApi }) {
               <div className="lab">Shared record</div>
               <div><Pill state tone={s.check.sharedState === 'attached' ? 'ok' : 'warn'}>{s.check.sharedState}</Pill><span className="muted small gap-l">evidence behind it <Meter value={v.confidence} /></span></div>
               <div className="lab">Next</div>
-              <div>{s.next}</div>
+              <div>{sameAsRecorded ? s.next : 'Follows from the decision above.'}</div>
             </div>
           </article>
         </section>

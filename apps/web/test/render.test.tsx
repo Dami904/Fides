@@ -6,7 +6,7 @@ import { act } from 'react';
 import { createRoot, type Root } from 'react-dom/client';
 import demoJson from '../fixtures/demo.json';
 import { App } from '../src/App';
-import { fixturesApi } from '../src/api';
+import { fixturesApi, type FidesApi } from '../src/api';
 import type { DemoFixture } from '../src/types';
 
 (globalThis as { IS_REACT_ACT_ENVIRONMENT?: boolean }).IS_REACT_ACT_ENVIRONMENT = true;
@@ -21,12 +21,12 @@ afterEach(() => {
 });
 
 /** Render the app at a route and let the fixtures load. */
-async function show(hash: string): Promise<HTMLElement> {
+async function show(hash: string, api: FidesApi = fixturesApi({ stepDelayMs: 0 })): Promise<HTMLElement> {
   location.hash = hash;
   el = document.createElement('div');
   document.body.appendChild(el);
   root = createRoot(el);
-  await act(async () => root!.render(<App api={fixturesApi({ stepDelayMs: 0 })} />));
+  await act(async () => root!.render(<App api={api} />));
   for (let i = 0; i < 20 && /\bLoading\./.test(el.textContent ?? ''); i++) await act(() => new Promise((r) => setTimeout(r, 10)));
   return el;
 }
@@ -65,5 +65,45 @@ describe('every screen renders from the fixtures', () => {
     el?.remove();
     const missing = await show(`#/evidence/${'0'.repeat(64)}`);
     expect(missing.textContent).toMatch(/no record/);
+  });
+});
+
+describe('the A / B split with a live engine behind it', () => {
+  const base = fixturesApi({ stepDelayMs: 0 });
+  const clickState = async (page: HTMLElement, label: string) => {
+    const b = [...page.querySelectorAll('button, [role="radio"]')].find((x) => x.textContent === label) as HTMLElement;
+    await act(async () => b.click());
+    for (let i = 0; i < 30 && /Asking the engine now/.test(page.textContent ?? ''); i++) await act(() => new Promise((r) => setTimeout(r, 10)));
+  };
+
+  it('shows the answer of the engine as live, and does not describe an outcome the live answer did not reach', async () => {
+    const split = await base.getSplit();
+    const asked: string[] = [];
+    const api: FidesApi = {
+      ...base,
+      mode: 'live',
+      // A live answer that differs from the recording: the detached state refuses instead of asking.
+      probeSplit: async (state) => {
+        asked.push(state);
+        const check = structuredClone(split.states[state].check);
+        if (state === 'detached') check.verdict.decision = 'REFUSE';
+        return { check, checkedAt: '2026-11-04T12:34:56.000Z' };
+      },
+    };
+    const page = await show('#/split', api);
+    await act(() => new Promise((r) => setTimeout(r, 20)));
+    expect(asked).toContain('attached');
+    expect(page.textContent).toMatch(/Live: the engine answered this just now \(12:34:56 UTC\)/);
+    await clickState(page, 'Detached');
+    expect(asked).toContain('detached');
+    expect(page.textContent).toMatch(/Follows from the decision above/);
+  });
+
+  it('a live check that fails says so and keeps the recorded decision', async () => {
+    const api: FidesApi = { ...base, mode: 'live', probeSplit: async () => { throw new Error('the shared record cannot be switched off here'); } };
+    const page = await show('#/split', api);
+    await act(() => new Promise((r) => setTimeout(r, 20)));
+    expect(page.textContent).toMatch(/Live check not available for this state \(the shared record cannot be switched off here\)\. Showing the recorded decision/);
+    expect(page.querySelector('.notice.bad')).toBeNull();
   });
 });

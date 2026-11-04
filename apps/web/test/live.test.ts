@@ -63,6 +63,39 @@ describe('the live API', () => {
     expect((await fetch(`${base}/demo`, { method: 'POST' })).status).toBe(405);
   });
 
+  it('the split toggle asks the engine for real: attached refuses, detached asks, unreachable never pays', async () => {
+    const attached = await api.probeSplit!('attached');
+    expect(attached.check.verdict.decision).toBe('REFUSE');
+    expect(attached.check.verdict.citations.evidenceIds.length).toBeGreaterThanOrEqual(2);
+    const detached = await api.probeSplit!('detached');
+    expect(detached.check.sharedState).toBe('detached');
+    expect(detached.check.verdict.decision).toBe('ASK');
+    expect(detached.check.verdict.citations.evidenceIds).toHaveLength(0);
+    const down = await api.probeSplit!('unreachable');
+    expect(down.check.sharedState).toBe('unreachable');
+    expect(['PAY', 'PAY_CAPPED']).not.toContain(down.check.verdict.decision);
+    // The record comes back: B refuses again, and the probes left nothing switched off or detached.
+    const back = await api.probeSplit!('attached');
+    expect(back.check.sharedState).toBe('attached');
+    expect(back.check.verdict.decision).toBe('REFUSE');
+    expect(back.checkedAt >= attached.checkedAt).toBe(true);
+  }, 60_000);
+
+  it('the real relayer cannot be switched off: the unreachable probe says so instead of faking it', async () => {
+    const real = liveServer({ ...h, setMemoryDown: () => false } as Harness, data);
+    await new Promise<void>((r) => real.listen(0, '127.0.0.1', r));
+    const root = `http://127.0.0.1:${(real.address() as AddressInfo).port}/api/probe`;
+    try {
+      const r = await fetch(`${root}/unreachable`);
+      expect(r.status).toBe(501);
+      expect(((await r.json()) as { error: string }).error).toMatch(/real Walrus Memory relayer/);
+      expect((await fetch(`${root}/attached`)).status).toBe(200);
+      expect((await fetch(`${root}/bogus`)).status).toBe(404);
+    } finally {
+      real.close();
+    }
+  }, 60_000);
+
   it('an unreachable live API rejects instead of falling back', async () => {
     await expect(liveApi('http://127.0.0.1:9/api')).rejects.toThrow();
   });
