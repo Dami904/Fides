@@ -3,9 +3,19 @@
   "version": "0.0.0",
   "private": true,
   "type": "module",
+  "main": "src/index.ts",
+  "types": "src/index.ts",
+  "scripts": {
+    "start": "tsx src/run.ts"
+  },
   "dependencies": {
+    "@fides/chain": "workspace:*",
+    "@fides/core": "workspace:*",
     "@mysten/sui": "^2.37.0",
     "@suimpp/mpp": "0.9.0",
     "mppx": "^0.4.9"
+  },
+  "devDependencies": {
+    "@fides/sdk": "workspace:*"
   }
 }
