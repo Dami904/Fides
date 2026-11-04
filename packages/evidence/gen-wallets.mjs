@@ -18,7 +18,7 @@ const setVar = (name, value) => {
   else lines.push(`${name}=${value}`);
 };
 
-for (const name of ['SUI_PRIVATE_KEY_A', 'SUI_PRIVATE_KEY_B', 'SUI_PRIVATE_KEY_MERCHANTS']) {
+for (const name of ['SUI_PRIVATE_KEY_A', 'SUI_PRIVATE_KEY_B', 'SUI_PRIVATE_KEY_C', 'SUI_PRIVATE_KEY_MERCHANTS']) {
   if (isSet(name)) {
     console.log(`${name}: already set, left alone`);
     continue;
