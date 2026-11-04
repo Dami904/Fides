@@ -8,18 +8,18 @@ Built for the Walrus x Tatum "Total Recall" hackathon. [Judge in 2 minutes](#jud
 
 ## Status
 
-Built and tested; runs on **Sui testnet**. The mainnet runs (real USDC, the 10+ mainnet Walrus Memory writes, the mainnet anchor) are **not done yet**: they wait on funding. The UI (decision feed, A/B split, merchant record with Re-verify, simulation board) is built. `pnpm web` runs it on **recorded fixtures** from the real engine; `pnpm web:live` runs the engine first and serves that run to it, with Re-verify checking records for real. A plain lookup page also ships with the registry. See [Honest limits](#honest-limits) and [`docs/ASSUMPTIONS.md`](docs/ASSUMPTIONS.md) for what is verified and what is not.
+Built and tested; runs on **Sui testnet**, and on **Sui mainnet** for the first real payment and the anchor: a 0.01 USDC MPP payment verified through Tatum, and the anchor package `0x2e884850e268d67708d527770bbf3e9e991e0aa845c88c5b68bdaed62943696f` published immutable, with a report event read back through Tatum (2026-11-04). The 10+ mainnet Walrus Memory writes and the demo on mainnet are **not done yet**: they need agents B and C funded on mainnet. The UI (decision feed, A/B split, merchant record with Re-verify, simulation board) is built. `pnpm web` runs it on **recorded fixtures** from the real engine; `pnpm web:live` runs the engine first and serves that run to it, with Re-verify checking records for real. A plain lookup page also ships with the registry. See [Honest limits](#honest-limits) and [`docs/ASSUMPTIONS.md`](docs/ASSUMPTIONS.md) for what is verified and what is not.
 
 ## Judge in 2 minutes
 
 | | |
 |---|---|
-| Tests | 390 pass, 10 skipped (live network tests and two slow simulation tests, run on request), typecheck clean |
+| Tests | 390 pass, 11 skipped (live network tests, Gemini included, and two slow simulation tests, run on request), typecheck clean |
 | UI | `pnpm web` opens the four screens on recorded fixtures; `pnpm web:live` on a fresh run of the engine (add `-- --live` for Sui testnet); `pnpm mockups` serves the static design mockups |
 | Real on-chain run | the full demo on Sui testnet: real MPP USDC payments, Tatum verification, Sui anchors. Output: [`docs/evidence/demo-live-testnet.txt`](docs/evidence/demo-live-testnet.txt) |
 | Measured result | 20 agents, 6 merchants (2 bad): **12 burns with the shared record, 44 without** (73% avoided), no good merchant refused. [`docs/evidence/simulation.txt`](docs/evidence/simulation.txt) |
 | Anchor module (testnet) | package `0x1e58e339d2914686089424a956b34f22997d8cf5fac477f3604d05c027ae6b4a`, events of type `<package>::anchor::Report` |
-| Not done | mainnet runs, the UI on live data, blog post and video |
+| Not done | the demo and the 10+ Walrus Memory writes on mainnet, blog post and video |
 
 ```bash
 pnpm install                 # Node 22 or newer, pnpm 11
@@ -235,13 +235,13 @@ Trust tiers come from verified outcomes, weighted by the reporter's own track re
 | `memory` | 28 | the write rule, exact-host filtering, look-alike hosts, header/evidence mismatch, the three states |
 | `chain` | 35 | rate limiting and retries, key never in a URL or error, injection refused, finality, anchor paging |
 | `sdk` | 79 | the whole check/report loop, forgeries, pending vs rejected, partial failures and retries, rule 6 end to end |
-| `tools`, `mcp` | 37 | the three tools, every vendor's tool shapes, MCP over memory, stdio and HTTP, auth and origin checks, rate limit and deadline |
+| `tools`, `mcp` | 38 | the three tools, every vendor's tool shapes, MCP over memory, stdio and HTTP, auth and origin checks, rate limit and deadline |
 | `merchants` | 26 | each merchant's behaviour, the address swap on the real MPP gate |
 | `agent` | 18 | the buy loop, timeouts, refused and unknown payments, a merchant naming another host, reporting retries, the full demo |
 | `registry` | 30 | verification, forged records, tampered storage, outages, rate limits, page safety, anchors recall missed |
 | `sim` | 4 | repeatability, and (on request) the result |
 | `web` | 39 | every screen rendered, the UI's logic and its API on fixtures and live: attempts, the board per round, the split view's three states, Re-verify for real, a forged record, an unreachable server |
-| **Total** | **400** | 390 run by default |
+| **Total** | **401** | 390 run by default |
 
 Live tests (a real relayer, Tatum testnet, real payments) run only with `FIDES_LIVE=1`. Everything else uses a simulated world: a fake ledger, in-process memory, real signatures, real HTTP between agents and merchants, the real engine. The headline demo and the live tests use real payments and a real chain; nothing in them is faked except where stated under [staged versus real](#staged-versus-real).
 
@@ -268,11 +268,11 @@ Read this before trusting any number.
 - **The person who approves an ASK is a script** that says yes. The simulation's person says yes 80% of the time.
 - **The simulation settles on a fake ledger** and its memory is in-process. It cannot say how rule 6 behaves on real embeddings.
 - **Three agents, not two,** because a refusal needs two independent reporters.
-- **Testnet, not mainnet.** Nothing here has settled real money yet.
+- **Mostly testnet.** On mainnet so far: one real 0.01 USDC payment and one anchor publish with one test report (about 0.005 SUI of gas in total). The engine's other runs are on testnet.
 
 ## Honest limits
 
-- **Mainnet is not run yet.** The payment, the anchor and the 10+ Walrus Memory writes on mainnet need funding. Scripted: `pnpm day1:mainnet` checks and spends nothing, `pnpm day1:mainnet:run` spends cents. The Walrus Memory writes so far on mainnet are test records in a throwaway namespace.
+- **Mainnet is partly run.** Done on 2026-11-04 (`pnpm day1:mainnet:run`, results in `docs/DAY1.md`): the payment and the anchor. Not done: the demo and the 10+ Walrus Memory writes in the shared record, which need agents B and C funded on mainnet. The Walrus Memory writes so far on mainnet are test records in a throwaway namespace.
 - **Proof of payment is not proof of bad service.** A payment shows money moved, not that the response was bad. A merchant can pay itself through its own agents to build clean reports (it costs gas), and an honest-looking agent can slander a merchant by paying and reporting a false burn. Mitigations: reporter weighting, a cap on one reporter's influence, two reporters for a refusal, response checks against the published schema. A burn counts against a merchant only if the reporter paid that merchant's pinned payout address, so a reporter cannot pay a wallet of its own and blame any host for the price of gas; the payout address inherited from the shared record is the one most independent reporters paid. Sybil and cluster detection is out of scope.
 - **Merchant identity is the host the agent called.** The reference agent refuses a merchant whose schema names a different host than the URL, except on loopback, where the local mock merchants name themselves. An agent that reaches merchants through some other path must do the same check.
 - **A payment that fails in an unknown way keeps its spend until the chain says otherwise.** If the payment call fails without proof that nothing was sent (a timeout after broadcast), the claim is marked unknown and still counts toward the daily cap. `fides.reconcileUnknown()` then looks, through Tatum, for a final transfer the agent sent after the claim for exactly that amount: found, the claim is paid; nothing after 10 minutes, the spend is released; a failed lookup changes nothing. The match is by amount and time, not by merchant, so two payments of the same amount in the same window could be swapped (the spend total is right either way). A signed transfer that is broadcast later than 10 minutes would not be caught.
@@ -286,7 +286,7 @@ Read this before trusting any number.
 - **The Walrus Memory relayer sees plaintext** (it encrypts with Seal after reading). Nothing private is stored: evidence is public by design. There is no documented delete, so "detach" means Fides stops using the record. The testnet staging relayer's certificate is broken: it serves a certificate for `*.up.railway.app` (checked 2026-11-04).
 - **The UI shows one run, not a live feed.** `pnpm web:live` runs the scripted demo and the simulation when it starts and serves that run; it does not update as new payments happen. Re-verify does run now, against the chain. `pnpm web` uses recorded fixtures. A label in the header says which, on every page. Every screen is rendered with React in a test (happy-dom); the look was checked by hand in a browser.
 - **Self-grading is measured in the simulation, where every merchant is ours.** With the shared record, when Fides paid without asking the answer was clean 97% of the time (288 of 297, three seeds); at the established and trusted tiers, 276 of 276. Without the record Fides never paid on its own, so there is nothing to grade. Those numbers come from honest simulated reporters and mock merchants, so they say the rules work as designed, not how they fare against real adversaries. A real agent grades itself with `fides.selfGrade()` once it passes `decisionId` to `report()` (the reference agent does); refusals are never graded, because nobody learns what would have happened.
-- **Not built:** the mainnet runs.
+- **Not run yet:** the demo on mainnet.
 
 More detail, with how each was measured, in [`docs/ASSUMPTIONS.md`](docs/ASSUMPTIONS.md) and [`docs/DAY1.md`](docs/DAY1.md).
 

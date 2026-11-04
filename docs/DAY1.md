@@ -93,3 +93,9 @@ Results of SPEC section 15. Record what was tried, what happened, and the fallba
 ## Blocked (2026-10-25)
 
 Checks 1 to 5 and 7 are blocked: the container's network policy denies `docs.tatum.io`, `tatum.io`, `*.gateway.tatum.io`, `*.walrus.xyz`, `docs.wal.app`, `fullnode.mainnet.sui.io` and the hackathon rules site (retried twice, still 403 on CONNECT). Needs the environment's Network access widened. Checks 1 to 5 also need keys and a funded wallet.
+
+## Mainnet runs (2026-11-04, run by scripts/day1-mainnet.mjs)
+
+- Check 4 on mainnet: MPP payment of 0.01 USDC from Agent A to the merchants wallet. Payment digest `Fm1ZG48n3SoDw9JNCSBVzNN9ytEYozU4ThickYTfimnZ`. Verified through Tatum mainnet GraphQL: sender = Agent A, status SUCCESS, checkpoint 341594189, USDC received by the merchants wallet 10000 raw units. All checks passed.
+- Check 5 on mainnet: anchor published, package `0x2e884850e268d67708d527770bbf3e9e991e0aa845c88c5b68bdaed62943696f` (saved to packages/move/deployments.json), publish tx `Er9zuxbwxqitLro86uiCa71p55mfqkxaToTjQaymK1ka`, test report tx `C95XbCzqDGwFpSWaN3cZK3zTnGJB1Ki7mzkbV29MyBGz`. Read back through Tatum mainnet GraphQL: event found, sender = publisher, merchant "check5.test.example", verdict 0.
+- Overall: mainnet checks 4 and 5 passed.
