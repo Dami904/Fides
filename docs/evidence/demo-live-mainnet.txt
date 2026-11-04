@@ -1,0 +1,64 @@
+# FIDES_NETWORK=mainnet pnpm demo:live -- --memory=live, run 2026-11-04
+Fides demo on mainnet (live). Agents: A, B, C. Merchants: good, flaky, malicious.
+
+== Step 1: Agent A, cold start, meets every merchant
+  A -> good.fides-demo.test: ASK (cannot say: not enough history) [tier] -> person approves -> paid -> delivered as advertised -> reported clean 56d0b838 (complete)
+  A -> flaky.fides-demo.test: ASK (cannot say: not enough history) [tier] -> person approves -> paid -> delivered as advertised -> reported clean 44913776 (complete)
+  A -> malicious.fides-demo.test: ASK (cannot say: not enough history) [tier] -> person approves -> paid -> delivered as advertised -> reported clean 075b11b3 (complete)
+  [ok] A asks about good and cannot say yet
+  [ok] A pays good once and it delivers
+  [ok] A asks about flaky and cannot say yet
+  [ok] A pays flaky once and it delivers
+  [ok] A asks about malicious and cannot say yet
+  [ok] A pays malicious once and it delivers
+
+== Step 2: A pays the flaky merchant again and gets junk
+  A -> flaky.fides-demo.test: ASK (cannot say: not enough history) [tier] citing 44913776 -> person approves -> paid -> BURNED (schema is "wrong/v0", expected fides.news/v1; data is missing or not an object) -> reported burn 35c47cdc (complete)
+  [ok] A is burned and reports a signed burn
+  [ok] the burn is anchored on Sui and written to the shared record
+
+== Step 3: C is burned too; B, who has never met flaky, reads the shared record and refuses
+  C -> flaky.fides-demo.test: PAY_CAPPED [shared-burn] citing 35c47cdc -> paid -> BURNED (asOf is 3600 s old, maximum is 120 s) -> reported burn 30396dbf (complete)
+  B -> flaky.fides-demo.test: REFUSE [shared-burns] citing 35c47cdc, 30396dbf: not paid
+  [ok] C is burned by the same merchant
+  [ok] B refuses, citing both signed burns
+  [ok] B pays nothing
+  [ok] A's burn is one of the cited records
+
+== Step 4: The malicious merchant swaps its payout address and quotes 4x
+  A -> malicious.fides-demo.test: REFUSE (cannot say: not enough history) [address]: not paid
+  B -> malicious.fides-demo.test: REFUSE (cannot say: not enough history) [address]: not paid
+  [ok] A refuses: address changed from the one it paid, price jumped
+  [ok] B refuses too, though it never paid this merchant: the pinned address comes from the shared record
+  [ok] both raised an address alert
+
+== Step 5: B detaches the shared memory: no access to it, nothing deleted
+  B -> flaky.fides-demo.test: ASK (cannot say: not enough history) [tier] (shared record detached) -> person approves -> paid -> BURNED (schema is "wrong/v0", expected fides.news/v1; data is missing or not an object) -> reported burn d3596a16 (complete)
+  Detaching removes B's access to the shared record. Nothing was deleted from it.
+  [ok] B no longer sees the burns: it can only ask a person
+  [ok] B cites no shared records
+  [ok] the person approves and B is burned: the same loss A and C had
+
+== Step 6: Re-verify a real record, then reject a forged one
+  re-verify format        ok   well formed, 1088 bytes, canonical
+  re-verify hash          ok   sha256 30396dbf7ace240480d386b0eb9abb5472ee31d1cc8ce4c50704f15659f05941 matches the Sui anchor
+  re-verify signature     ok   signed by reporter 0x34c40318c2e953b18cbd2df24305433ac87cca54e39d2cc151176a0928d9f100
+  re-verify anchor-sender ok   anchor event sender equals the reporter
+  re-verify payment       ok   final in checkpoint 341607131, sender is the reporter, 10000 paid to 0x6bb4c83392650cbd167bac4140ad7688a798a3c4347b0a21bf2d63a50de7071e
+  forged record c656b035: REJECTED, no anchor event found for this evidence (it may not be indexed yet)
+  [ok] the anchor event for the record is found on Sui
+  [ok] a real record passes every step of the re-verify
+  [ok] the forged record is rejected and shown
+  [ok] it changes nothing: B cites the same signed records and reaches the same decision
+
+== Step 7: The shared record cannot be reached: B fails closed
+  This run uses the real Walrus Memory relayer, which cannot be switched off here: the outage is covered by the simulated demo and the tests.
+  [ok] while it is reachable B refuses flaky, citing the signed burns
+
+== Cost of the burns (USDC)
+  A: 0.01
+  B: 0.01
+  C: 0.01
+  B lost nothing to flaky while attached (step 3), and lost the same as A and C once it detached (step 5).
+
+All expectations met.
