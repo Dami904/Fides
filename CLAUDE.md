@@ -48,10 +48,11 @@ pnpm day1:mainnet:run            # spends cents: one MPP payment and one anchor 
 
 ```bash
 pnpm web                         # the UI (React and Vite) on fixtures; pnpm web:build builds it
+pnpm web:live                    # the UI on a fresh engine run (-- --live for Sui testnet)
 pnpm mockups                     # the four early UI mockups on http://127.0.0.1:4400/ (open /mockups/index.html)
 pnpm fixtures                    # re-export the real demo and simulation data the mockups read (apps/web/fixtures)
 ```
 
-Run a single package's tests with `node node_modules/vitest/vitest.mjs run packages/core`. `apps/web` holds the UI: a React app (landing page, decision feed and detail, A/B split, merchants, evidence with Re-verify, simulation) built against the `FidesApi` interface and running on recorded fixtures from the real engine. It is not connected to live data yet. The static mockups in `apps/web/mockups` came first and are kept for reference.
+Run a single package's tests with `node node_modules/vitest/vitest.mjs run packages/core`. `apps/web` holds the UI: a React app (landing page, decision feed and detail, A/B split, merchants, evidence with Re-verify, simulation) built against the `FidesApi` interface and running on recorded fixtures from the real engine. `pnpm web:live` runs the engine first and serves that run to it through `apps/web/server` (Re-verify checks for real). The static mockups in `apps/web/mockups` came first and are kept for reference.
 
 Where things are: the engine is `packages/core`, the loop is `packages/sdk` (`fides.check` and `fides.report`), the network is picked by `FIDES_NETWORK` through `packages/chain/networks.json`. `docs/ASSUMPTIONS.md` is the log of what is verified and what is not: update it whenever something unverified is relied on.

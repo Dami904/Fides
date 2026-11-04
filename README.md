@@ -8,14 +8,14 @@ Built for the Walrus x Tatum "Total Recall" hackathon. [Judge in 2 minutes](#jud
 
 ## Status
 
-Built and tested; runs on **Sui testnet**. The mainnet runs (real USDC, the 10+ mainnet Walrus Memory writes, the mainnet anchor) are **not done yet**: they wait on funding. The UI (decision feed, A/B split, merchant record with Re-verify, simulation board) is built and runs on **recorded fixtures** from the real engine; it is **not yet connected to live data** (a live API and demo server are still to do). A plain lookup page also ships with the registry. See [Honest limits](#honest-limits) and [`docs/ASSUMPTIONS.md`](docs/ASSUMPTIONS.md) for what is verified and what is not.
+Built and tested; runs on **Sui testnet**. The mainnet runs (real USDC, the 10+ mainnet Walrus Memory writes, the mainnet anchor) are **not done yet**: they wait on funding. The UI (decision feed, A/B split, merchant record with Re-verify, simulation board) is built. `pnpm web` runs it on **recorded fixtures** from the real engine; `pnpm web:live` runs the engine first and serves that run to it, with Re-verify checking records for real. A plain lookup page also ships with the registry. See [Honest limits](#honest-limits) and [`docs/ASSUMPTIONS.md`](docs/ASSUMPTIONS.md) for what is verified and what is not.
 
 ## Judge in 2 minutes
 
 | | |
 |---|---|
-| Tests | 383 pass, 10 skipped (live network tests and two slow simulation tests, run on request), typecheck clean |
-| UI | `pnpm web` opens the four screens (React, on recorded fixtures); `pnpm mockups` serves the static design mockups |
+| Tests | 390 pass, 10 skipped (live network tests and two slow simulation tests, run on request), typecheck clean |
+| UI | `pnpm web` opens the four screens on recorded fixtures; `pnpm web:live` on a fresh run of the engine (add `-- --live` for Sui testnet); `pnpm mockups` serves the static design mockups |
 | Real on-chain run | the full demo on Sui testnet: real MPP USDC payments, Tatum verification, Sui anchors. Output: [`docs/evidence/demo-live-testnet.txt`](docs/evidence/demo-live-testnet.txt) |
 | Measured result | 20 agents, 6 merchants (2 bad): **12 burns with the shared record, 44 without** (73% avoided), no good merchant refused. [`docs/evidence/simulation.txt`](docs/evidence/simulation.txt) |
 | Anchor module (testnet) | package `0x1e58e339d2914686089424a956b34f22997d8cf5fac477f3604d05c027ae6b4a`, events of type `<package>::anchor::Report` |
@@ -23,7 +23,7 @@ Built and tested; runs on **Sui testnet**. The mainnet runs (real USDC, the 10+ 
 
 ```bash
 pnpm install                 # Node 22 or newer, pnpm 11
-pnpm test                    # 383 tests, no network, no keys
+pnpm test                    # 390 tests, no network, no keys
 pnpm demo                    # the whole story, simulated: seconds, free
 pnpm sim                     # 20 agents x 6 merchants, with and without the shared record
 ```
@@ -201,7 +201,7 @@ Trust boundaries worth knowing: Walrus Memory is untrusted storage (any delegate
 | `apps/agent` | the paying agent loop and the scripted demo |
 | `apps/sim` | the simulation |
 | `apps/registry` | the read-only verifying registry and the lookup page |
-| `apps/web` | the UI: Vite, React and TypeScript behind a `FidesApi` interface (fixtures implemented, live not yet), plus the static mockups |
+| `apps/web` | the UI: Vite, React and TypeScript behind a `FidesApi` interface (fixtures, and live through a small loopback server in `apps/web/server`), plus the static mockups |
 
 ## How it decides
 
@@ -238,10 +238,10 @@ Trust tiers come from verified outcomes, weighted by the reporter's own track re
 | `tools`, `mcp` | 37 | the three tools, every vendor's tool shapes, MCP over memory, stdio and HTTP, auth and origin checks, rate limit and deadline |
 | `merchants` | 26 | each merchant's behaviour, the address swap on the real MPP gate |
 | `agent` | 18 | the buy loop, timeouts, refused and unknown payments, a merchant naming another host, reporting retries, the full demo |
-| `registry` | 28 | verification, forged records, tampered storage, outages, rate limits, page safety |
+| `registry` | 30 | verification, forged records, tampered storage, outages, rate limits, page safety, anchors recall missed |
 | `sim` | 4 | repeatability, and (on request) the result |
-| `web` | 34 | every screen rendered, the UI's logic and its API on fixtures: attempts, the board per round, the split view's three states, Re-verify, a forged record |
-| **Total** | **393** | 383 run by default |
+| `web` | 39 | every screen rendered, the UI's logic and its API on fixtures and live: attempts, the board per round, the split view's three states, Re-verify for real, a forged record, an unreachable server |
+| **Total** | **400** | 390 run by default |
 
 Live tests (a real relayer, Tatum testnet, real payments) run only with `FIDES_LIVE=1`. Everything else uses a simulated world: a fake ledger, in-process memory, real signatures, real HTTP between agents and merchants, the real engine. The headline demo and the live tests use real payments and a real chain; nothing in them is faked except where stated under [staged versus real](#staged-versus-real).
 
@@ -278,15 +278,15 @@ Read this before trusting any number.
 - **A payment that fails in an unknown way keeps its spend until the chain says otherwise.** If the payment call fails without proof that nothing was sent (a timeout after broadcast), the claim is marked unknown and still counts toward the daily cap. `fides.reconcileUnknown()` then looks, through Tatum, for a final transfer the agent sent after the claim for exactly that amount: found, the claim is paid; nothing after 10 minutes, the spend is released; a failed lookup changes nothing. The match is by amount and time, not by merchant, so two payments of the same amount in the same window could be swapped (the spend total is right either way). A signed transfer that is broadcast later than 10 minutes would not be caught.
 - **Trust is slow.** With the spec's thresholds a merchant needs several independent, experienced reporters to reach "established". In the simulation that happened (93 automatic payments to good merchants in one seed, none without the record) but only at 20 agents; at 12 agents and 8 rounds it did not, and the three-agent demo never reaches it. Thresholds are not calibrated: easing them in the simulation raised automatic payments to good merchants from 273 to 389 and cut how often a person was asked from 269 to 115, for one more burn (13 against 12), over three seeds ([`docs/evidence/sweep.txt`](docs/evidence/sweep.txt)). That is a trade-off for the owner to choose, not a free win, and the simulation's honest reporters make the easier setting look safer than it is.
 - **Similar-incident recall (rule 6) is unproven on real embeddings.** It is tested end to end with fake distances, and the simulation shows it changes nothing measurable. The provisional recall cutoff (0.45) rests on two real reports.
-- **Recall is fuzzy and the registry can be incomplete.** It asks for up to 50 memories by meaning and filters by host. Sui's anchor events are the exact index; the registry does not enumerate them by merchant.
+- **Recall is fuzzy and the registry can be incomplete.** It asks for up to 50 memories by meaning and filters by host. To catch what recall misses, it also reads the newest 150 anchor events on Sui (events cannot be filtered by merchant on chain) and lists any anchored report for the merchant whose record did not come back. Those are shown but not counted: without the signed record, the signature and the payment cannot be checked. Older anchors past those pages are not scanned.
 - **Merchants verify through the default fullnode,** not Tatum, and Tatum's JSON-RPC is not served. Tatum is on the agent and registry side of verification.
 - **A merchant that is malicious from its first response, to an agent with no shared reports, is not flagged by the address rule.**
 - **What still gets through:** in the simulation, 12 burns remain with the record, partly the malicious merchant after its turn, when a person approves an ASK about the changed address.
 - **The model adapters (OpenAI, Anthropic, Gemini, OpenRouter) are checked against the vendors' documentation, not against live APIs.** The MCP server is verified with a real MCP client. There is no TLS in front of the HTTP MCP server; put one there.
-- **The Walrus Memory relayer sees plaintext** (it encrypts with Seal after reading). Nothing private is stored: evidence is public by design. There is no documented delete, so "detach" means Fides stops using the record. The testnet staging relayer's certificate is broken (checked 2026-10-28).
-- **The UI is not connected to live data yet.** Its pages run on fixtures recorded from the engine, and a label in the header says so on every page. Every screen is rendered with React in a test (happy-dom) on those fixtures, including Re-verify running its five checks; the look was checked by hand in a browser.
+- **The Walrus Memory relayer sees plaintext** (it encrypts with Seal after reading). Nothing private is stored: evidence is public by design. There is no documented delete, so "detach" means Fides stops using the record. The testnet staging relayer's certificate is broken: it serves a certificate for `*.up.railway.app` (checked 2026-11-04).
+- **The UI shows one run, not a live feed.** `pnpm web:live` runs the scripted demo and the simulation when it starts and serves that run; it does not update as new payments happen. Re-verify does run now, against the chain. `pnpm web` uses recorded fixtures. A label in the header says which, on every page. Every screen is rendered with React in a test (happy-dom); the look was checked by hand in a browser.
 - **Self-grading is measured in the simulation, where every merchant is ours.** With the shared record, when Fides paid without asking the answer was clean 97% of the time (288 of 297, three seeds); at the established and trusted tiers, 276 of 276. Without the record Fides never paid on its own, so there is nothing to grade. Those numbers come from honest simulated reporters and mock merchants, so they say the rules work as designed, not how they fare against real adversaries. A real agent grades itself with `fides.selfGrade()` once it passes `decisionId` to `report()` (the reference agent does); refusals are never graded, because nobody learns what would have happened.
-- **Not built:** the mainnet runs, a live API for the UI.
+- **Not built:** the mainnet runs.
 
 More detail, with how each was measured, in [`docs/ASSUMPTIONS.md`](docs/ASSUMPTIONS.md) and [`docs/DAY1.md`](docs/DAY1.md).
 
@@ -330,6 +330,7 @@ pnpm demo                         # simulated, no keys
 pnpm sim                          # the simulation (pnpm sim -- --seeds=5)
 pnpm merchants                    # the three mock merchants on 127.0.0.1:4101-4103
 pnpm web                          # the UI on http://127.0.0.1:4500 (recorded fixtures)
+pnpm web:live                     # the same UI on a fresh run of the engine (-- --live for Sui testnet)
 pnpm registry                     # lookup page and API on http://127.0.0.1:4200
 pnpm --filter @fides/mcp start    # MCP over stdio (add -- --http, with FIDES_MCP_TOKEN, for HTTP)
 ```
