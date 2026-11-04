@@ -1,0 +1,22 @@
+{
+  "testnet": {
+    "suiNetwork": "testnet",
+    "fullnodeUrl": "https://fullnode.testnet.sui.io:443",
+    "tatumGraphqlUrl": "https://sui-testnet.gateway.tatum.io/graphql",
+    "tatumGrpcUrl": "https://sui-testnet-grpc.gateway.tatum.io",
+    "tatumKeyEnv": "TATUM_TESTNET_API_KEY",
+    "memwalRelayerUrl": "https://relayer-staging.memory.walrus.xyz",
+    "usdcType": "0xa1ec7fc00a6f40db9693ad1415d0c193ad3906494428cf252621037bd7117e29::usdc::USDC",
+    "usdcDecimals": 6
+  },
+  "mainnet": {
+    "suiNetwork": "mainnet",
+    "fullnodeUrl": "https://fullnode.mainnet.sui.io:443",
+    "tatumGraphqlUrl": "https://sui-mainnet.gateway.tatum.io/graphql",
+    "tatumGrpcUrl": "https://sui-mainnet-grpc.gateway.tatum.io",
+    "tatumKeyEnv": "TATUM_MAINNET_API_KEY",
+    "memwalRelayerUrl": "https://relayer.memory.walrus.xyz",
+    "usdcType": "0xdba34672e30cb065b1f93e3ab55318768fd6fef66c15942c9f7cb846e2f900e7::usdc::USDC",
+    "usdcDecimals": 6
+  }
+}
