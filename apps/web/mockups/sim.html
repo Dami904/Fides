@@ -1,0 +1,156 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Fides: simulation board (mockup)</title>
+<link rel="stylesheet" href="fides.css">
+<style>
+  .controls { display: flex; gap: 14px 22px; align-items: center; flex-wrap: wrap; padding: 12px 16px; background: var(--surface); border: 1px solid var(--rule); margin-top: 6px; }
+  .controls .round { font: 700 1.1rem var(--mono); min-width: 7ch; font-variant-numeric: tabular-nums; }
+  input[type=range] { flex: 1 1 260px; accent-color: var(--cyan); min-width: 160px; }
+  .boards { display: grid; grid-template-columns: 1fr 1fr; gap: 22px; margin-top: 8px; }
+  .board h2 { font: 700 .8rem var(--mono); letter-spacing: .12em; text-transform: uppercase; display: flex; align-items: center; gap: 10px; }
+  .board.with h2 { color: var(--green); } .board.without h2 { color: var(--ochre); }
+  .counters { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin: 10px 0 12px; }
+  .counters div { border: 1px solid var(--rule); background: var(--bg); padding: 6px 10px; }
+  .counters b { display: block; font: 700 1.5rem var(--mono); font-variant-numeric: tabular-nums; } .counters span { font: 700 .6rem var(--mono); letter-spacing: .12em; text-transform: uppercase; color: var(--muted); }
+  .counters .burns b { color: var(--red); }
+  .grid { display: grid; grid-template-columns: 74px repeat(6, 1fr); gap: 3px; align-items: center; }
+  .grid .colh { font: 700 .6rem var(--mono); letter-spacing: .06em; text-transform: uppercase; text-align: center; padding: 4px 0; border-top: 2px solid var(--rule-strong); color: var(--muted); }
+  .grid .colh.bad { border-top-color: var(--red); color: var(--red); }
+  .grid .rowh { font: .66rem var(--mono); color: var(--muted); }
+  .cell { height: 20px; border: 1px solid var(--rule); background: transparent; display: grid; place-items: center; font: 800 .66rem var(--mono); }
+  .cell.clean { background: var(--green-wash); border-color: var(--green); color: var(--green); }
+  .cell.burn { background: var(--red); border-color: var(--red); color: var(--bg); }
+  .cell.refuse { border-color: var(--ink); color: var(--ink); background: repeating-linear-gradient(135deg, transparent 0 4px, color-mix(in srgb, var(--ink) 35%, transparent) 4px 5px); }
+  .cell.asked { border-color: var(--ochre); color: var(--ochre); }
+  .cell.flash { animation: flash .9s ease-out; }
+  @keyframes flash { 0% { box-shadow: 0 0 0 0 var(--cyan), 0 0 14px 2px var(--cyan); } 100% { box-shadow: 0 0 0 0 transparent; } }
+  .legend { display: flex; gap: 8px 18px; flex-wrap: wrap; font: .72rem var(--mono); color: var(--muted); margin: 14px 0 0; align-items: center; }
+  .legend .cell { display: inline-grid; width: 18px; height: 18px; vertical-align: middle; margin-right: 6px; }
+  .result { margin-top: 18px; font: 700 1.05rem var(--mono); } .result b { color: var(--green); }
+  @media (max-width: 900px) { .boards { grid-template-columns: 1fr; } }
+  @media (prefers-reduced-motion: reduce) { .cell.flash { animation: none; } }
+</style>
+</head>
+<body>
+<div class="frame">
+  <div id="chrome"></div>
+
+  <div class="page-head">
+    <div>
+      <h1>Simulation board</h1>
+      <p>Twenty agents, six merchants, two of them bad. The same world twice: once with the shared record, once without. Each cell is one agent and one merchant. Move the slider, or press play, and watch where the burns land.</p>
+    </div>
+  </div>
+
+  <div class="controls">
+    <button class="btn" id="play" type="button">Play</button>
+    <span class="round" id="round" aria-live="polite"></span>
+    <input id="slider" type="range" min="0" max="12" value="0" step="1" aria-label="Round">
+    <span class="live" id="live"><i></i><span id="live-text">Paused</span></span>
+  </div>
+
+  <div class="boards">
+    <section class="slip board with" aria-label="With the shared record"><h2><span class="pill ok state">with</span> the shared record</h2><div class="counters" id="c-with"></div><div class="grid" id="g-with"></div></section>
+    <section class="slip board without" aria-label="Without the shared record"><h2><span class="pill warn state">without</span> the shared record</h2><div class="counters" id="c-without"></div><div class="grid" id="g-without"></div></section>
+  </div>
+
+  <div class="legend" aria-label="Legend">
+    <span><span class="cell clean">✓</span>paid, delivered</span>
+    <span><span class="cell burn">✕</span>paid, burned</span>
+    <span><span class="cell refuse"></span>refused</span>
+    <span><span class="cell asked">?</span>asked a person, not paid</span>
+    <span><span class="cell"></span>not visited yet</span>
+  </div>
+  <p class="result" id="result"></p>
+
+  <section class="slip" style="margin-top:22px" aria-label="Which rule decided">
+    <h2>Which rule decided each check</h2>
+    <table class="ledger" id="rules" style="margin-top:8px"></table>
+  </section>
+
+  <footer class="note">Built on one recorded simulation run (seed 1, 20 agents, 12 rounds): <code>fixtures/sim.json</code>. Settlement is simulated; the engine, the signed evidence and the checks are real. Over three seeds the totals are 12 burns with the shared record and 44 without (<code>docs/evidence/simulation.txt</code>).</footer>
+</div>
+
+<script src="../fixtures/sim.js"></script>
+<script src="fides.js"></script>
+<script>
+(function () {
+  const { h } = Fides;
+  const S = window.FIDES_SIM;
+  Fides.frame('sim.html', [['Data', 'recorded simulation, seed 1', false], ['Settlement', 'simulated', false], ['Memory', 'in-process', false], ['Engine and signatures', 'real', true]]);
+
+  const ROUNDS = S.shared.config.rounds;
+  const agents = Array.from({ length: S.shared.config.agents }, (_, i) => `agent${i + 1}`);
+  const merchants = [...new Set(S.shared.events.map((e) => e.merchant))].sort((a, b) => { const k = (m) => (m.startsWith('good') ? 0 : m.startsWith('flaky') ? 1 : 2); return k(a) - k(b) || a.localeCompare(b); });
+  const kindOf = Object.fromEntries(S.shared.events.map((e) => [e.merchant, e.kind]));
+  const label = (m) => m.split('.')[0].replace('good', 'good ').replace('flaky', 'flaky').replace('malicious', 'malic.');
+
+  const slider = document.getElementById('slider');
+  slider.max = ROUNDS;
+
+  function stateOf(events, round) {
+    const cells = new Map();
+    for (const e of events) {
+      if (e.round > round) continue;
+      const k = e.agent + '|' + e.merchant; const c = cells.get(k) || { burn: false, refuse: false, clean: false, asked: false };
+      if (e.burned) c.burn = true; else if (e.decision === 'REFUSE') c.refuse = true; else if (e.paid) c.clean = true; else c.asked = true;
+      cells.set(k, c);
+    }
+    const kind = (c) => (!c ? 'none' : c.burn ? 'burn' : c.refuse ? 'refuse' : c.clean ? 'clean' : c.asked ? 'asked' : 'none');
+    const totals = { burns: 0, paid: 0, refused: 0, asked: 0 };
+    for (const e of events) { if (e.round > round) continue; if (e.burned) totals.burns++; if (e.paid) totals.paid++; if (e.decision === 'REFUSE') totals.refused++; if (e.decision === 'ASK') totals.asked++; }
+    return { cells, kind, totals };
+  }
+
+  const prev = { with: new Map(), without: new Map() };
+  function drawBoard(which, events, round) {
+    const { cells, kind, totals } = stateOf(events, round);
+    const grid = document.getElementById('g-' + which);
+    const head = [h('span'), ...merchants.map((m) => h('div', { class: 'colh' + (kindOf[m] === 'good' ? '' : ' bad'), title: m, text: label(m) }))];
+    const rows = agents.flatMap((a) => [h('span', { class: 'rowh', text: a }), ...merchants.map((m) => {
+      const k = kind(cells.get(a + '|' + m)); const was = prev[which].get(a + '|' + m);
+      const el = h('div', { class: `cell ${k}${was !== undefined && was !== k ? ' flash' : ''}`, title: `${a} and ${m}: ${k}`, role: 'img', 'aria-label': `${a} and ${m}: ${k}` }, { clean: '✓', burn: '✕', asked: '?' }[k] || '');
+      prev[which].set(a + '|' + m, k); return el;
+    })]);
+    grid.replaceChildren(...head, ...rows);
+    document.getElementById('c-' + which).replaceChildren(
+      h('div', { class: 'burns' }, h('b', { text: String(totals.burns) }), h('span', { text: 'burns' })),
+      h('div', null, h('b', { text: String(totals.paid) }), h('span', { text: 'paid' })),
+      h('div', null, h('b', { text: String(totals.refused) }), h('span', { text: 'refused' })),
+      h('div', null, h('b', { text: String(totals.asked) }), h('span', { text: 'asked' })));
+    return totals;
+  }
+
+  function draw(round) {
+    document.getElementById('round').textContent = `round ${round}/${ROUNDS}`;
+    slider.value = round;
+    const a = drawBoard('with', S.shared.events, round), b = drawBoard('without', S.detached.events, round);
+    const r = document.getElementById('result');
+    r.replaceChildren(round === ROUNDS ? h('span', null, 'The shared record avoided ', h('b', { text: `${b.burns - a.burns} of ${b.burns}` }), ` burns in this run (${Math.round((100 * (b.burns - a.burns)) / b.burns)}%).`) : h('span', { class: 'muted', text: 'Run to the last round to see the result.' }));
+  }
+
+  // rule histogram, final
+  const rules = [...new Set([...Object.keys(S.shared.rules), ...Object.keys(S.detached.rules)])].sort((x, y) => (S.shared.rules[y] || 0) - (S.shared.rules[x] || 0));
+  document.getElementById('rules').replaceChildren(
+    h('thead', null, h('tr', null, h('th', { text: 'rule' }), h('th', { class: 'num', text: 'with the record' }), h('th', { class: 'num', text: 'without' }))),
+    h('tbody', null, rules.map((r) => h('tr', null, h('td', { text: r }), h('td', { class: 'num', text: String(S.shared.rules[r] || 0) }), h('td', { class: 'num', text: String(S.detached.rules[r] || 0) })))));
+
+  let timer = null;
+  const play = document.getElementById('play');
+  function stop() { clearInterval(timer); timer = null; play.textContent = 'Play'; document.getElementById('live').classList.remove('on'); document.getElementById('live-text').textContent = 'Paused'; }
+  play.addEventListener('click', () => {
+    if (timer) return stop();
+    if (Number(slider.value) >= ROUNDS) draw(0);
+    play.textContent = 'Pause'; document.getElementById('live').classList.add('on'); document.getElementById('live-text').textContent = 'Replaying';
+    const reduce = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
+    timer = setInterval(() => { const r = Number(slider.value) + 1; draw(r); if (r >= ROUNDS) stop(); }, reduce ? 120 : 800);
+  });
+  slider.addEventListener('input', () => { stop(); draw(Number(slider.value)); });
+  draw(ROUNDS);
+})();
+</script>
+</body>
+</html>

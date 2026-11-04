@@ -1,0 +1,148 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Fides: A / B split (mockup)</title>
+<link rel="stylesheet" href="fides.css">
+<style>
+  .switch-row { display: flex; gap: 12px 24px; align-items: center; flex-wrap: wrap; margin: 6px 0 4px; padding: 14px 18px; border: 1px solid var(--rule); border-top: 3px double var(--ink); background: var(--surface); box-shadow: var(--shadow); }
+  .switch-row .what { font: 700 .7rem var(--sans); letter-spacing: .12em; text-transform: uppercase; color: var(--muted); }
+  .switch-row .says { flex: 1 1 320px; font-size: .92rem; }
+  .split { display: grid; grid-template-columns: minmax(0, 1fr) 54px minmax(0, 1.25fr); gap: 0; margin-top: 14px; }
+  .col-title { font: 700 .7rem var(--sans); letter-spacing: .12em; text-transform: uppercase; color: var(--muted); margin: 6px 0 -6px; }
+  .spine { position: relative; display: flex; justify-content: center; }
+  .spine::before { content: ""; position: absolute; top: 24px; bottom: 24px; left: 50%; width: 0; border-left: 2px dashed var(--rule-strong); transition: border-color .3s; }
+  .spine.cut::before { border-left-style: dotted; border-color: var(--red); }
+  .spine .tag { position: relative; align-self: center; writing-mode: vertical-rl; transform: rotate(180deg); background: var(--bg); padding: 10px 2px; font: 700 .68rem var(--sans); letter-spacing: .16em; text-transform: uppercase; color: var(--muted); }
+  #hist .item { display: grid; grid-template-columns: 30px 1fr; gap: 10px; padding: 10px 0; border-bottom: 1px dotted var(--rule); }
+  #hist .item:last-child { border-bottom: 0; }
+  #hist .item.cited { background: linear-gradient(90deg, var(--ochre-wash), transparent 70%); outline: 1.5px solid var(--ochre); outline-offset: 3px; }
+  .losses { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin-top: 22px; }
+  .tile { background: var(--surface); border: 1px solid var(--rule); border-top: 3px double var(--ink); padding: 12px 16px; box-shadow: var(--shadow); }
+  .tile .lab { font: 700 .68rem var(--sans); letter-spacing: .12em; text-transform: uppercase; color: var(--muted); }
+  .tile .val { font: 600 1.9rem var(--serif); font-variant-numeric: tabular-nums; margin-top: 2px; }
+  .tile.hot .val { color: var(--red); } .tile.ok .val { color: var(--green); }
+  @media (max-width: 860px) { .split { grid-template-columns: 1fr; } .spine { display: none; } .losses { grid-template-columns: 1fr; } }
+</style>
+</head>
+<body>
+<div class="frame">
+  <div id="chrome"></div>
+
+  <div class="page-head">
+    <div>
+      <h1>A and B, side by side</h1>
+      <p>The same merchant, the same price, the same agent logic. The only thing that changes is whether B can reach the shared record. Flip it and watch the verdict.</p>
+    </div>
+  </div>
+
+  <div class="switch-row">
+    <span class="what">Agent B's shared record</span>
+    <div class="seg" id="sw" role="radiogroup" aria-label="State of the shared record for Agent B"></div>
+    <div class="says" id="says" aria-live="polite"></div>
+  </div>
+
+  <div class="split">
+    <section aria-label="Who got there first">
+      <div class="col-title">Who got there first</div>
+      <div class="slip" id="hist"></div>
+    </section>
+    <div class="spine" id="spine" aria-hidden="true"><span class="tag" id="spine-tag">shared record</span></div>
+    <section aria-label="Agent B now">
+      <div class="col-title">Agent B, about to pay</div>
+      <div id="b"></div>
+    </section>
+  </div>
+
+  <div class="losses" id="losses" aria-label="What each agent lost to this merchant"></div>
+
+  <footer class="note">Built on a recorded run of the scripted demo (<code>fixtures/demo.json</code>). B's three verdicts are the ones the engine returned for the same question with the shared record attached, detached and unreachable.</footer>
+</div>
+
+<script src="../fixtures/demo.js"></script>
+<script src="fides.js"></script>
+<script>
+(function () {
+  const { h, short, shortAddr, usd, stamp, flagOf, meter, evidenceChip } = Fides;
+  const D = window.FIDES_DEMO;
+  Fides.frame('split.html', [['Data', 'recorded demo run', false], ['Settlement', 'simulated', false], ['Memory', 'in-process', false], ['Engine and signatures', 'real', true]]);
+
+  const host = D.merchants.flaky;
+  const aClean = D.steps[0].results.find((r) => r.host === host);
+  const aBurn = D.steps[1].results[0];
+  const cBurn = D.steps[2].results[0];
+  const bDetached = D.steps[4].results[0];
+  const chk = Object.fromEntries(D.steps[6].checks.map((c) => [c.label, c.check]));
+  const STATES = {
+    attached: { label: 'Attached', check: chk.attached, loss: 0, paid: false,
+      says: 'B reads the signed records, verifies each against Sui and Tatum, and sees two independent burns.',
+      next: 'B pays nothing. Nobody has to be asked.' },
+    detached: { label: 'Detached', check: bDetached.check, loss: 0.01, paid: true,
+      says: 'B has lost access to the shared record. Nothing was deleted: B simply cannot see it.',
+      next: 'B has no history, so it asks a person. The person approves, B pays 0.01 USDC, and the merchant returns junk.' },
+    unreachable: { label: 'Unreachable', check: chk.unreachable, loss: 0, paid: false,
+      says: 'The shared record cannot be reached. That is not the same as "no reports", and B does not treat it that way.',
+      next: 'B answers from its own history only, and will not pay on its own.' },
+  };
+
+  // ---------- who got there first ----------
+  function histItem(who, res, label, id, tone) {
+    return h('div', { class: 'item', 'data-id': id },
+      h('span', { class: 'who', text: who }),
+      h('div', null,
+        h('div', null, h('b', { text: label }), h('span', { class: 'muted small', text: `  paid ${usd(0.01)} USDC` })),
+        h('div', { class: tone === 'bad' ? 'red small' : 'green small', text: res }),
+        h('div', { style: 'margin-top:4px' }, evidenceChip(id, 'verified'))));
+  }
+  const hist = document.getElementById('hist');
+  hist.append(
+    h('div', { class: 'slip-head' }, h('span', { class: 'host', text: host }), h('span', { class: 'pill state', text: 'signed, anchored records' })),
+    h('hr', { class: 'rule-line' }),
+    histItem('A', 'delivered as advertised', 'Agent A, first visit', aClean.receipt.evidenceId, 'ok'),
+    histItem('A', aBurn.exchange.problems[0] + '.', 'Agent A, second visit: burned', aBurn.receipt.evidenceId, 'bad'),
+    histItem('C', cBurn.exchange.problems[0] + '.', 'Agent C: burned', cBurn.receipt.evidenceId, 'bad'));
+
+  // ---------- B ----------
+  const bEl = document.getElementById('b');
+  const says = document.getElementById('says');
+  let current = null;
+  function renderB(key, press) {
+    const s = STATES[key]; const c = s.check; const v = c.verdict;
+    const slip = h('article', { class: `slip ${flagOf(v.decision)}` });
+    slip.append(h('div', { class: 'slip-head' },
+      h('span', { class: 'who', text: 'B' }), h('span', { class: 'host', text: host }), h('span', { class: 'price', style: 'font:600 .95rem var(--serif)' }, usd(0.01), ' USDC'),
+      h('div', { class: 'right' }, stamp(v.decision, { big: true, press, sub: v.cannotSay ? 'cannot say' : undefined }))));
+    const body = h('div', { class: 'body' });
+    body.append(h('div', { class: 'lab', text: 'Why' }), h('div', null, h('ul', { class: 'reasons' }, v.reasons.map((r) => h('li', { text: r }))),
+      h('div', { style: 'margin-top:6px;display:flex;gap:6px;flex-wrap:wrap' }, v.rulesFired.map((r) => h('span', { class: 'pill', text: 'rule: ' + r })), h('span', { class: 'pill state', text: 'tier: ' + v.tier }))));
+    body.append(h('div', { class: 'lab', text: 'Cites' }), h('div', null, v.citations.evidenceIds.length ? v.citations.evidenceIds.map((id) => evidenceChip(id, 'verified')) : h('span', { class: 'muted small', text: 'nothing: it cannot see the shared record' })));
+    body.append(h('div', { class: 'lab', text: 'Shared record' }), h('div', null, h('span', { class: `pill state ${c.sharedState === 'attached' ? 'ok' : 'warn'}`, text: c.sharedState }), h('span', { class: 'muted small', style: 'margin-left:10px' }, 'evidence behind it ', meter(v.confidence))));
+    body.append(h('div', { class: 'lab', text: 'Next' }), h('div', null, s.next));
+    slip.append(body);
+    bEl.replaceChildren(slip);
+    // highlight the records B cites on the left
+    const cited = new Set(v.citations.evidenceIds);
+    hist.querySelectorAll('.item').forEach((it) => it.classList.toggle('cited', cited.has(it.dataset.id)));
+    document.getElementById('spine').classList.toggle('cut', key !== 'attached');
+    document.getElementById('spine-tag').textContent = key === 'attached' ? 'shared record' : key === 'detached' ? 'detached' : 'unreachable';
+    says.textContent = s.says;
+    // what each agent lost
+    const loss = { A: 0.01, B: s.loss, C: 0.01 };
+    document.getElementById('losses').replaceChildren(...['A', 'B', 'C'].map((n) => h('div', { class: `tile ${loss[n] > 0 ? 'hot' : 'ok'}` }, h('div', { class: 'lab', text: `Agent ${n} lost to ${host.split('.')[0]}` }), h('div', { class: 'val' }, usd(loss[n]), h('span', { class: 'muted small', style: 'font:500 .85rem var(--sans)', text: ' USDC' })), h('div', { class: 'muted small', text: n === 'B' ? (s.paid ? 'paid, then burned' : 'nothing paid') : 'paid, then burned' }))));
+    current = key;
+  }
+
+  const sw = document.getElementById('sw');
+  function drawSwitch() {
+    sw.replaceChildren(...Object.entries(STATES).map(([k, s]) => {
+      const b = h('button', { type: 'button', role: 'radio', 'aria-checked': String(current === k) }, s.label);
+      b.addEventListener('click', () => { if (current !== k) { renderB(k, true); drawSwitch(); } });
+      return b;
+    }));
+  }
+  renderB('attached', true); drawSwitch();
+})();
+</script>
+</body>
+</html>

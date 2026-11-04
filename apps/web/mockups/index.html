@@ -1,0 +1,24 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Fides: UI mockups</title>
+<link rel="stylesheet" href="fides.css">
+</head>
+<body>
+<div class="frame">
+  <div id="chrome"></div>
+  <div class="page-head"><div><h1>UI mockups</h1><p>Four screens, built on real data from the demo and the simulation. Pick one.</p></div></div>
+  <div class="cols two">
+    <a class="slip" href="feed.html" style="text-decoration:none;color:inherit"><h2>Decision feed</h2><p class="muted">Every verdict as it happens: the reasons, the records cited, what came back.</p></a>
+    <a class="slip" href="split.html" style="text-decoration:none;color:inherit"><h2>A / B split</h2><p class="muted">One merchant, two agents. Flip B's shared record and watch the verdict change.</p></a>
+    <a class="slip" href="merchant.html" style="text-decoration:none;color:inherit"><h2>Merchant record</h2><p class="muted">Tier over time, every signed report, rejected records, and Re-verify.</p></a>
+    <a class="slip" href="sim.html" style="text-decoration:none;color:inherit"><h2>Simulation board</h2><p class="muted">20 agents, 6 merchants, with and without the shared record.</p></a>
+  </div>
+  <footer class="note">Mockups. The data is recorded from the engine, not typed by hand.</footer>
+</div>
+<script src="fides.js"></script>
+<script>Fides.frame('index.html', [['Data', 'recorded demo and simulation', false], ['Settlement', 'simulated', false]]);</script>
+</body>
+</html>

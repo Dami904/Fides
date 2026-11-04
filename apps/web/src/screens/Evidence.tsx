@@ -1,0 +1,60 @@
+import type { FidesApi } from '../api';
+import { PageHead, Pill, Seal, useLoad, useVerify } from '../components';
+import { href } from '../lib';
+
+const CHECKS: [string, string][] = [
+  ['format', 'The record parses as canonical JSON in the evidence format, with no floats.'],
+  ['hash', 'The sha256 of the fetched bytes equals the hash anchored on Sui.'],
+  ['signature', 'The reporter signed exactly these bytes.'],
+  ['anchor-sender', 'The anchor transaction was sent by the same key that signed.'],
+  ['payment', 'The payment it describes exists, read through Tatum, and is final.'],
+];
+
+export function Evidence({ api, id }: { api: FidesApi; id: string }) {
+  const { data, error } = useLoad(() => api.getEvidence(id), [api, id]);
+  const { steps, running, done, run } = useVerify(api);
+  if (error) return <div className="notice bad">This record could not be loaded: {error}. <a href={href.merchants}>Back to the merchants</a>.</div>;
+  if (!data) return <p className="muted pad">Loading.</p>;
+  const { merchant, item: e } = data;
+  const rejected = e.status === 'rejected';
+  return (
+    <>
+      <PageHead crumbs={[['Merchants', href.merchants], [merchant.host, href.merchant(merchant.host)], [`Record ${e.id.slice(0, 8)}`]]}
+        title={<span className="ev-title"><Seal id={e.id} status={rejected ? 'rejected' : 'verified'} size={40} />{rejected ? 'Rejected record' : `A ${e.verdict} report`}</span>}>
+        {rejected ? 'Someone published this claiming a burn. It failed a check, so it is shown here and never counted.' : `Agent ${e.agent} paid ${merchant.host}, checked what came back, signed this record and anchored its hash on Sui.`}
+      </PageHead>
+      <main className="ev-grid">
+        <section className={`slip ${rejected ? 'flag-red' : e.verdict === 'burned' ? 'flag-red' : 'flag-green'}`}>
+          <dl className="facts">
+            <dt>status</dt><dd><Pill state tone={rejected ? 'bad' : 'ok'}>{rejected ? 'rejected' : 'verified'}</Pill></dd>
+            <dt>verdict</dt><dd className={rejected || e.verdict === 'burned' ? 'red' : 'green'}>{rejected ? 'burned (claimed)' : e.verdict}</dd>
+            <dt>reporter</dt><dd>{rejected ? 'unknown' : `agent ${e.agent}`}</dd>
+            <dt>merchant</dt><dd><a href={href.merchant(merchant.host)}>{merchant.host}</a></dd>
+            <dt>{rejected ? 'reason' : 'found'}</dt><dd>{rejected ? e.rejectReason : e.problems.length ? e.problems.join('; ') : 'Delivered as advertised.'}</dd>
+            <dt>evidence id</dt><dd className="mono tiny break">{e.id}</dd>
+          </dl>
+        </section>
+        <aside className="slip side">
+          <div className="side-head">
+            <h2>The five checks</h2>
+            <button className="btn primary" type="button" disabled={running} onClick={() => void run(e.id)}>{running ? 'Checking…' : steps.length ? 'Run again' : 'Re-verify'}</button>
+          </div>
+          <ol className="explain" aria-live="polite">
+            {CHECKS.map(([n, d]) => {
+              const s = steps.find((x) => x.name === n);
+              const stopped = done !== null && !s;
+              return (
+                <li key={n} className={s ? (s.ok ? 'pass' : 'fail') : stopped ? 'skip' : ''}>
+                  <b>{n}</b>
+                  <span>{s ? s.detail : stopped ? 'Not reached: an earlier check failed.' : d}</span>
+                </li>
+              );
+            })}
+          </ol>
+          {done !== null && <div className={`verdict-line ${done ? 'pass' : 'fail'}`}>{done ? 'Passes every check. It counts.' : 'Fails a check. It is not counted.'}</div>}
+          <p className="muted tiny">The checks run again every time a record is read. Nothing is trusted because it was trusted before.</p>
+        </aside>
+      </main>
+    </>
+  );
+}

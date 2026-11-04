@@ -1,0 +1,149 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Fides: merchant record (mockup)</title>
+<link rel="stylesheet" href="fides.css">
+<style>
+  .stats { display: flex; gap: 6px 28px; flex-wrap: wrap; margin-top: 10px; }
+  .stats div b { display: block; font: 600 1.5rem var(--serif); font-variant-numeric: tabular-nums; }
+  .stats div span { font: 700 .66rem var(--sans); letter-spacing: .12em; text-transform: uppercase; color: var(--muted); }
+  .track { position: relative; margin: 18px 6px 4px; height: 120px; }
+  .track .line { position: absolute; left: 0; right: 0; top: 49px; border-top: 2px solid var(--rule-strong); }
+  .track .st { position: absolute; top: 41px; transform: translateX(-50%); text-align: center; font: 700 .64rem var(--mono); letter-spacing: .1em; text-transform: uppercase; color: var(--muted); }
+  .track .st i { display: block; width: 16px; height: 16px; margin: 0 auto 26px; border: 2px solid var(--rule-strong); background: var(--bg); transform: rotate(45deg); }
+  .track .st.here { color: var(--ink); } .track .st.here i { background: var(--cyan); border-color: var(--cyan); box-shadow: 0 0 14px -2px var(--cyan); }
+  .track .st.burned { color: var(--red); } .track .st.burned i { border-color: var(--red); } .track .st.burned.here i { background: var(--red); box-shadow: 0 0 14px -2px var(--red); }
+  .track .tick { position: absolute; width: 5px; transform: translateX(-50%); }
+  .track .tick.clean { top: 20px; height: 24px; background: var(--green); } .track .tick.burn { top: 55px; height: 24px; background: var(--red); }
+  .track .cap { position: absolute; font: .7rem var(--sans); color: var(--muted); }
+  .ev { display: grid; grid-template-columns: 34px 1fr auto; gap: 12px; align-items: start; }
+  .ev .meta { display: flex; gap: 6px 12px; flex-wrap: wrap; align-items: baseline; }
+  .ev.rej .meta b { text-decoration: line-through; text-decoration-thickness: 1.5px; }
+  @media (max-width: 640px) { .ev { grid-template-columns: 34px 1fr; } .ev .act { grid-column: 2; } }
+</style>
+</head>
+<body>
+<div class="frame">
+  <div id="chrome"></div>
+
+  <div class="page-head">
+    <div>
+      <h1>Merchant record</h1>
+      <p>Everything the shared record says about one merchant: its tier, every signed report, and the records that failed a check. Each record can be checked again, right here.</p>
+    </div>
+    <div class="seg" id="pick" role="group" aria-label="Merchant"></div>
+  </div>
+
+  <main id="main"></main>
+
+  <footer class="note">Built on a recorded run of the scripted demo. The re-verify steps are the ones the engine returned for one real record. For the other records in this mockup the same steps are replayed with that record's own id: the live page runs the checks for each.</footer>
+</div>
+
+<script src="../fixtures/demo.js"></script>
+<script src="fides.js"></script>
+<script>
+(function () {
+  const { h, short, shortAddr, usd, stamp, seal, evidenceChip, attempts, reverify } = Fides;
+  const D = window.FIDES_DEMO;
+  Fides.frame('merchant.html', [['Data', 'recorded demo run', false], ['Settlement', 'simulated', false], ['Memory', 'in-process', false], ['Checks', 'real', true]]);
+
+  // ---------- real re-verify steps from step 6 of the demo, and the forged record ----------
+  const notes = D.steps[5].notes;
+  const captured = notes.filter((n) => n.startsWith('re-verify')).map((n) => { const m = /^re-verify (\S+)\s+(ok|FAIL)\s+(.*)$/.exec(n); return { name: m[1], ok: m[2] === 'ok', detail: m[3] }; });
+  const capturedSha = (/sha256 ([0-9a-f]{64})/.exec(captured[1].detail) || [])[1];
+  const forged = (() => { const m = /^forged record (\w+): REJECTED, (.*)$/.exec(notes.find((n) => n.startsWith('forged record')) || ''); return m ? { short: m[1], reason: m[2] } : null; })();
+
+  const atts = attempts(D.events);
+  const hosts = D.merchants;
+  const names = ['flaky', 'malicious', 'good'];
+  let current = 'flaky';
+  const pick = document.getElementById('pick');
+  const main = document.getElementById('main');
+
+  function stepsFor(id) {
+    if (id === capturedSha) return captured;
+    return captured.map((s) => ({ ...s, detail: s.name === 'hash' ? `sha256 ${id} matches the Sui anchor` : s.detail }));
+  }
+
+  function render() {
+    const host = hosts[current];
+    const mine = atts.filter((a) => a.host === host);
+    const reports = mine.filter((a) => a.reported).map((a) => ({ id: a.reported.evidenceId, agent: a.agent, verdict: a.reported.verdict, checks: a.response?.checks, problems: a.response?.problems || [] }));
+    // What the whole shared record says: the latest check made with the record attached (not one made while an agent was cut off from it).
+    const attached = mine.filter((a) => a.check && a.check.sharedState === 'attached').map((a) => a.check);
+    const recovered = D.steps.flatMap((s) => s.checks || []).filter((c) => c.label === 'recovered' && c.check.verdict.citations.evidenceIds.length && host === hosts.flaky).map((c) => ({ decision: c.check.verdict.decision, tier: c.check.verdict.tier, cannotSay: c.check.verdict.cannotSay }));
+    const lastCheck = [...attached, ...recovered].pop();
+    const tier = lastCheck?.tier || 'new';
+    const alerts = D.steps.flatMap((s) => s.results).filter((r) => r.host === host).flatMap((r) => r.check?.verdict.alerts || []);
+    const pinned = mine[0]?.recipient;
+    const nowRecipient = mine[mine.length - 1]?.recipient;
+    const clean = reports.filter((r) => r.verdict === 'clean').length, burned = reports.length - clean;
+
+    // ---- header slip
+    const head = h('section', { class: 'slip ' + (burned ? 'flag-red' : 'flag-green') },
+      h('div', { class: 'slip-head' }, h('span', { class: 'host', style: 'font-size:1.5rem', text: host }),
+        h('span', { class: `pill state ${tier === 'burned' ? 'bad' : tier === 'new' ? 'warn' : 'ok'}`, text: `tier: ${tier}` }),
+        lastCheck?.cannotSay ? h('span', { class: 'pill warn state', text: 'cannot say: not enough history' }) : null,
+        h('div', { class: 'right' }, lastCheck ? stamp(lastCheck.decision, { big: true, sub: 'last verdict' }) : null)),
+      h('div', { class: 'stats' },
+        h('div', null, h('b', { text: String(clean) }), h('span', { text: 'verified clean' })),
+        h('div', null, h('b', { class: burned ? 'red' : '', text: String(burned) }), h('span', { text: 'verified burns' })),
+        h('div', null, h('b', { text: String(new Set(reports.map((r) => r.agent)).size) }), h('span', { text: 'independent reporters' })),
+        h('div', null, h('b', { class: forged && current === 'flaky' ? 'red' : '', text: String(forged && current === 'flaky' ? 1 : 0) }), h('span', { text: 'rejected records' }))),
+      h('hr', { class: 'rule-line' }),
+      h('div', { class: 'small' }, h('span', { class: 'muted' }, 'Paid at '), h('code', { text: pinned || 'unknown' }), alerts.length ? h('span', { class: 'pill bad state', style: 'margin-left:10px', text: 'address alert' }) : null),
+      alerts.length ? h('div', { class: 'notice bad', style: 'margin-top:10px' }, h('b', { text: 'The payout address changed. ' }), `Quoted now: ${shortAddr(nowRecipient)}, which is not the address agents paid before (${shortAddr(pinned)}). The alert stays open until a person clears it.`) : null);
+
+    // ---- tier track
+    const pos = { new: 14, established: 50, trusted: 86, burned: 50 };
+    const stations = [['new', 'New', 14], ['established', 'Established', 50], ['trusted', 'Trusted', 86]];
+    const track = h('section', { class: 'slip', 'aria-label': 'Tier timeline' },
+      h('h2', { text: 'Tier over time' }),
+      h('p', { class: 'muted small', style: 'margin:4px 0 0', text: 'Green marks above the line are verified clean reports, red marks below are verified burns, in the order they were reported. A verified burn drops a merchant at once; recovery is slow.' }),
+      h('div', { class: 'track' },
+        h('div', { class: 'line' }),
+        stations.map(([k, label, x]) => h('div', { class: 'st' + (tier === k ? ' here' : ''), style: `left:${x}%` }, h('i'), label)),
+        h('div', { class: 'st burned' + (tier === 'burned' ? ' here' : ''), style: 'left:94%' }, h('i'), 'Burned'),
+        reports.map((r, i) => h('div', { class: 'tick ' + (r.verdict === 'clean' ? 'clean' : 'burn'), style: `left:${8 + (i + 0.5) * (72 / Math.max(reports.length, 1))}%`, title: `${r.verdict} by ${r.agent}` })),
+        !reports.length ? h('div', { class: 'cap', style: 'left:0;top:84px', text: 'No verified reports yet.' }) : null));
+
+    // ---- evidence
+    const list = h('section', { 'aria-label': 'Evidence' }, h('h2', { style: 'margin-top:22px', text: 'Evidence' }));
+    function evCard(r, rejected) {
+      const steps = h('ol', { class: 'steps', 'aria-live': 'polite' });
+      const verdictLine = h('div');
+      const btn = h('button', { class: 'btn small', type: 'button' }, 'Re-verify');
+      btn.addEventListener('click', () => {
+        btn.disabled = true; verdictLine.replaceChildren();
+        const s = rejected
+          ? [captured[0], { name: 'hash', ok: false, detail: 'no anchor event found for this evidence: there is nothing on Sui to compare the hash with' }]
+          : stepsFor(r.id);
+        reverify(steps, s, (ok) => { verdictLine.replaceChildren(h('div', { class: 'verdict-line ' + (ok ? 'pass' : 'fail'), text: ok ? 'Passes every check. It counts.' : 'Fails a check. It is not counted.' })); btn.disabled = false; });
+      });
+      return h('article', { class: `slip ${rejected ? 'flag-red' : ''}` },
+        h('div', { class: 'ev' },
+          seal(r.id, rejected ? 'rejected' : 'verified', 34),
+          h('div', null,
+            h('div', { class: `meta ${rejected ? '' : ''}` },
+              h('b', { class: rejected ? 'red' : r.verdict === 'burned' ? 'red' : 'green', text: rejected ? 'burned (claimed)' : r.verdict }),
+              h('span', { class: `pill state ${rejected ? 'bad' : 'ok'}`, text: rejected ? 'rejected' : 'verified' }),
+              h('span', { class: 'mono tiny muted', text: rejected ? r.id : r.id.slice(0, 16) + '…' }),
+              rejected ? null : h('span', { class: 'small muted', text: `reported by agent ${r.agent}` })),
+            rejected ? h('div', { class: 'red small', style: 'margin-top:4px' }, 'Rejected: ', r.reason) : (r.problems.length ? h('div', { class: 'small', style: 'margin-top:4px' }, r.problems.join('; ')) : h('div', { class: 'small muted', style: 'margin-top:4px', text: 'Delivered as advertised.' })),
+            steps, verdictLine),
+          h('div', { class: 'act' }, btn)));
+    }
+    if (reports.length) reports.forEach((r) => list.append(evCard(r, false)));
+    else list.append(h('div', { class: 'slip' }, 'No reports for this merchant yet. That is an honest cold start, not an error.'));
+    if (current === 'flaky' && forged) list.append(h('h3', { style: 'margin-top:22px', text: 'Shown, never counted' }), evCard({ id: forged.short, reason: forged.reason }, true));
+
+    main.replaceChildren(head, track, list);
+    pick.replaceChildren(...names.map((n) => { const b = h('button', { type: 'button', 'aria-pressed': String(n === current) }, n); b.addEventListener('click', () => { current = n; render(); }); return b; }));
+  }
+  render();
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,130 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Fides: decision feed (mockup)</title>
+<link rel="stylesheet" href="fides.css">
+<style>
+  .agent-tag { display: flex; align-items: center; gap: 8px; }
+  .price { font: 600 .95rem var(--serif); font-variant-numeric: tabular-nums; }
+  .checks { display: flex; flex-wrap: wrap; gap: 4px 6px; }
+  .empty { padding: 40px 0; text-align: center; color: var(--muted); }
+  .slip.enter { animation: enter .35s ease-out both; }
+  @keyframes enter { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
+  @media (prefers-reduced-motion: reduce) { .slip.enter { animation: none; } }
+</style>
+</head>
+<body>
+<div class="frame">
+  <div id="chrome"></div>
+
+  <div class="page-head">
+    <div>
+      <h1>Decision feed</h1>
+      <p>Every time an agent is about to pay, Fides answers. The verdict is stamped; below it, the reasons, the records it cites, and what happened after.</p>
+    </div>
+    <div class="filters" role="group" aria-label="Filters">
+      <span class="live" id="live"><i></i><span id="live-text">Recorded run</span></span>
+      <div class="seg" id="f-agent" role="group" aria-label="Agent"></div>
+      <div class="seg" id="f-decision" role="group" aria-label="Verdict"></div>
+      <button class="btn" id="replay" type="button">Replay the run</button>
+    </div>
+  </div>
+
+  <main id="feed" aria-live="polite"></main>
+
+  <footer class="note">Mockup built on a recorded run of the scripted demo (<code>fixtures/demo.json</code>). Names, prices, rules and cited record ids are what the engine produced; nothing on this page is typed by hand.</footer>
+</div>
+
+<script src="../fixtures/demo.js"></script>
+<script src="fides.js"></script>
+<script>
+(function () {
+  const { h, short, shortAddr, usd, stamp, flagOf, meter, evidenceChip, attempts } = Fides;
+  const D = window.FIDES_DEMO;
+  Fides.frame('feed.html', [['Data', 'recorded demo run', false], ['Settlement', 'simulated', false], ['Memory', 'in-process', false], ['Engine and signatures', 'real', true]]);
+
+  const all = attempts(D.events);
+  const state = { agent: 'All', decision: 'All' };
+  const CHECK_LABEL = { schemaValid: 'matches schema', fresh: 'fresh', onTime: 'on time', amountMatchesQuote: 'price as quoted', payToMatchesPinned: 'pay-to as pinned' };
+
+  function seg(el, options, key) {
+    el.replaceChildren(...options.map((o) => {
+      const b = h('button', { type: 'button', 'aria-pressed': String(state[key] === o) }, o);
+      b.addEventListener('click', () => { state[key] = o; seg(el, options, key); render(); });
+      return b;
+    }));
+  }
+
+  function card(a, press) {
+    const c = a.check;
+    const decision = c ? c.decision : 'ASK';
+    const slip = h('article', { class: `slip ${flagOf(decision)} enter` });
+    slip.append(h('div', { class: 'slip-head' },
+      h('div', { class: 'agent-tag' }, h('span', { class: 'who', text: a.agent, title: `Agent ${a.agent}` }), h('span', { class: 'host', text: a.host })),
+      h('span', { class: 'price' }, usd(a.amount), ' USDC'),
+      h('span', { class: 'muted tiny mono', title: a.recipient }, 'to ', shortAddr(a.recipient)),
+      h('div', { class: 'right' }, stamp(decision, { big: true, press }))));
+
+    const body = h('div', { class: 'body' });
+    if (c) {
+      body.append(h('div', { class: 'lab', text: 'Why' }),
+        h('div', null,
+          h('ul', { class: 'reasons' }, c.reasons.map((r) => h('li', { text: r }))),
+          h('div', { style: 'margin-top:6px;display:flex;gap:6px;flex-wrap:wrap;align-items:center' },
+            c.rules.map((r) => h('span', { class: 'pill', title: 'the rule that decided', text: 'rule: ' + r })),
+            h('span', { class: 'pill state', text: `tier: ${c.tier}` }),
+            c.cannotSay ? h('span', { class: 'pill warn state', text: 'cannot say: not enough history' }) : null)));
+      body.append(h('div', { class: 'lab', text: 'Cites' }),
+        h('div', null, c.evidenceIds.length
+          ? c.evidenceIds.map((id) => Fides.evidenceChip(id, 'verified'))
+          : h('span', { class: 'muted small', text: 'no signed records for this merchant' })));
+      body.append(h('div', { class: 'lab', text: 'Shared record' }),
+        h('div', null, h('span', { class: `pill state ${c.sharedState === 'attached' ? 'ok' : 'warn'}`, text: c.sharedState }),
+          c.rejected ? h('span', { class: 'pill bad state', style: 'margin-left:6px', text: `${c.rejected} rejected` }) : null,
+          c.pending ? h('span', { class: 'pill warn state', style: 'margin-left:6px', text: `${c.pending} pending` }) : null,
+          h('span', { class: 'muted small', style: 'margin-left:10px' }, 'evidence behind it ', meter(c.confidence))));
+    }
+    const out = [];
+    if (a.asked) out.push(h('div', null, a.asked.approved ? 'A person approved.' : 'Nobody approved: not paid.'));
+    if (a.skipped) out.push(h('div', { class: 'red' }, 'Not paid: ' + a.skipped.why + '.'));
+    if (a.paid) out.push(h('div', null, 'Paid ', h('b', { text: usd(a.amount) + ' USDC' }), ' ', h('span', { class: 'muted mono tiny', title: a.paid.txDigest }, 'tx …' + a.paid.txDigest.slice(-8))));
+    if (a.response) {
+      out.push(h('div', { class: 'checks', style: 'margin-top:6px' }, Object.entries(a.response.checks).map(([k, ok]) => h('span', { class: `pill state ${ok ? 'ok' : 'bad'}`, text: (ok ? '✓ ' : '✕ ') + CHECK_LABEL[k] }))));
+      if (a.response.problems.length) out.push(h('div', { class: 'red small', style: 'margin-top:4px', text: a.response.problems.join('; ') }));
+    }
+    if (a.reported) out.push(h('div', { style: 'margin-top:8px;display:flex;align-items:center;gap:8px' }, Fides.seal(a.reported.evidenceId, 'verified', 26), h('span', null, 'Reported ', h('b', { class: a.reported.verdict === 'burned' ? 'red' : 'green', text: a.reported.verdict }), ' as a signed, anchored record ', h('span', { class: 'mono tiny muted', text: short(a.reported.evidenceId) }))));
+    if (out.length) body.append(h('div', { class: 'lab', text: 'What happened' }), h('div', null, out));
+    slip.append(body);
+    return slip;
+  }
+
+  const feed = document.getElementById('feed');
+  let timer = null;
+  function visible() { return all.filter((a) => (state.agent === 'All' || a.agent === state.agent) && (state.decision === 'All' || (a.check && (state.decision === 'Pay' ? /^PAY/.test(a.check.decision) : a.check.decision.toLowerCase() === state.decision.toLowerCase())))); }
+  function render() {
+    clearTimeout(timer); setLive(false, 'Recorded run');
+    const v = visible();
+    feed.replaceChildren(...(v.length ? v.map((a) => card(a, false)) : [h('p', { class: 'empty', text: 'Nothing matches these filters.' })]));
+  }
+  function setLive(on, text) { document.getElementById('live').classList.toggle('on', on); document.getElementById('live-text').textContent = text; }
+  function replay() {
+    clearTimeout(timer); feed.replaceChildren();
+    const v = visible(); let i = 0;
+    setLive(true, 'Replaying the recorded run');
+    const next = () => {
+      if (i >= v.length) { setLive(false, 'Recorded run'); return; }
+      feed.prepend(card(v[i++], true));
+      timer = setTimeout(next, 900);
+    };
+    next();
+  }
+  seg(document.getElementById('f-agent'), ['All', 'A', 'B', 'C'], 'agent');
+  seg(document.getElementById('f-decision'), ['All', 'Pay', 'Ask', 'Refuse'], 'decision');
+  document.getElementById('replay').addEventListener('click', replay);
+  render();
+})();
+</script>
+</body>
+</html>
