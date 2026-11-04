@@ -128,6 +128,9 @@ importers:
       '@fides/agent':
         specifier: workspace:*
         version: link:../agent
+      '@fides/evidence':
+        specifier: workspace:*
+        version: link:../../packages/evidence
       '@fides/sim':
         specifier: workspace:*
         version: link:../sim

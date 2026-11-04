@@ -12,6 +12,7 @@
     "typecheck": "tsc -b && pnpm --filter @fides/web typecheck",
     "web": "pnpm --filter @fides/web dev",
     "web:build": "pnpm --filter @fides/web build",
+    "web:live": "pnpm --filter @fides/web live",
     "check:secrets": "node scripts/check-secrets.mjs",
     "check:secrets:all": "node scripts/check-secrets.mjs --all",
     "merchants": "tsx apps/merchants/src/run.ts",

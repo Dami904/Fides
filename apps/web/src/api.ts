@@ -21,29 +21,80 @@ export interface FidesApi {
   getSimulation(): Promise<SimFixture>;
 }
 
-const demo = demoJson as unknown as DemoFixture;
-const sim = simJson as unknown as SimFixture;
-const all = attempts(demo.events);
-
-const capturedSteps = parseSteps(demo.steps[5]!.notes);
-const capturedSha = /sha256 ([0-9a-f]{64})/.exec(capturedSteps[1]?.detail ?? '')?.[1];
-const forged = (() => {
-  const m = /^forged record (\w+): REJECTED, (.*)$/.exec(demo.steps[5]!.notes.find((n) => n.startsWith('forged record')) ?? '');
-  return m ? { id: m[1]!, reason: m[2]! } : null;
-})();
+export interface ApiSource {
+  mode: FidesApi['mode'];
+  honesty: Honesty;
+  /** Re-verify for real (live). Without it, the checks recorded in the demo are replayed (fixtures). */
+  verify?: (evidenceId: string) => AsyncIterable<VerifyStep>;
+  /** The slowest the Re-verify animation goes: each step waits at least this long after the one before. */
+  stepDelayMs?: number;
+}
 
 export function fixturesApi(o: { stepDelayMs?: number } = {}): FidesApi {
-  const stepDelay = o.stepDelayMs ?? 380; // the pace of the Re-verify animation
-  return {
+  return apiFrom(demoJson as unknown as DemoFixture, simJson as unknown as SimFixture, {
     mode: 'fixtures',
-    honesty: () => ({
+    honesty: {
       items: [
         { key: 'Data', value: 'recorded demo run', real: false },
         { key: 'Settlement', value: 'simulated', real: false },
         { key: 'Memory', value: 'in-process', real: false },
         { key: 'Engine and signatures', value: 'real', real: true },
       ],
-    }),
+    },
+    ...(o.stepDelayMs !== undefined ? { stepDelayMs: o.stepDelayMs } : {}),
+  });
+}
+
+/**
+ * The live implementation: the demo server (apps/web/server) ran the real engine when it started and verifies records
+ * on request. Everything is loaded first, and this throws if the server cannot be reached: the caller shows that as an
+ * error, never as fixtures in disguise.
+ */
+export async function liveApi(base: string, fetchImpl: typeof fetch = fetch): Promise<FidesApi> {
+  const get = async <T,>(path: string): Promise<T> => {
+    const r = await fetchImpl(base + path);
+    if (!r.ok) throw new Error(`${base}${path}: HTTP ${r.status} ${(await r.text()).slice(0, 200)}`);
+    return (await r.json()) as T;
+  };
+  const [info, demo, sim] = await Promise.all([get<{ honesty: Honesty }>('/info'), get<DemoFixture>('/demo'), get<SimFixture>('/sim')]);
+  return apiFrom(demo, sim, {
+    mode: 'live',
+    honesty: info.honesty,
+    async *verify(id) {
+      const r = await fetchImpl(`${base}/verify/${encodeURIComponent(id)}`);
+      if (!r.ok || !r.body) throw new Error(`re-verify failed: HTTP ${r.status} ${(await r.text()).slice(0, 200)}`);
+      // One JSON step per line, sent as each check finishes.
+      const reader = r.body.getReader();
+      const dec = new TextDecoder();
+      let buf = '';
+      for (;;) {
+        const { value, done } = await reader.read();
+        buf += dec.decode(value ?? new Uint8Array(), { stream: !done });
+        let nl: number;
+        while ((nl = buf.indexOf('\n')) >= 0) {
+          const line = buf.slice(0, nl).trim();
+          buf = buf.slice(nl + 1);
+          if (line) yield JSON.parse(line) as VerifyStep;
+        }
+        if (done) break;
+      }
+    },
+  });
+}
+
+/** Everything the screens need, derived from one demo run and one simulation run. */
+export function apiFrom(demo: DemoFixture, sim: SimFixture, src: ApiSource): FidesApi {
+  const all = attempts(demo.events);
+  const capturedSteps = parseSteps(demo.steps[5]!.notes);
+  const capturedSha = /sha256 ([0-9a-f]{64})/.exec(capturedSteps[1]?.detail ?? '')?.[1];
+  const forged = (() => {
+    const m = /^forged record (\w+): REJECTED, (.*)$/.exec(demo.steps[5]!.notes.find((n) => n.startsWith('forged record')) ?? '');
+    return m ? { id: m[1]!, reason: m[2]! } : null;
+  })();
+  const stepDelay = src.stepDelayMs ?? 380; // the pace of the Re-verify animation
+  return {
+    mode: src.mode,
+    honesty: () => src.honesty,
     listDecisions: async () => all,
     listMerchants: async () => [demo.merchants.flaky, demo.merchants.malicious, demo.merchants.good],
 
@@ -111,6 +162,16 @@ export function fixturesApi(o: { stepDelayMs?: number } = {}): FidesApi {
 
     async *verifyEvidence(id) {
       const wait = () => new Promise((r) => setTimeout(r, stepDelay));
+      if (src.verify) {
+        let last = Date.now();
+        for await (const s of src.verify(id)) {
+          const left = stepDelay - (Date.now() - last);
+          if (left > 0) await new Promise((r) => setTimeout(r, left));
+          last = Date.now();
+          yield s;
+        }
+        return;
+      }
       const steps: VerifyStep[] =
         forged && id === forged.id
           ? [capturedSteps[0]!, { name: 'hash', ok: false, detail: 'no anchor event found for this evidence: there is nothing on Sui to compare the hash with' }]

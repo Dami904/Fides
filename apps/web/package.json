@@ -9,7 +9,8 @@
     "preview": "vite preview",
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "fixtures": "tsx scripts/export-fixtures.ts",
-    "mockups": "node scripts/serve-mockups.mjs"
+    "mockups": "node scripts/serve-mockups.mjs",
+    "live": "tsx server/run.ts"
   },
   "dependencies": {
     "react": "^18.3.1",
@@ -17,6 +18,7 @@
   },
   "devDependencies": {
     "@fides/agent": "workspace:*",
+    "@fides/evidence": "workspace:*",
     "@fides/sim": "workspace:*",
     "@types/react": "^18.3.12",
     "@types/react-dom": "^18.3.1",
