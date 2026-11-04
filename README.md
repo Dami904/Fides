@@ -235,7 +235,7 @@ Trust tiers come from verified outcomes, weighted by the reporter's own track re
 | `memory` | 28 | the write rule, exact-host filtering, look-alike hosts, header/evidence mismatch, the three states |
 | `chain` | 35 | rate limiting and retries, key never in a URL or error, injection refused, finality, anchor paging |
 | `sdk` | 66 | the whole check/report loop, forgeries, pending vs rejected, partial failures and retries, rule 6 end to end |
-| `tools`, `mcp` | 35 | the three tools, every vendor's tool shapes, MCP over memory, stdio and HTTP, auth and origin checks |
+| `tools`, `mcp` | 37 | the three tools, every vendor's tool shapes, MCP over memory, stdio and HTTP, auth and origin checks, rate limit and deadline |
 | `merchants` | 26 | each merchant's behaviour, the address swap on the real MPP gate |
 | `agent` | 18 | the buy loop, timeouts, refused and unknown payments, a merchant naming another host, reporting retries, the full demo |
 | `registry` | 28 | verification, forged records, tampered storage, outages, rate limits, page safety |

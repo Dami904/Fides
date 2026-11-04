@@ -4,6 +4,7 @@ Fides gives an agent three tools: `fides_check` (should I pay this merchant?), `
 
 | Route | Works with | Code |
 |---|---|---|
+| MCP server (HTTP) | clients that need a URL: hosted connectors, agents on another machine | `packages/mcp` (`--http`) |
 | MCP server (stdio) | Claude Desktop and Claude Code, OpenAI Agents SDK, Gemini CLI, most agent frameworks | `packages/mcp` |
 | Tool-calling adapters | OpenAI (Chat Completions, Responses), Anthropic Messages, Gemini, OpenRouter, anything OpenAI-compatible | `packages/tools` |
 
@@ -15,7 +16,7 @@ Put `FIDES_AGENT_PROMPT` (from `@fides/tools`) in the model's system prompt. It 
 - **Checked against the vendors' documentation on 2026-10-28:** OpenAI Responses (tool, `function_call`, `function_call_output`), Anthropic (`input_schema`, name rules), OpenRouter (OpenAI chat shape, `tools` sent on every request).
 - **Not verified against a live API** for any vendor: no model API keys were available. Treat the adapters as correct to the documented format, not as tested with each vendor.
 - **Gemini:** its current page documents a newer Interactions API; the older `generateContent` format is also supported here, from the format as documented earlier. Both are unverified live.
-- **Not built:** a remote (HTTP) MCP endpoint. Clients that need a public MCP URL (for example a hosted connector in a vendor API) cannot use this yet. stdio only.
+- **MCP over HTTP** (`pnpm --filter @fides/mcp start -- --http`, needs `FIDES_MCP_TOKEN` of 16+ characters): verified with a real MCP client in tests. Closed by default: bearer token, loopback bind, Host and Origin checks, POST only, 1 MB body limit, 60 requests a minute (bursts of 20, then 429 with Retry-After), and a 504 after 120 s. A 504 does not cancel the work behind it. Not tested behind a real proxy or with a vendor's hosted connector. Put TLS in front of it before exposing it.
 
 ## MCP (stdio)
 

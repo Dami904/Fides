@@ -99,4 +99,26 @@ describe('Fides MCP over HTTP', () => {
     expect(a.result.tools).toHaveLength(3);
     expect(b.result.tools).toHaveLength(3);
   });
+
+  it('a burst over the rate limit is 429 with Retry-After, and the bucket refills with time', async () => {
+    let t = 1_000_000;
+    const { url } = await boot({ rateLimit: { perMinute: 6, burst: 2 }, now: () => t });
+    expect((await rpc(url, auth)).status).toBe(200);
+    expect((await rpc(url, auth)).status).toBe(200);
+    const over = await rpc(url, auth);
+    expect(over.status).toBe(429);
+    expect(over.headers.get('retry-after')).toBe('10'); // 6 a minute: one every 10 s
+    expect((await rpc(url, {})).status).toBe(401); // a request without the token is refused before it can spend the bucket
+    t += 10_000;
+    expect((await rpc(url, auth)).status).toBe(200);
+    expect((await rpc(url, auth)).status).toBe(429);
+  });
+
+  it('a call that does not finish in time is answered 504, not left hanging', async () => {
+    const { url, agent } = await boot({ requestTimeoutMs: 150 });
+    agent.fides.check = () => new Promise(() => undefined); // Tatum never answers
+    const r = await rpc(url, auth, { jsonrpc: '2.0', id: 2, method: 'tools/call', params: { name: 'fides_check', arguments: { merchantHost: MERCHANT_HOST, payTo: PAYTO, amount: '0.01', asset: USDC } } });
+    expect(r.status).toBe(504);
+    expect((await r.json()).error).toBe('no answer within 150 ms');
+  });
 });
