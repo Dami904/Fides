@@ -91,6 +91,13 @@ async function lookup(host) {
   frag.append(top);
   if (m.stale) frag.append(el('div', 'notice', 'The shared record could not be reached just now. This is an older answer, not an empty record.'));
   if (m.refresh && m.refresh.pending > 0) frag.append(el('div', 'notice', m.refresh.pending + ' report(s) could not be checked yet and are not counted.'));
+  const an = m.refresh && m.refresh.anchors;
+  if (an && an.notRecalled.length > 0) {
+    const card = el('div', 'notice', an.notRecalled.length + ' report(s) are anchored on Sui for this merchant, but their signed records were not returned by the shared record. They are listed, not counted: without the record, the signature and the payment cannot be checked.');
+    for (const a of an.notRecalled) { const p = el('div', 'muted'); p.append(a.verdict + ' by ' + a.reporter.slice(0, 10) + '..., anchor '); p.append(el('code', '', a.anchorTx)); card.append(p); }
+    frag.append(card);
+  }
+  if (an && an.state === 'failed') frag.append(el('div', 'muted', 'The anchors on Sui could not be read just now, so reports the shared record missed may not be shown.'));
   if (m.refresh && m.refresh.malformed > 0) frag.append(el('div', 'muted', m.refresh.malformed + ' memory(ies) in the shared record were not Fides reports and were ignored.'));
   if (m.evidence.length === 0) frag.append(el('div', 'card', 'No reports for this merchant yet.'));
   for (const e of m.evidence) frag.append(evidenceCard(e));

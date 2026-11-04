@@ -85,6 +85,10 @@ export class Ledger {
           .map(([digest, p]) => ({ ...p, digest }))
           .reverse();
       },
+      listAnchors: async () => {
+        if (this.failAnchors) throw new Error('Tatum HTTP 503');
+        return { anchors: [...this.anchors].reverse(), cursor: null, hasMore: false };
+      },
       findAnchor: async (o) => {
         if (this.failAnchors) throw new Error('Tatum HTTP 503');
         return (

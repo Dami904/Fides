@@ -27,6 +27,7 @@ async function boot(opts: RegistryServerOptions = {}, ttl = 0) {
   const chain = world.ledger.chain();
   const counting = {
     getPayment: (d: string) => (chainCalls.payments++, chain.getPayment(d)),
+    listAnchors: (o: Parameters<NonNullable<typeof chain.listAnchors>>[0]) => chain.listAnchors!(o),
     findAnchor: (o: Parameters<typeof chain.findAnchor>[0]) => (chainCalls.anchors++, chain.findAnchor(o)),
   };
   const registry = new Registry({ state, shared: new SharedRecord(world.memory, { maxEvidenceBytes: config.maxEvidenceBytes }), chain: counting, anchorPackageId: PKG, config, refreshTtlMs: ttl });
@@ -148,6 +149,30 @@ describe('forged and unverifiable reports are shown, rejected, and never counted
     const m = await (await get(`/v1/merchants/${MERCHANT_HOST}`)).json();
     expect(m.refresh.malformed).toBe(1);
     expect(m.evidence).toEqual([]);
+  });
+});
+
+describe('reports anchored on Sui that recall did not return', () => {
+  const event = (sha: string, merchant: string, tx: string) => ({ evidenceSha256: sha, sender: '0x' + '1'.repeat(64), payTxDigest: 'TX' + tx, verdict: 'burned' as const, merchant, eventTxDigest: 'ANCH' + tx, timestamp: new Date().toISOString() });
+
+  it('are listed from the anchor events, not counted, and the recalled ones are not repeated', async () => {
+    const { world, get } = await boot();
+    const { evidenceId } = await aBurn(world);
+    const missing = 'ab'.repeat(32);
+    world.ledger.anchors.push(event(missing, MERCHANT_HOST, 'missing'), event('cd'.repeat(32), 'other.example', 'other'));
+    const m = await (await get(`/v1/merchants/${MERCHANT_HOST}`)).json();
+    expect(m.assessment).toMatchObject({ burnCount: 1 });
+    expect(m.refresh.anchors.state).toBe('complete');
+    expect(m.refresh.anchors.notRecalled).toEqual([expect.objectContaining({ evidenceId: missing, verdict: 'burned', anchorTx: 'ANCHmissing' })]);
+    expect(m.refresh.anchors.notRecalled.map((a: { evidenceId: string }) => a.evidenceId)).not.toContain(evidenceId);
+  });
+
+  it('a failed anchor scan is reported, not read as "nothing missed"', async () => {
+    const { world, registry } = await boot();
+    await aBurn(world);
+    world.ledger.failAnchors = true;
+    const r = await registry.refresh(MERCHANT_HOST);
+    expect(r.anchors).toMatchObject({ state: 'failed', error: expect.stringMatching(/503/) });
   });
 });
 

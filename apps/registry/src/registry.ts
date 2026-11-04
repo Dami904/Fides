@@ -18,6 +18,25 @@ export interface RegistryDeps {
   now?: () => number;
   /** How long a merchant's refresh is reused. Protects the Tatum and relayer budgets. Default 60 s. */
   refreshTtlMs?: number;
+  /** Pages of anchor events (50 each, newest first, all merchants) scanned per refresh for reports recall missed. Default 3. */
+  anchorScanPages?: number;
+}
+
+/** A report anchored on Sui for this merchant whose signed record recall did not return. Shown, never counted. */
+export interface AnchoredOnly {
+  evidenceId: string;
+  reporter: string;
+  verdict: 'clean' | 'burned';
+  anchorTx: string;
+  paymentTx: string;
+  anchoredAt: string;
+}
+
+export interface AnchorScan {
+  /** complete: every anchor event was read. partial: only the newest pages were. failed: the lookup failed. unavailable: the chain client cannot list events. */
+  state: 'complete' | 'partial' | 'failed' | 'unavailable';
+  notRecalled: AnchoredOnly[];
+  error?: string;
 }
 
 export interface RefreshResult {
@@ -31,6 +50,12 @@ export interface RefreshResult {
   fromCache: boolean;
   error?: string;
   refreshedAt: number;
+  /**
+   * Recall is fuzzy and can miss a record. The anchors on Sui are exact, so they are scanned too: an anchor for this
+   * merchant whose record recall did not return is listed here. It is not counted, because without the signed record
+   * neither the signature nor the payment can be checked.
+   */
+  anchors?: AnchorScan;
 }
 
 export interface EvidenceView {
@@ -112,6 +137,7 @@ export class Registry {
       if (r.kind === 'pending') pending++;
     }
     const rows = this.d.state.listEvidence(host);
+    const anchors = await this.scanAnchors(host, new Set(rows.map((r) => r.evidenceId)));
     const result: RefreshResult = {
       sharedRecord: 'attached',
       verified: rows.filter((r) => r.status === 'verified').length,
@@ -120,9 +146,33 @@ export class Registry {
       malformed: recall.rejected.length,
       fromCache: false,
       refreshedAt: now,
+      anchors,
     };
     this.last.set(host, result);
     return result;
+  }
+
+  /** Read the newest anchor events and keep those for this merchant that recall did not bring back. A failure is reported, not hidden. */
+  private async scanAnchors(host: string, known: Set<string>): Promise<AnchorScan> {
+    const list = this.d.chain.listAnchors?.bind(this.d.chain);
+    if (!list) return { state: 'unavailable', notRecalled: [] };
+    const notRecalled: AnchoredOnly[] = [];
+    let before: string | undefined;
+    try {
+      for (let page = 0; page < (this.d.anchorScanPages ?? 3); page++) {
+        const r = await list({ packageId: this.d.anchorPackageId, pageSize: 50, ...(before ? { before } : {}) });
+        for (const a of r.anchors) {
+          if (a.merchant.toLowerCase() !== host || known.has(a.evidenceSha256)) continue;
+          known.add(a.evidenceSha256);
+          notRecalled.push({ evidenceId: a.evidenceSha256, reporter: a.sender, verdict: a.verdict, anchorTx: a.eventTxDigest, paymentTx: a.payTxDigest, anchoredAt: a.timestamp });
+        }
+        if (!r.hasMore || !r.cursor) return { state: 'complete', notRecalled };
+        before = r.cursor;
+      }
+      return { state: 'partial', notRecalled };
+    } catch (e) {
+      return { state: 'failed', notRecalled, error: (e as Error).message };
+    }
   }
 
   /** The merchant as it stands. Pass the refresh this answer follows, so the view reports that one (cached or fresh). */
