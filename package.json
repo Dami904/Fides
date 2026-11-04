@@ -22,6 +22,7 @@
     "sim": "tsx apps/sim/src/cli.ts",
     "demo": "tsx apps/agent/src/cli.ts",
     "demo:live": "tsx apps/agent/src/cli.ts --live",
+    "trials": "tsx apps/agent/src/trials.ts",
     "day1:mainnet": "node scripts/day1-mainnet.mjs",
     "day1:mainnet:run": "node scripts/day1-mainnet.mjs --yes"
   },

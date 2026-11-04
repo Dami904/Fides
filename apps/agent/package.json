@@ -6,7 +6,8 @@
   "main": "src/index.ts",
   "types": "src/index.ts",
   "scripts": {
-    "demo": "tsx src/cli.ts"
+    "demo": "tsx src/cli.ts",
+    "trials": "tsx src/trials.ts"
   },
   "dependencies": {
     "@fides/chain": "workspace:*",

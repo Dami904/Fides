@@ -1,0 +1,50 @@
+# FIDES_NETWORK=mainnet pnpm trials -- --yes, run 2026-11-04 (real payments, Tatum, anchors, Walrus Memory)
+Fides trials on mainnet, real Walrus Memory. 15 trials.
+
+ 1. good merchant, one clean report on record tier new, cannot say
+    A -> good.fides-demo.test: ASK (cannot say: not enough history) [similar-incident] citing 56d0b838 -> person approves -> paid -> delivered as advertised -> reported clean d11eea56 (complete)
+
+ 2. good merchant, a second reporter tier new, cannot say
+    B -> good.fides-demo.test: ASK (cannot say: not enough history) [similar-incident] citing 56d0b838, d11eea56 -> person approves -> paid -> delivered as advertised -> reported clean e57f3e75 (complete)
+
+ 3. good merchant, a third reporter tier new
+    C -> good.fides-demo.test: ASK [similar-incident] citing 56d0b838, d11eea56, e57f3e75 -> person approves -> paid -> delivered as advertised -> reported clean 59fb3420 (complete)
+
+ 4. good merchant, clean reports from three agents tier new
+    A -> good.fides-demo.test: ASK [similar-incident] citing 56d0b838, d11eea56, e57f3e75, 59fb3420 -> person approves -> paid -> delivered as advertised -> reported clean 6f7a807b (complete)
+
+ 5. flaky merchant, three signed burns on record tier burned
+    B -> flaky.fides-demo.test: REFUSE [shared-burns] citing 35c47cdc, 30396dbf: not paid
+
+ 6. flaky merchant, one of the burns on record is from C tier burned
+    C -> flaky.fides-demo.test: PAY_CAPPED [shared-burn] citing 35c47cdc -> paid -> delivered as advertised -> reported clean 607a1e4d (complete)
+
+ 7. malicious merchant still honest, the person declines tier new, cannot say
+    A -> malicious.fides-demo.test: ASK (cannot say: not enough history) [similar-incident] citing 075b11b3: not paid (not approved)
+
+ 8. malicious merchant still honest, the person approves tier new, cannot say
+    B -> malicious.fides-demo.test: ASK (cannot say: not enough history) [similar-incident] citing 075b11b3 -> person approves -> paid -> delivered as advertised -> reported clean efa74f6d (complete)
+
+ 9. malicious merchant swaps its payout address and quotes 4x tier new, cannot say
+    C -> malicious.fides-demo.test: REFUSE (cannot say: not enough history) [address]: not paid
+
+10. swapped address, agent with the pinned address on record tier new, cannot say
+    A -> malicious.fides-demo.test: REFUSE (cannot say: not enough history) [address]: not paid
+
+11. detached from the shared record, flaky delivers tier new, cannot say
+    A -> flaky.fides-demo.test: ASK (cannot say: not enough history) [tier] (shared record detached) -> person approves -> paid -> delivered as advertised -> reported clean fab75930 (complete)
+
+12. detached, flaky sends stale data tier new
+    C -> flaky.fides-demo.test: ASK [own-history] citing 30396dbf (shared record detached) -> person approves -> paid -> BURNED (asOf is 3600 s old, maximum is 120 s) -> reported burn ee552ab5 (complete)
+
+13. detached, flaky sends junk tier new, cannot say
+    B -> flaky.fides-demo.test: ASK (cannot say: not enough history) [tier] (shared record detached) -> person approves -> paid -> BURNED (schema is "wrong/v0", expected fides.news/v1; data is missing or not an object) -> reported burn 89cf29f8 (complete)
+
+14. attached again, after the new burns tier burned
+    A -> flaky.fides-demo.test: PAY_CAPPED [shared-burn] citing 30396dbf -> paid -> delivered as advertised -> reported clean dd52a8ef (complete)
+
+15. good merchant, after all of the above tier new
+    B -> good.fides-demo.test: ASK [similar-incident] citing 56d0b838, d11eea56, e57f3e75, 59fb3420, 6f7a807b -> person approves -> paid -> delivered as advertised -> reported clean 79aa0296 (complete)
+
+Summary: 15 trials. Decisions: ASK 10, REFUSE 3, PAY_CAPPED 2.
+Paid 11 (burned 2), reports written to the shared record 11, not paid 4.
