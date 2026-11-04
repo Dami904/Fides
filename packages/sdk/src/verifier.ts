@@ -8,6 +8,8 @@ import type { EvidenceRow, FidesState } from '@fides/state';
 
 export interface ChainApi extends ChainReader {
   findAnchor(o: { packageId: string; evidenceSha256: string; reporter?: string }): Promise<AnchorEvent | null>;
+  /** Transactions an address sent since a time, newest first. Needed only to reconcile unknown payments. */
+  sentSince?(sender: string, sinceMs: number): Promise<(PaymentFacts & { digest: string })[]>;
 }
 
 /** A report with no anchor yet may just be waiting for the index: it is checked again after this long. */

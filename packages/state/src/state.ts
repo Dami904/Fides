@@ -60,6 +60,9 @@ CREATE TABLE IF NOT EXISTS evidence_blobs (
 CREATE TABLE IF NOT EXISTS unreported (
   idempotency_key TEXT PRIMARY KEY, outcome_json TEXT NOT NULL, error TEXT NOT NULL, attempts INTEGER NOT NULL, first_failed_at INTEGER NOT NULL, last_tried_at INTEGER NOT NULL
 );
+CREATE TABLE IF NOT EXISTS claim_payments (
+  idempotency_key TEXT PRIMARY KEY, tx_digest TEXT NOT NULL UNIQUE
+);
 CREATE TABLE IF NOT EXISTS alerts (
   id INTEGER PRIMARY KEY AUTOINCREMENT, merchant TEXT NOT NULL, kind TEXT NOT NULL, open INTEGER NOT NULL, created_at INTEGER NOT NULL
 );
@@ -175,6 +178,17 @@ export class FidesState {
       .prepare('SELECT idempotency_key, owner, merchant, amount, created_at FROM claims WHERE status = ? ORDER BY created_at')
       .all(status) as { idempotency_key: string; owner: string; merchant: string; amount: string; created_at: number }[];
     return rows.map((r) => ({ key: r.idempotency_key, owner: r.owner, merchant: r.merchant, amountRaw: BigInt(r.amount), createdAt: r.created_at }));
+  }
+
+  /** Ties a claim to the on-chain payment that settled it, so one transfer never settles two claims. */
+  linkPayment(idempotencyKey: string, txDigest: string): void {
+    this.db.prepare('INSERT INTO claim_payments (idempotency_key, tx_digest) VALUES (?, ?)').run(idempotencyKey, txDigest);
+  }
+
+  /** The claim a payment already settled, or null. */
+  claimForPayment(txDigest: string): string | null {
+    const r = this.db.prepare('SELECT idempotency_key FROM claim_payments WHERE tx_digest = ?').get(txDigest) as { idempotency_key: string } | undefined;
+    return r?.idempotency_key ?? null;
   }
 
   /** Amounts this owner actually paid this merchant, oldest first. Input for the typical-price median. */

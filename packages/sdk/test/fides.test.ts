@@ -736,6 +736,82 @@ describe('a payment whose outcome is unknown keeps its spend', () => {
   });
 });
 
+describe('reconciling unknown payments against the chain', () => {
+  const MIN = 60_000;
+  const unknown = (a: Agent, key: string) => {
+    a.fides.approve(a.input(), key);
+    a.fides.markUnknown(key);
+  };
+  const utc = (w: World) => new Date(w.clock.now).toISOString().slice(0, 10);
+
+  it('a transfer that did land settles the claim as paid and keeps the spend', async () => {
+    const w = newWorld();
+    const a = makeAgent(w, 'A');
+    unknown(a, 'u1');
+    w.clock.now += 5000;
+    const tx = w.ledger.pay(a.address, PAYTO, 10_000n); // the payment went through after all
+    const r = await a.fides.reconcileUnknown();
+    expect(r).toEqual([{ key: 'u1', result: 'paid', txDigest: tx, reason: 'the transfer is on chain and final' }]);
+    expect(a.fides.unknownPayments()).toEqual([]);
+    expect(a.state.spentToday('A', utc(w))).toBe(10_000n);
+    expect(await a.fides.reconcileUnknown()).toEqual([]); // nothing left to do
+  });
+
+  it('no transfer: kept while it could still land, released after the grace period', async () => {
+    const w = newWorld();
+    const a = makeAgent(w, 'A');
+    unknown(a, 'u1');
+    w.clock.now += 2 * MIN;
+    expect(await a.fides.reconcileUnknown()).toMatchObject([{ key: 'u1', result: 'unknown', reason: 'too recent: a transfer may still land' }]);
+    expect(a.state.spentToday('A', utc(w))).toBe(10_000n);
+    w.clock.now += 10 * MIN;
+    expect(await a.fides.reconcileUnknown()).toMatchObject([{ key: 'u1', result: 'released' }]);
+    expect(a.state.spentToday('A', utc(w))).toBe(0n);
+  });
+
+  it('one transfer settles one claim, never two', async () => {
+    const w = newWorld();
+    const a = makeAgent(w, 'A');
+    unknown(a, 'u1');
+    unknown(a, 'u2');
+    w.ledger.pay(a.address, PAYTO, 10_000n);
+    const r = await a.fides.reconcileUnknown();
+    expect(r.map((x) => x.result)).toEqual(['paid', 'unknown']);
+    w.clock.now += 11 * MIN;
+    expect((await a.fides.reconcileUnknown()).map((x) => x.result)).toEqual(['released']); // and not paid by the same transfer
+  });
+
+  it('a payment that was already reported is not taken for the unknown one', async () => {
+    const w = newWorld();
+    const a = makeAgent(w, 'A');
+    unknown(a, 'u1');
+    await a.fides.report(a.pay(10_000n)); // a different payment, same amount, reported normally
+    w.clock.now += 11 * MIN;
+    expect(await a.fides.reconcileUnknown()).toMatchObject([{ key: 'u1', result: 'released' }]);
+  });
+
+  it('a matching transfer that is not final yet keeps the claim unknown, even after the grace period', async () => {
+    const w = newWorld();
+    const a = makeAgent(w, 'A');
+    unknown(a, 'u1');
+    w.ledger.pay(a.address, PAYTO, 10_000n, { checkpoint: null });
+    w.clock.now += 11 * MIN;
+    expect(await a.fides.reconcileUnknown()).toMatchObject([{ key: 'u1', result: 'unknown', reason: 'a matching transfer is not final yet' }]);
+  });
+
+  it('a failed chain lookup changes nothing and says so', async () => {
+    const w = newWorld();
+    const a = makeAgent(w, 'A');
+    unknown(a, 'u1');
+    w.clock.now += 11 * MIN;
+    w.ledger.failPayments = true;
+    const r = await a.fides.reconcileUnknown();
+    expect(r).toMatchObject([{ key: 'u1', result: 'unknown' }]);
+    expect(r[0]!.reason).toMatch(/^chain lookup failed, nothing changed: Tatum HTTP 429/);
+    expect(a.fides.unknownPayments()).toHaveLength(1);
+  });
+});
+
 describe('payments that could not be reported are not forgotten', () => {
   it('a failed report is queued with its cause, retried later, and cleared once it works', async () => {
     const w = newWorld();

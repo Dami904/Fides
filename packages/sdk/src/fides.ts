@@ -19,7 +19,7 @@ import {
   type FidesConfig,
   type Verdict,
 } from '@fides/core';
-import { signEvidence, verifyEvidence, type ChainReader, type EvidenceBody } from '@fides/evidence';
+import { signEvidence, verifyEvidence, type ChainReader, type EvidenceBody, type PaymentFacts } from '@fides/evidence';
 import { buildSituationQuery, type RecalledReport, type SharedRecord, type SharedMode } from '@fides/memory';
 import type { AnchorEvent } from '@fides/chain';
 import type { EvidenceRow, FidesState } from '@fides/state';
@@ -271,6 +271,63 @@ export class Fides {
   /** Payments whose outcome is not known yet, oldest first: reconcile each against the chain. */
   unknownPayments() {
     return this.d.state.listClaims('unknown');
+  }
+
+  /**
+   * Settle unknown payments from the chain. For each one, look for a final transfer this agent sent at or after the
+   * claim, of exactly the claimed amount, to someone else, not already tied to another claim or report:
+   *   - found: the money moved, the claim becomes paid (report it if the answer can still be judged)
+   *   - a matching transfer that is not final yet, or a claim younger than graceMs: it stays unknown
+   *   - nothing found after graceMs: the payment never landed, the spend is released
+   * A failed chain lookup leaves every claim unknown and says so. One pass, no loop: call it at start up or on a timer.
+   */
+  async reconcileUnknown(o: { graceMs?: number } = {}): Promise<{ key: string; result: 'paid' | 'released' | 'unknown'; txDigest?: string; reason: string }[]> {
+    const { state, chain } = this.d;
+    const claims = state.listClaims('unknown');
+    if (!claims.length) return [];
+    const grace = o.graceMs ?? 10 * 60_000;
+    const skew = 60_000; // claim time is this machine's clock, the chain's time is the validators'
+    const now = this.now();
+    const keep = (reason: string) => claims.map((c) => ({ key: c.key, result: 'unknown' as const, reason }));
+    if (!chain.sentSince) return keep('this chain reader cannot list sent transactions: reconcile by hand');
+    let sent: (PaymentFacts & { digest: string })[];
+    try {
+      sent = await chain.sentSince(this.address, Math.min(...claims.map((c) => c.createdAt)) - skew);
+    } catch (e) {
+      const reason = `chain lookup failed, nothing changed: ${(e as Error).message}`;
+      this.log({ level: 'error', op: 'payment.reconcile', msg: reason, err: (e as Error).message });
+      return keep(reason);
+    }
+    const me = this.address.toLowerCase();
+    const candidates = sent
+      .filter((t) => t.status === 'SUCCESS' && !state.claimForPayment(t.digest) && !state.verifiedForPayment(this.address, t.digest))
+      .reverse(); // oldest first, so the oldest claim gets the oldest transfer
+    const used = new Set<string>();
+    const out: { key: string; result: 'paid' | 'released' | 'unknown'; txDigest?: string; reason: string }[] = [];
+    for (const c of claims) {
+      const match = candidates.find(
+        (t) =>
+          !used.has(t.digest) &&
+          (!t.timestamp || Date.parse(t.timestamp) >= c.createdAt - skew) &&
+          t.changes.some((ch) => ch.amount === c.amountRaw && !!ch.owner && ch.owner.toLowerCase() !== me),
+      );
+      if (match && (match.checkpoint === null || match.checkpoint === undefined)) {
+        out.push({ key: c.key, result: 'unknown', txDigest: match.digest, reason: 'a matching transfer is not final yet' });
+      } else if (match) {
+        used.add(match.digest);
+        state.linkPayment(c.key, match.digest);
+        state.settle(c.key, 'paid');
+        this.log({ level: 'warn', op: 'payment.reconcile', msg: 'unknown payment found on chain: paid', key: c.key, host: c.merchant, txDigest: match.digest });
+        out.push({ key: c.key, result: 'paid', txDigest: match.digest, reason: 'the transfer is on chain and final' });
+      } else if (now - c.createdAt > grace) {
+        state.settle(c.key, 'failed');
+        this.log({ level: 'info', op: 'payment.reconcile', msg: 'no transfer on chain: spend released', key: c.key, host: c.merchant });
+        out.push({ key: c.key, result: 'released', reason: `no matching transfer on chain ${Math.round((now - c.createdAt) / 60_000)} min after the claim` });
+      } else {
+        out.push({ key: c.key, result: 'unknown', reason: 'too recent: a transfer may still land' });
+      }
+    }
+    return out;
   }
 
   // ------------------------------------------------------------------ check

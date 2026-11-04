@@ -52,6 +52,8 @@ export class Ledger {
   failPayments = false;
   failAnchors = false;
   private n = 0;
+  /** Chain time for new payments. The world's clock when the ledger belongs to a world. */
+  constructor(private clock: () => number = () => Date.now()) {}
 
   /** Agent pays `amount` raw units to `payTo`. Returns the transaction digest. */
   pay(from: string, payTo: string, amount: bigint, over: Partial<PaymentFacts> = {}): string {
@@ -60,6 +62,7 @@ export class Ledger {
       sender: from,
       status: 'SUCCESS',
       checkpoint: 1000 + this.n,
+      timestamp: new Date(this.clock()).toISOString(),
       changes: [
         { owner: from, amount: -amount, coinType: USDC },
         { owner: payTo, amount, coinType: USDC },
@@ -74,6 +77,13 @@ export class Ledger {
       getPayment: async (d) => {
         if (this.failPayments) throw new Error('Tatum HTTP 429');
         return this.payments.get(d) ?? null;
+      },
+      sentSince: async (sender, sinceMs) => {
+        if (this.failPayments) throw new Error('Tatum HTTP 429');
+        return [...this.payments.entries()]
+          .filter(([, p]) => p.sender.toLowerCase() === sender.toLowerCase() && (!p.timestamp || Date.parse(p.timestamp) >= sinceMs))
+          .map(([digest, p]) => ({ ...p, digest }))
+          .reverse();
       },
       findAnchor: async (o) => {
         if (this.failAnchors) throw new Error('Tatum HTTP 503');
@@ -105,7 +115,10 @@ export interface World {
   ledger: Ledger;
   clock: { now: number };
 }
-export const newWorld = (): World => ({ memory: new SharedMemory(), ledger: new Ledger(), clock: { now: T0 } });
+export const newWorld = (): World => {
+  const clock = { now: T0 };
+  return { memory: new SharedMemory(), ledger: new Ledger(() => clock.now), clock };
+};
 
 export interface Agent {
   name: string;

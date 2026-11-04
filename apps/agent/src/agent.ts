@@ -118,6 +118,11 @@ export class PayingAgent {
     return this.o.fides.retryUnreported();
   }
 
+  /** Settle payments whose outcome was unknown, from the chain. One pass. */
+  reconcileUnknown(o?: { graceMs?: number }) {
+    return this.o.fides.reconcileUnknown(o);
+  }
+
   async buy(url: string): Promise<BuyResult> {
     const agent = this.name;
     const fail = (error: string, host: string | null, extra: Partial<BuyResult> = {}): BuyResult => {

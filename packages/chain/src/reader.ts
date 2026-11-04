@@ -27,6 +27,13 @@ interface TxData {
   };
 }
 
+interface SentPage {
+  transactions: {
+    pageInfo: { hasPreviousPage: boolean; startCursor: string | null };
+    nodes: (NonNullable<TxData['transaction']> & { digest: string })[];
+  };
+}
+
 const b64 = (s: string) => Buffer.from(s, 'base64');
 
 export class TatumChainReader implements ChainReader {
@@ -59,6 +66,40 @@ export class TatumChainReader implements ChainReader {
   async latestCheckpoint(): Promise<number> {
     const d = await this.client.query<{ checkpoint: { sequenceNumber: number } }>('{ checkpoint { sequenceNumber } }');
     return d.checkpoint.sequenceNumber;
+  }
+
+  /**
+   * Transactions this address sent at or after sinceMs, newest first, with their payment facts. Used to reconcile a
+   * payment whose outcome was unknown. Pages back until it passes sinceMs; if maxPages runs out first it throws, because
+   * a partial list could make a sent payment look missing.
+   */
+  async sentSince(sender: string, sinceMs: number, o: { pageSize?: number; maxPages?: number } = {}): Promise<(PaymentFacts & { digest: string })[]> {
+    if (!ADDRESS.test(sender)) throw new Error('invalid sender address');
+    const out: (PaymentFacts & { digest: string })[] = [];
+    let before: string | null = null;
+    for (let page = 0; page < (o.maxPages ?? 5); page++) {
+      // The address is checked against ADDRESS above, so it is safe to place in the filter.
+      const d: SentPage = await this.client.query<SentPage>(
+        `query($n: Int, $b: String) { transactions(last: $n, before: $b, filter: { sentAddress: "${sender}" }) { pageInfo { hasPreviousPage startCursor } nodes { digest sender { address } effects { status timestamp checkpoint { sequenceNumber } balanceChanges { nodes { owner { address } amount coinType { repr } } } } } } }`,
+        { n: o.pageSize ?? 20, b: before },
+      );
+      const nodes = [...d.transactions.nodes].reverse(); // pages come oldest first within the page
+      for (const n of nodes) {
+        const t = n.effects.timestamp ? Date.parse(n.effects.timestamp) : NaN;
+        if (!Number.isNaN(t) && t < sinceMs) return out;
+        out.push({
+          digest: n.digest,
+          sender: n.sender?.address ?? '',
+          status: n.effects.status,
+          checkpoint: n.effects.checkpoint?.sequenceNumber ?? null,
+          timestamp: n.effects.timestamp ?? null,
+          changes: n.effects.balanceChanges.nodes.map((c) => ({ owner: c.owner?.address, amount: BigInt(c.amount), coinType: c.coinType.repr })),
+        });
+      }
+      if (!d.transactions.pageInfo.hasPreviousPage) return out;
+      before = d.transactions.pageInfo.startCursor;
+    }
+    throw new Error(`more than ${(o.maxPages ?? 5) * (o.pageSize ?? 20)} transactions since ${new Date(sinceMs).toISOString()}: cannot be sure the list is complete`);
   }
 
   /** Raw balances by coin type. */
