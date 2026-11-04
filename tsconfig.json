@@ -1,0 +1,17 @@
+{
+  "files": [],
+  "references": [
+    { "path": "packages/core" },
+    { "path": "packages/evidence" },
+    { "path": "packages/state" },
+    { "path": "packages/memory" },
+    { "path": "packages/chain" },
+    { "path": "packages/sdk" },
+    { "path": "apps/merchants" },
+    { "path": "apps/agent" },
+    { "path": "apps/sim" },
+    { "path": "packages/tools" },
+    { "path": "packages/mcp" },
+    { "path": "apps/registry" }
+  ]
+}

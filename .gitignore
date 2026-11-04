@@ -24,3 +24,8 @@ coverage/
 *.log
 .vscode/
 .idea/
+
+# working drafts, not for the public repo
+docs/SOCIAL.md
+docs/DEMO_SCRIPT.md
+docs/BLOG_DRAFT.md
