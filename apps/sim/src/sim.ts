@@ -10,7 +10,7 @@ import { Ed25519Keypair } from '@mysten/sui/keypairs/ed25519';
 import type { FidesConfig } from '@fides/core';
 import { PayingAgent, simGate, simPayer } from '@fides/agent';
 import { MERCHANTS, Merchant, seededRandom, walletsFromEnv, type MerchantDef } from '@fides/merchants';
-import { testing } from '@fides/sdk';
+import { selfGrade, testing, type SelfGrade } from '@fides/sdk';
 
 export type Mode = 'shared' | 'detached';
 
@@ -45,6 +45,8 @@ export interface SimEvent {
   merchant: string;
   kind: 'good' | 'flaky' | 'malicious';
   decision: string | null;
+  /** The tier the verdict had. */
+  tier: string | null;
   rules: string[];
   paid: boolean;
   burned: boolean;
@@ -66,6 +68,8 @@ export interface SimResult {
   /** How often each rule decided a check. */
   rules: Record<string, number>;
   events: SimEvent[];
+  /** Every paid attempt's verdict scored against what the merchant actually returned (self-grading). */
+  grade: SelfGrade;
 }
 
 /** Two bad merchants among six: four good, one flaky, one malicious. */
@@ -90,7 +94,7 @@ export async function runSimulation(over: Partial<SimConfig> = {}, onEvent?: (e:
   }
 
   const events: SimEvent[] = [];
-  const result: SimResult = { config: cfg, burns: 0, paid: 0, refused: 0, refusedGood: 0, asked: 0, approvedAsks: 0, lostRaw: 0n, burnsByMerchant: {}, rules: {}, events };
+  const result: SimResult = { config: cfg, burns: 0, paid: 0, refused: 0, refusedGood: 0, asked: 0, approvedAsks: 0, lostRaw: 0n, burnsByMerchant: {}, rules: {}, events, grade: selfGrade([]) };
   const ask = () => {
     result.asked++;
     const yes = rand() < cfg.pApprove;
@@ -128,7 +132,7 @@ export async function runSimulation(over: Partial<SimConfig> = {}, onEvent?: (e:
           result.lostRaw += 10_000n;
           result.burnsByMerchant[s.def.host] = (result.burnsByMerchant[s.def.host] ?? 0) + 1;
         }
-        const e: SimEvent = { round, agent: a.name, merchant: s.def.host, kind: s.def.name, decision: r.decision, rules, paid: r.paid, burned };
+        const e: SimEvent = { round, agent: a.name, merchant: s.def.host, kind: s.def.name, decision: r.decision, tier: r.check?.verdict.tier ?? null, rules, paid: r.paid, burned };
         events.push(e);
         onEvent?.(e);
       }
@@ -136,7 +140,13 @@ export async function runSimulation(over: Partial<SimConfig> = {}, onEvent?: (e:
   } finally {
     await Promise.all(servers.map((s) => s.close()));
   }
+  result.grade = gradeEvents(events);
   return result;
+}
+
+/** Scores the verdicts of paid attempts against their outcome. Unpaid attempts teach nothing and are not graded. */
+export function gradeEvents(events: SimEvent[]): SelfGrade {
+  return selfGrade(events.filter((e) => e.paid && e.decision).map((e) => ({ decision: e.decision!, tier: e.tier ?? 'unknown', outcome: e.burned ? 'burned' : 'clean' })));
 }
 
 export interface Comparison {

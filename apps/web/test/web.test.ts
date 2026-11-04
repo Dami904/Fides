@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import demoJson from '../fixtures/demo.json';
 import simJson from '../fixtures/sim.json';
 import { fixturesApi } from '../src/api';
-import { attempts, boardAt, glyphCells, href, merchantOrder, parseRoute, parseSteps, short, shortAddr, usd } from '../src/lib';
+import { attempts, boardAt, gradeAt, glyphCells, href, merchantOrder, parseRoute, parseSteps, short, shortAddr, usd } from '../src/lib';
 import type { DemoFixture, SimFixture, VerifyStep } from '../src/types';
 
 const demo = demoJson as unknown as DemoFixture;
@@ -57,6 +57,19 @@ describe('glyph: a stable picture of a hash', () => {
   it('survives a short or empty hash', () => {
     expect(() => glyphCells('')).not.toThrow();
     expect(() => glyphCells('f')).not.toThrow();
+  });
+});
+
+describe('gradeAt: self-grading on the recorded simulation', () => {
+  it('grades only paid attempts, up to the round, and agrees with the board', () => {
+    expect(gradeAt(sim.shared.events, 0).auto.graded).toBe(0);
+    const end = sim.shared.config.rounds;
+    const g = gradeAt(sim.shared.events, end);
+    const paid = sim.shared.events.filter((e) => e.paid);
+    const tierTotal = Object.values(g.byTier).reduce((n, l) => n + l!.graded, 0);
+    expect(tierTotal).toBe(paid.length); // every paid attempt has the tier its verdict had
+    expect(Object.values(g.byTier).reduce((n, l) => n + l!.graded - l!.clean, 0)).toBe(boardAt(sim.shared.events, end).totals.burns);
+    expect(gradeAt(sim.detached.events, end).auto.graded).toBe(0); // without the record nothing is ever paid without asking
   });
 });
 

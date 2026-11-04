@@ -25,6 +25,7 @@ import type { AnchorEvent } from '@fides/chain';
 import type { EvidenceRow, FidesState } from '@fides/state';
 import type { Anchorer } from './anchor.js';
 import { silentLogger, type Logger } from './log.js';
+import { selfGrade, type GradedVerdict, type SelfGrade } from './grade.js';
 import { ReportVerifier, reportTimeMs, type ChainApi, type IngestResult } from './verifier.js';
 
 export type { ChainApi } from './verifier.js';
@@ -68,6 +69,8 @@ export interface Outcome {
   issuedAt?: string;
   /** The claim key given to check(). Settles the reserved spend as paid. Without it the payment is registered under its digest. */
   idempotencyKey?: string;
+  /** check()'s decisionId. The verdict is then scored against this outcome (self-grading). */
+  decisionId?: number;
   /** Whose daily cap this payment counts against. Defaults to the agent id; use the same value as check()'s ownerId. */
   ownerId?: string;
   /** Memory pattern tags. Derived from the merchant's history when left out. */
@@ -268,6 +271,20 @@ export class Fides {
     this.log({ level: 'error', op: 'payment.unknown', msg: 'payment outcome unknown, spend kept: reconcile against the chain', key: idempotencyKey });
   }
 
+  /**
+   * Self-grading: this agent's verdicts scored against the outcomes it reported, by decision and by tier. Only
+   * verdicts whose payment was reported with its decisionId are graded.
+   */
+  selfGrade(filter: { owner?: string } = {}): SelfGrade {
+    const rows = this.d.state
+      .listDecisions(filter)
+      .flatMap((d): GradedVerdict[] => {
+        const v = (d.outcome as { verdict?: string } | null)?.verdict;
+        return v === 'clean' || v === 'burned' ? [{ decision: d.decision, tier: d.tier ?? 'unknown', outcome: v }] : [];
+      });
+    return selfGrade(rows);
+  }
+
   /** Payments whose outcome is not known yet, oldest first: reconcile each against the chain. */
   unknownPayments() {
     return this.d.state.listClaims('unknown');
@@ -442,6 +459,7 @@ export class Fides {
       rules: verdict.rulesFired,
       citations: verdict.citations,
       confidence: verdict.confidence,
+      tier: verdict.tier,
       nowMs: now,
     });
     for (const a of verdict.alerts) state.openAlert(a.merchant, a.kind, now);
@@ -522,6 +540,7 @@ export class Fides {
       amountRaw: o.amount,
     });
     state.upsertEvidence(row(existing?.anchorTx ?? null));
+    if (o.decisionId !== undefined) state.setDecisionOutcome(o.decisionId, { verdict: body.verdict, burnKind: body.burnKind, evidenceId });
     state.pinPayToIfNew(host, o.payTo, now); // the address we actually paid, if check() never pinned one
 
     // The payment really happened (verified above), so it counts toward today's spend and the typical-price history

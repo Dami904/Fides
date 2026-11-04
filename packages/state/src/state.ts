@@ -81,6 +81,8 @@ export class FidesState {
     const cols = (this.db.prepare('PRAGMA table_info(evidence_index)').all() as { name: string }[]).map((c) => c.name);
     if (!cols.includes('pay_to')) this.db.exec('ALTER TABLE evidence_index ADD COLUMN pay_to TEXT');
     if (!cols.includes('amount')) this.db.exec('ALTER TABLE evidence_index ADD COLUMN amount TEXT');
+    const dcols = (this.db.prepare('PRAGMA table_info(decisions)').all() as { name: string }[]).map((c) => c.name);
+    if (!dcols.includes('tier')) this.db.exec('ALTER TABLE decisions ADD COLUMN tier TEXT');
   }
 
   close(): void {
@@ -200,10 +202,10 @@ export class FidesState {
   }
 
   // ---- decisions
-  recordDecision(d: { owner: string; merchant: string; decision: string; rules: string[]; citations: unknown; confidence: number; nowMs: number }): number {
+  recordDecision(d: { owner: string; merchant: string; decision: string; rules: string[]; citations: unknown; confidence: number; tier?: string; nowMs: number }): number {
     const r = this.db
-      .prepare('INSERT INTO decisions (owner, merchant, decision, rules_json, citations_json, confidence, created_at) VALUES (?, ?, ?, ?, ?, ?, ?)')
-      .run(d.owner, d.merchant.toLowerCase(), d.decision, JSON.stringify(d.rules), JSON.stringify(d.citations), d.confidence, d.nowMs);
+      .prepare('INSERT INTO decisions (owner, merchant, decision, rules_json, citations_json, confidence, tier, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?)')
+      .run(d.owner, d.merchant.toLowerCase(), d.decision, JSON.stringify(d.rules), JSON.stringify(d.citations), d.confidence, d.tier ?? null, d.nowMs);
     return Number(r.lastInsertRowid);
   }
 
@@ -211,7 +213,7 @@ export class FidesState {
     this.db.prepare('UPDATE decisions SET outcome_json = ? WHERE id = ?').run(JSON.stringify(outcome), id);
   }
 
-  listDecisions(filter: { owner?: string; merchant?: string } = {}): { id: number; owner: string; merchant: string; decision: string; rules: string[]; confidence: number; createdAt: number; outcome: unknown }[] {
+  listDecisions(filter: { owner?: string; merchant?: string } = {}): { id: number; owner: string; merchant: string; decision: string; rules: string[]; confidence: number; tier: string | null; createdAt: number; outcome: unknown }[] {
     const rows = this.db
       .prepare('SELECT * FROM decisions WHERE (? IS NULL OR owner = ?) AND (? IS NULL OR merchant = ?) ORDER BY id')
       .all(filter.owner ?? null, filter.owner ?? null, filter.merchant?.toLowerCase() ?? null, filter.merchant?.toLowerCase() ?? null) as Record<string, unknown>[];
@@ -222,6 +224,7 @@ export class FidesState {
       decision: r.decision as string,
       rules: JSON.parse(r.rules_json as string) as string[],
       confidence: r.confidence as number,
+      tier: (r.tier as string | null) ?? null,
       createdAt: r.created_at as number,
       outcome: r.outcome_json ? JSON.parse(r.outcome_json as string) : null,
     }));

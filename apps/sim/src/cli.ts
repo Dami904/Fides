@@ -1,6 +1,6 @@
 // pnpm sim                    20 agents, 6 merchants (2 bad), 12 rounds, seeds 1 to 3, with and without the shared record
 // pnpm sim -- --seeds=5 --agents=20 --rounds=12
-import { compare } from './sim.js';
+import { compare, gradeEvents } from './sim.js';
 
 const arg = (k: string, d: number) => Number(process.argv.find((a) => a.startsWith(`--${k}=`))?.split('=')[1] ?? d);
 const seedCount = arg('seeds', 3);
@@ -29,3 +29,12 @@ const rules = (rs: typeof c.shared) => {
 };
 console.log(`\nRules that decided checks, with the record: ${rules(c.shared)}`);
 console.log(`Rules that decided checks, without it:     ${rules(c.detached)}`);
+
+// Self-grading: every paid attempt's verdict against what the merchant actually returned. Refusals are not graded.
+const pct = (l: { graded: number; clean: number; cleanRate: number | null }) => (l.cleanRate === null ? 'nothing to grade' : `${Math.round(100 * l.cleanRate)}% clean (${l.clean} of ${l.graded})`);
+for (const [label, rs] of [['with the record', c.shared], ['without it', c.detached]] as const) {
+  const g = gradeEvents(rs.flatMap((r) => r.events));
+  const tiers = Object.entries(g.byTier).map(([t, l]) => `${t} ${pct(l)}`).join('; ');
+  console.log(`
+Self-grade, ${label}: when Fides paid without asking, ${pct(g.autoPaid)}. By tier at the time: ${tiers}.`);
+}

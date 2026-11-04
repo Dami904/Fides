@@ -1,8 +1,12 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import type { FidesApi } from '../api';
 import { PageHead, Pill } from '../components';
-import { boardAt, merchantOrder, type CellState } from '../lib';
+import { boardAt, gradeAt, merchantOrder, type CellState, type GradeLine } from '../lib';
 import type { SimFixture, SimRun } from '../types';
+
+const TIERS = ['trusted', 'established', 'new', 'burned'] as const;
+const rate = (l?: GradeLine) => (!l || !l.graded ? 'nothing to grade' : `${Math.round((100 * l.clean) / l.graded)}% clean`);
+const count = (l?: GradeLine) => (!l || !l.graded ? '' : `${l.clean} of ${l.graded}`);
 
 const GLYPH: Record<CellState, string> = { clean: '✓', burn: '✕', asked: '?', refuse: '', none: '' };
 
@@ -61,6 +65,7 @@ export function Simulation({ api }: { api: FidesApi }) {
   const merchants = merchantOrder(sim.shared.events);
   const a = boardAt(sim.shared.events, round).totals, b = boardAt(sim.detached.events, round).totals;
   const goodRefused = sim.shared.events.filter((e) => e.round <= round && e.kind === 'good' && e.decision === 'REFUSE').length;
+  const gWith = gradeAt(sim.shared.events, round), gWithout = gradeAt(sim.detached.events, round);
   const ruleNames =[...new Set([...Object.keys(sim.shared.rules), ...Object.keys(sim.detached.rules)])].sort((x, y) => (sim.shared.rules[y] ?? 0) - (sim.shared.rules[x] ?? 0));
 
   return (
@@ -95,6 +100,19 @@ export function Simulation({ api }: { api: FidesApi }) {
         <table className="ledger">
           <thead><tr><th>rule</th><th className="num">with the record</th><th className="num">without</th></tr></thead>
           <tbody>{ruleNames.map((r) => <tr key={r}><td>{r}</td><td className="num">{sim.shared.rules[r] ?? 0}</td><td className="num">{sim.detached.rules[r] ?? 0}</td></tr>)}</tbody>
+        </table>
+      </details>
+      <details className="slip more-detail" aria-label="Self-grade">
+        <summary><h2>How often Fides was right</h2><span className="muted small">paid without asking: {rate(gWith.auto)} with the record</span></summary>
+        <p className="muted small">Every paid attempt's verdict, scored against what the merchant actually returned. Refusals are not graded: nobody learns what would have happened.</p>
+        <table className="ledger">
+          <thead><tr><th>when Fides said</th><th className="num">with the record</th><th className="num">without</th></tr></thead>
+          <tbody>
+            <tr><td>pay, without asking</td><td className="num">{rate(gWith.auto)} <span className="muted">{count(gWith.auto)}</span></td><td className="num">{rate(gWithout.auto)} <span className="muted">{count(gWithout.auto)}</span></td></tr>
+            {TIERS.filter((t) => gWith.byTier[t] || gWithout.byTier[t]).map((t) => (
+              <tr key={t}><td>tier {t}</td><td className="num">{rate(gWith.byTier[t])} <span className="muted">{count(gWith.byTier[t])}</span></td><td className="num">{rate(gWithout.byTier[t])} <span className="muted">{count(gWithout.byTier[t])}</span></td></tr>
+            ))}
+          </tbody>
         </table>
       </details>
       <footer className="note">Recorded simulation, seed {sim.seed}. Settlement is simulated; the engine, the signed evidence and the checks are real. Over three seeds the totals are 12 burns with the shared record and 44 without.</footer>

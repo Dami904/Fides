@@ -6,6 +6,7 @@ import { assessMerchant, loadConfig } from '@fides/core';
 import { agreedPayTo, classifyBurn, derivePatterns, ReportError } from '../src/fides.js';
 import { reportTimeMs } from '../src/verifier.js';
 import { jsonLogger } from '../src/log.js';
+import { selfGrade } from '../src/grade.js';
 import { burned, makeAgent, newWorld, MERCHANT_HOST, PAYTO, T0, USDC, type Agent, type World } from '../src/testing.js';
 
 const cfg = loadConfig({ dailyCapUsd: '5' });
@@ -733,6 +734,37 @@ describe('a payment whose outcome is unknown keeps its spend', () => {
     a.fides.release('u2'); // reconciled: nothing reached the chain
     expect(a.state.spentToday('A', utc)).toBe(10_000n);
     expect(() => a.fides.markUnknown('u2')).toThrow(/not reserved/);
+  });
+});
+
+describe('self-grading: verdicts scored against what happened', () => {
+  it('scores by decision, by tier and for payments made without asking; nothing graded is null, not 0%', () => {
+    const g = selfGrade([
+      { decision: 'PAY', tier: 'trusted', outcome: 'clean' },
+      { decision: 'PAY', tier: 'trusted', outcome: 'clean' },
+      { decision: 'PAY_CAPPED', tier: 'established', outcome: 'burned' },
+      { decision: 'ASK', tier: 'new', outcome: 'burned' },
+    ]);
+    expect(g.graded).toBe(4);
+    expect(g.autoPaid).toEqual({ graded: 3, clean: 2, cleanRate: 2 / 3 });
+    expect(g.byTier.trusted).toEqual({ graded: 2, clean: 2, cleanRate: 1 });
+    expect(g.byDecision.ASK).toEqual({ graded: 1, clean: 0, cleanRate: 0 });
+    expect(selfGrade([]).autoPaid).toEqual({ graded: 0, clean: 0, cleanRate: null });
+  });
+
+  it('a reported outcome is attached to the decision it followed, with the tier the verdict had', async () => {
+    const w = newWorld();
+    const a = makeAgent(w, 'A');
+    const c1 = await a.fides.check(a.input(), { idempotencyKey: 'k1' });
+    await a.fides.report(a.pay(10_000n, { idempotencyKey: 'k1', decisionId: c1.decisionId }));
+    w.clock.now += 1000;
+    const c2 = await a.fides.check(a.input(), { idempotencyKey: 'k2' });
+    await a.fides.report(a.pay(10_000n, { idempotencyKey: 'k2', decisionId: c2.decisionId, checks: burned }));
+    await a.fides.check(a.input()); // checked, never paid: not graded
+    const g = a.fides.selfGrade();
+    expect(g.graded).toBe(2);
+    expect(g.byDecision[c1.verdict.decision]).toMatchObject({ graded: 2, clean: 1 });
+    expect(g.byTier[c1.verdict.tier]?.graded).toBeGreaterThanOrEqual(1);
   });
 });
 

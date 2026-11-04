@@ -39,7 +39,7 @@ export interface DemoFixture {
   steps: DemoStep[]; events: AgentEvent[];
 }
 
-export interface SimEvent { round: number; agent: string; merchant: string; kind: 'good' | 'flaky' | 'malicious'; decision: Decision | null; rules: string[]; paid: boolean; burned: boolean }
+export interface SimEvent { round: number; agent: string; merchant: string; kind: 'good' | 'flaky' | 'malicious'; decision: Decision | null; tier?: Tier | null; rules: string[]; paid: boolean; burned: boolean }
 export interface SimRun { config: { agents: number; rounds: number; seed: number }; burns: number; paid: number; refused: number; asked: number; rules: Record<string, number>; events: SimEvent[] }
 export interface SimFixture { generatedAt: string; seed: number; shared: SimRun; detached: SimRun }
 

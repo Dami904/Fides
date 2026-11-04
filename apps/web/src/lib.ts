@@ -1,5 +1,5 @@
 // Pure logic the screens share. No React, no I/O: tested on its own.
-import type { AgentEvent, Attempt, SimEvent } from './types';
+import type { AgentEvent, Attempt, SimEvent, Tier } from './types';
 
 /** Group the flat event stream into one record per attempt. An attempt starts at a 402 challenge. */
 export function attempts(events: AgentEvent[]): Attempt[] {
@@ -38,6 +38,23 @@ export function glyphCells(hex: string): [number, number][] {
 }
 
 export type CellState = 'none' | 'burn' | 'refuse' | 'clean' | 'asked';
+
+export interface GradeLine { graded: number; clean: number }
+/**
+ * Self-grading as of a round: every paid attempt's verdict against what the merchant returned. "auto" is the payments
+ * made without asking a person (PAY, PAY_CAPPED). Refusals and unapproved asks are never graded.
+ */
+export function gradeAt(events: SimEvent[], round: number): { auto: GradeLine; byTier: Partial<Record<Tier, GradeLine>> } {
+  const auto: GradeLine = { graded: 0, clean: 0 };
+  const byTier: Partial<Record<Tier, GradeLine>> = {};
+  for (const e of events) {
+    if (e.round > round || !e.paid || !e.decision) continue;
+    const clean = e.burned ? 0 : 1;
+    if (e.decision === 'PAY' || e.decision === 'PAY_CAPPED') { auto.graded++; auto.clean += clean; }
+    if (e.tier) { const l = (byTier[e.tier] ??= { graded: 0, clean: 0 }); l.graded++; l.clean += clean; }
+  }
+  return { auto, byTier };
+}
 
 /** The state of every agent and merchant cell, and the counters, as of a given round. Worst outcome wins. */
 export function boardAt(events: SimEvent[], round: number) {

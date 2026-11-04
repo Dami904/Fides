@@ -1,4 +1,4 @@
-﻿Simulation: 20 agents, 6 merchants (4 good, 1 flaky, 1 malicious), 12 rounds, 3 seeds. Settlement simulated.
+Simulation: 20 agents, 6 merchants (4 good, 1 flaky, 1 malicious), 12 rounds, 3 seeds. Settlement simulated.
 
 seed 1 shared   burns   5  paid 178  refused  51  asked  85
 seed 1 detached burns  17  paid 192  refused   9  asked 231
@@ -19,3 +19,7 @@ The shared record avoided 32 of 44 burns (73%).
 
 Rules that decided checks, with the record: tier 315, similar-incident 229, shared-burns 85, address 69, shared-burn 21, own-history 1
 Rules that decided checks, without it:     tier 651, own-history 35, address 34
+
+Self-grade, with the record: when Fides paid without asking, 97% clean (288 of 297). By tier at the time: new 97% clean (231 of 237); burned 33% clean (3 of 9); established 100% clean (159 of 159); trusted 100% clean (117 of 117).
+
+Self-grade, without it: when Fides paid without asking, nothing to grade. By tier at the time: new 93% clean (511 of 548); burned 67% clean (14 of 21).

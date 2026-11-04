@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-10-29T13:33:37.102Z",
+  "generatedAt": "2026-11-04T14:25:51.492Z",
   "seed": 1,
   "shared": {
     "config": {
@@ -9,7 +9,9 @@
       "mode": "shared",
       "pApprove": 0.8,
       "turnAtRound": 6,
-      "flakyRate": 0.4
+      "flakyRate": 0.4,
+      "maxLatencyMs": 150,
+      "lateMs": 400
     },
     "burns": 5,
     "paid": 178,
@@ -34,6 +36,7 @@
         "merchant": "flaky1.fides-sim.test",
         "kind": "flaky",
         "decision": "ASK",
+        "tier": "new",
         "rules": [
           "tier"
         ],
@@ -46,6 +49,7 @@
         "merchant": "good4.fides-sim.test",
         "kind": "good",
         "decision": "ASK",
+        "tier": "new",
         "rules": [
           "similar-incident"
         ],
@@ -58,6 +62,7 @@
         "merchant": "malicious1.fides-sim.test",
         "kind": "malicious",
         "decision": "ASK",
+        "tier": "new",
         "rules": [
           "similar-incident"
         ],
@@ -70,6 +75,7 @@
         "merchant": "good3.fides-sim.test",
         "kind": "good",
         "decision": "ASK",
+        "tier": "new",
         "rules": [
           "similar-incident"
         ],
@@ -82,6 +88,7 @@
         "merchant": "good2.fides-sim.test",
         "kind": "good",
         "decision": "ASK",
+        "tier": "new",
         "rules": [
           "similar-incident"
         ],
@@ -94,6 +101,7 @@
         "merchant": "flaky1.fides-sim.test",
         "kind": "flaky",
         "decision": "PAY_CAPPED",
+        "tier": "new",
         "rules": [
           "shared-burn"
         ],
@@ -106,6 +114,7 @@
         "merchant": "good4.fides-sim.test",
         "kind": "good",
         "decision": "ASK",
+        "tier": "new",
         "rules": [
           "similar-incident"
         ],
@@ -118,6 +127,7 @@
         "merchant": "good2.fides-sim.test",
         "kind": "good",
         "decision": "ASK",
+        "tier": "new",
         "rules": [
           "similar-incident"
         ],
@@ -130,6 +140,7 @@
         "merchant": "good4.fides-sim.test",
         "kind": "good",
         "decision": "ASK",
+        "tier": "new",
         "rules": [
           "similar-incident"
         ],
@@ -142,6 +153,7 @@
         "merchant": "flaky1.fides-sim.test",
         "kind": "flaky",
         "decision": "PAY_CAPPED",
+        "tier": "new",
         "rules": [
           "shared-burn"
         ],
@@ -154,6 +166,7 @@
         "merchant": "malicious1.fides-sim.test",
         "kind": "malicious",
         "decision": "ASK",
+        "tier": "new",
         "rules": [
           "similar-incident"
         ],
@@ -166,6 +179,7 @@
         "merchant": "good2.fides-sim.test",
         "kind": "good",
         "decision": "ASK",
+        "tier": "new",
         "rules": [
           "similar-incident"
         ],
@@ -178,6 +192,7 @@
         "merchant": "good4.fides-sim.test",
         "kind": "good",
         "decision": "ASK",
+        "tier": "new",
         "rules": [
           "similar-incident"
         ],
@@ -190,6 +205,7 @@
         "merchant": "good4.fides-sim.test",
         "kind": "good",
         "decision": "ASK",
+        "tier": "new",
         "rules": [
           "similar-incident"
         ],
@@ -202,6 +218,7 @@
         "merchant": "good1.fides-sim.test",
         "kind": "good",
         "decision": "ASK",
+        "tier": "new",
         "rules": [
           "similar-incident"
         ],
@@ -214,6 +231,7 @@
         "merchant": "flaky1.fides-sim.test",
         "kind": "flaky",
         "decision": "PAY_CAPPED",
+        "tier": "new",
         "rules": [
           "shared-burn"
         ],
@@ -226,402 +244,7 @@
         "merchant": "flaky1.fides-sim.test",
         "kind": "flaky",
         "decision": "PAY_CAPPED",
-        "rules": [
-          "shared-burn"
-        ],
-        "paid": true,
-        "burned": true
-      },
-      {
-        "round": 1,
-        "agent": "agent4",
-        "merchant": "malicious1.fides-sim.test",
-        "kind": "malicious",
-        "decision": "ASK",
-        "rules": [
-          "similar-incident"
-        ],
-        "paid": true,
-        "burned": false
-      },
-      {
-        "round": 1,
-        "agent": "agent11",
-        "merchant": "malicious1.fides-sim.test",
-        "kind": "malicious",
-        "decision": "ASK",
-        "rules": [
-          "similar-incident"
-        ],
-        "paid": true,
-        "burned": false
-      },
-      {
-        "round": 1,
-        "agent": "agent9",
-        "merchant": "flaky1.fides-sim.test",
-        "kind": "flaky",
-        "decision": "REFUSE",
-        "rules": [
-          "shared-burns"
-        ],
-        "paid": false,
-        "burned": false
-      },
-      {
-        "round": 2,
-        "agent": "agent1",
-        "merchant": "flaky1.fides-sim.test",
-        "kind": "flaky",
-        "decision": "REFUSE",
-        "rules": [
-          "shared-burns"
-        ],
-        "paid": false,
-        "burned": false
-      },
-      {
-        "round": 2,
-        "agent": "agent13",
-        "merchant": "malicious1.fides-sim.test",
-        "kind": "malicious",
-        "decision": "ASK",
-        "rules": [
-          "similar-incident"
-        ],
-        "paid": false,
-        "burned": false
-      },
-      {
-        "round": 2,
-        "agent": "agent16",
-        "merchant": "good1.fides-sim.test",
-        "kind": "good",
-        "decision": "ASK",
-        "rules": [
-          "similar-incident"
-        ],
-        "paid": true,
-        "burned": false
-      },
-      {
-        "round": 2,
-        "agent": "agent2",
-        "merchant": "malicious1.fides-sim.test",
-        "kind": "malicious",
-        "decision": "ASK",
-        "rules": [
-          "similar-incident"
-        ],
-        "paid": true,
-        "burned": false
-      },
-      {
-        "round": 2,
-        "agent": "agent17",
-        "merchant": "good2.fides-sim.test",
-        "kind": "good",
-        "decision": "ASK",
-        "rules": [
-          "similar-incident"
-        ],
-        "paid": true,
-        "burned": false
-      },
-      {
-        "round": 2,
-        "agent": "agent14",
-        "merchant": "good4.fides-sim.test",
-        "kind": "good",
-        "decision": "ASK",
-        "rules": [
-          "similar-incident"
-        ],
-        "paid": true,
-        "burned": false
-      },
-      {
-        "round": 2,
-        "agent": "agent11",
-        "merchant": "malicious1.fides-sim.test",
-        "kind": "malicious",
-        "decision": "ASK",
-        "rules": [
-          "similar-incident"
-        ],
-        "paid": true,
-        "burned": false
-      },
-      {
-        "round": 2,
-        "agent": "agent19",
-        "merchant": "good2.fides-sim.test",
-        "kind": "good",
-        "decision": "ASK",
-        "rules": [
-          "similar-incident"
-        ],
-        "paid": true,
-        "burned": false
-      },
-      {
-        "round": 2,
-        "agent": "agent9",
-        "merchant": "malicious1.fides-sim.test",
-        "kind": "malicious",
-        "decision": "ASK",
-        "rules": [
-          "similar-incident"
-        ],
-        "paid": false,
-        "burned": false
-      },
-      {
-        "round": 2,
-        "agent": "agent4",
-        "merchant": "good3.fides-sim.test",
-        "kind": "good",
-        "decision": "ASK",
-        "rules": [
-          "similar-incident"
-        ],
-        "paid": false,
-        "burned": false
-      },
-      {
-        "round": 2,
-        "agent": "agent3",
-        "merchant": "malicious1.fides-sim.test",
-        "kind": "malicious",
-        "decision": "ASK",
-        "rules": [
-          "similar-incident"
-        ],
-        "paid": true,
-        "burned": false
-      },
-      {
-        "round": 2,
-        "agent": "agent7",
-        "merchant": "malicious1.fides-sim.test",
-        "kind": "malicious",
-        "decision": "ASK",
-        "rules": [
-          "similar-incident"
-        ],
-        "paid": false,
-        "burned": false
-      },
-      {
-        "round": 2,
-        "agent": "agent8",
-        "merchant": "flaky1.fides-sim.test",
-        "kind": "flaky",
-        "decision": "REFUSE",
-        "rules": [
-          "shared-burns"
-        ],
-        "paid": false,
-        "burned": false
-      },
-      {
-        "round": 2,
-        "agent": "agent15",
-        "merchant": "malicious1.fides-sim.test",
-        "kind": "malicious",
-        "decision": "ASK",
-        "rules": [
-          "similar-incident"
-        ],
-        "paid": true,
-        "burned": false
-      },
-      {
-        "round": 2,
-        "agent": "agent12",
-        "merchant": "good2.fides-sim.test",
-        "kind": "good",
-        "decision": "ASK",
-        "rules": [
-          "similar-incident"
-        ],
-        "paid": false,
-        "burned": false
-      },
-      {
-        "round": 2,
-        "agent": "agent10",
-        "merchant": "flaky1.fides-sim.test",
-        "kind": "flaky",
-        "decision": "PAY_CAPPED",
-        "rules": [
-          "shared-burn"
-        ],
-        "paid": true,
-        "burned": false
-      },
-      {
-        "round": 2,
-        "agent": "agent20",
-        "merchant": "flaky1.fides-sim.test",
-        "kind": "flaky",
-        "decision": "REFUSE",
-        "rules": [
-          "shared-burns"
-        ],
-        "paid": false,
-        "burned": false
-      },
-      {
-        "round": 2,
-        "agent": "agent6",
-        "merchant": "good2.fides-sim.test",
-        "kind": "good",
-        "decision": "ASK",
-        "rules": [
-          "similar-incident"
-        ],
-        "paid": true,
-        "burned": false
-      },
-      {
-        "round": 2,
-        "agent": "agent18",
-        "merchant": "good2.fides-sim.test",
-        "kind": "good",
-        "decision": "ASK",
-        "rules": [
-          "similar-incident"
-        ],
-        "paid": true,
-        "burned": false
-      },
-      {
-        "round": 2,
-        "agent": "agent5",
-        "merchant": "good1.fides-sim.test",
-        "kind": "good",
-        "decision": "ASK",
-        "rules": [
-          "similar-incident"
-        ],
-        "paid": false,
-        "burned": false
-      },
-      {
-        "round": 3,
-        "agent": "agent3",
-        "merchant": "good4.fides-sim.test",
-        "kind": "good",
-        "decision": "ASK",
-        "rules": [
-          "similar-incident"
-        ],
-        "paid": false,
-        "burned": false
-      },
-      {
-        "round": 3,
-        "agent": "agent19",
-        "merchant": "good1.fides-sim.test",
-        "kind": "good",
-        "decision": "ASK",
-        "rules": [
-          "similar-incident"
-        ],
-        "paid": false,
-        "burned": false
-      },
-      {
-        "round": 3,
-        "agent": "agent8",
-        "merchant": "good2.fides-sim.test",
-        "kind": "good",
-        "decision": "ASK",
-        "rules": [
-          "similar-incident"
-        ],
-        "paid": true,
-        "burned": false
-      },
-      {
-        "round": 3,
-        "agent": "agent20",
-        "merchant": "good3.fides-sim.test",
-        "kind": "good",
-        "decision": "ASK",
-        "rules": [
-          "similar-incident"
-        ],
-        "paid": true,
-        "burned": false
-      },
-      {
-        "round": 3,
-        "agent": "agent1",
-        "merchant": "malicious1.fides-sim.test",
-        "kind": "malicious",
-        "decision": "ASK",
-        "rules": [
-          "similar-incident"
-        ],
-        "paid": true,
-        "burned": false
-      },
-      {
-        "round": 3,
-        "agent": "agent18",
-        "merchant": "good4.fides-sim.test",
-        "kind": "good",
-        "decision": "ASK",
-        "rules": [
-          "similar-incident"
-        ],
-        "paid": true,
-        "burned": false
-      },
-      {
-        "round": 3,
-        "agent": "agent7",
-        "merchant": "good3.fides-sim.test",
-        "kind": "good",
-        "decision": "ASK",
-        "rules": [
-          "similar-incident"
-        ],
-        "paid": true,
-        "burned": false
-      },
-      {
-        "round": 3,
-        "agent": "agent10",
-        "merchant": "malicious1.fides-sim.test",
-        "kind": "malicious",
-        "decision": "ASK",
-        "rules": [
-          "similar-incident"
-        ],
-        "paid": true,
-        "burned": false
-      },
-      {
-        "round": 3,
-        "agent": "agent4",
-        "merchant": "good3.fides-sim.test",
-        "kind": "good",
-        "decision": "ASK",
-        "rules": [
-          "similar-incident"
-        ],
-        "paid": true,
-        "burned": false
-      },
-      {
-        "round": 3,
-        "agent": "agent6",
-        "merchant": "flaky1.fides-sim.test",
-        "kind": "flaky",
-        "decision": "PAY_CAPPED",
+        "tier": "new",
         "rules": [
           "shared-burn"
         ],
@@ -629,11 +252,441 @@
         "burned": true
       },
       {
+        "round": 1,
+        "agent": "agent4",
+        "merchant": "malicious1.fides-sim.test",
+        "kind": "malicious",
+        "decision": "ASK",
+        "tier": "new",
+        "rules": [
+          "similar-incident"
+        ],
+        "paid": true,
+        "burned": false
+      },
+      {
+        "round": 1,
+        "agent": "agent11",
+        "merchant": "malicious1.fides-sim.test",
+        "kind": "malicious",
+        "decision": "ASK",
+        "tier": "new",
+        "rules": [
+          "similar-incident"
+        ],
+        "paid": true,
+        "burned": false
+      },
+      {
+        "round": 1,
+        "agent": "agent9",
+        "merchant": "flaky1.fides-sim.test",
+        "kind": "flaky",
+        "decision": "REFUSE",
+        "tier": "new",
+        "rules": [
+          "shared-burns"
+        ],
+        "paid": false,
+        "burned": false
+      },
+      {
+        "round": 2,
+        "agent": "agent1",
+        "merchant": "flaky1.fides-sim.test",
+        "kind": "flaky",
+        "decision": "REFUSE",
+        "tier": "new",
+        "rules": [
+          "shared-burns"
+        ],
+        "paid": false,
+        "burned": false
+      },
+      {
+        "round": 2,
+        "agent": "agent13",
+        "merchant": "malicious1.fides-sim.test",
+        "kind": "malicious",
+        "decision": "ASK",
+        "tier": "new",
+        "rules": [
+          "similar-incident"
+        ],
+        "paid": false,
+        "burned": false
+      },
+      {
+        "round": 2,
+        "agent": "agent16",
+        "merchant": "good1.fides-sim.test",
+        "kind": "good",
+        "decision": "ASK",
+        "tier": "new",
+        "rules": [
+          "similar-incident"
+        ],
+        "paid": true,
+        "burned": false
+      },
+      {
+        "round": 2,
+        "agent": "agent2",
+        "merchant": "malicious1.fides-sim.test",
+        "kind": "malicious",
+        "decision": "ASK",
+        "tier": "new",
+        "rules": [
+          "similar-incident"
+        ],
+        "paid": true,
+        "burned": false
+      },
+      {
+        "round": 2,
+        "agent": "agent17",
+        "merchant": "good2.fides-sim.test",
+        "kind": "good",
+        "decision": "ASK",
+        "tier": "new",
+        "rules": [
+          "similar-incident"
+        ],
+        "paid": true,
+        "burned": false
+      },
+      {
+        "round": 2,
+        "agent": "agent14",
+        "merchant": "good4.fides-sim.test",
+        "kind": "good",
+        "decision": "ASK",
+        "tier": "new",
+        "rules": [
+          "similar-incident"
+        ],
+        "paid": true,
+        "burned": false
+      },
+      {
+        "round": 2,
+        "agent": "agent11",
+        "merchant": "malicious1.fides-sim.test",
+        "kind": "malicious",
+        "decision": "ASK",
+        "tier": "new",
+        "rules": [
+          "similar-incident"
+        ],
+        "paid": true,
+        "burned": false
+      },
+      {
+        "round": 2,
+        "agent": "agent19",
+        "merchant": "good2.fides-sim.test",
+        "kind": "good",
+        "decision": "ASK",
+        "tier": "new",
+        "rules": [
+          "similar-incident"
+        ],
+        "paid": true,
+        "burned": false
+      },
+      {
+        "round": 2,
+        "agent": "agent9",
+        "merchant": "malicious1.fides-sim.test",
+        "kind": "malicious",
+        "decision": "ASK",
+        "tier": "new",
+        "rules": [
+          "similar-incident"
+        ],
+        "paid": false,
+        "burned": false
+      },
+      {
+        "round": 2,
+        "agent": "agent4",
+        "merchant": "good3.fides-sim.test",
+        "kind": "good",
+        "decision": "ASK",
+        "tier": "new",
+        "rules": [
+          "similar-incident"
+        ],
+        "paid": false,
+        "burned": false
+      },
+      {
+        "round": 2,
+        "agent": "agent3",
+        "merchant": "malicious1.fides-sim.test",
+        "kind": "malicious",
+        "decision": "ASK",
+        "tier": "new",
+        "rules": [
+          "similar-incident"
+        ],
+        "paid": true,
+        "burned": false
+      },
+      {
+        "round": 2,
+        "agent": "agent7",
+        "merchant": "malicious1.fides-sim.test",
+        "kind": "malicious",
+        "decision": "ASK",
+        "tier": "new",
+        "rules": [
+          "similar-incident"
+        ],
+        "paid": false,
+        "burned": false
+      },
+      {
+        "round": 2,
+        "agent": "agent8",
+        "merchant": "flaky1.fides-sim.test",
+        "kind": "flaky",
+        "decision": "REFUSE",
+        "tier": "new",
+        "rules": [
+          "shared-burns"
+        ],
+        "paid": false,
+        "burned": false
+      },
+      {
+        "round": 2,
+        "agent": "agent15",
+        "merchant": "malicious1.fides-sim.test",
+        "kind": "malicious",
+        "decision": "ASK",
+        "tier": "new",
+        "rules": [
+          "similar-incident"
+        ],
+        "paid": true,
+        "burned": false
+      },
+      {
+        "round": 2,
+        "agent": "agent12",
+        "merchant": "good2.fides-sim.test",
+        "kind": "good",
+        "decision": "ASK",
+        "tier": "new",
+        "rules": [
+          "similar-incident"
+        ],
+        "paid": false,
+        "burned": false
+      },
+      {
+        "round": 2,
+        "agent": "agent10",
+        "merchant": "flaky1.fides-sim.test",
+        "kind": "flaky",
+        "decision": "PAY_CAPPED",
+        "tier": "new",
+        "rules": [
+          "shared-burn"
+        ],
+        "paid": true,
+        "burned": false
+      },
+      {
+        "round": 2,
+        "agent": "agent20",
+        "merchant": "flaky1.fides-sim.test",
+        "kind": "flaky",
+        "decision": "REFUSE",
+        "tier": "burned",
+        "rules": [
+          "shared-burns"
+        ],
+        "paid": false,
+        "burned": false
+      },
+      {
+        "round": 2,
+        "agent": "agent6",
+        "merchant": "good2.fides-sim.test",
+        "kind": "good",
+        "decision": "ASK",
+        "tier": "new",
+        "rules": [
+          "similar-incident"
+        ],
+        "paid": true,
+        "burned": false
+      },
+      {
+        "round": 2,
+        "agent": "agent18",
+        "merchant": "good2.fides-sim.test",
+        "kind": "good",
+        "decision": "ASK",
+        "tier": "new",
+        "rules": [
+          "similar-incident"
+        ],
+        "paid": true,
+        "burned": false
+      },
+      {
+        "round": 2,
+        "agent": "agent5",
+        "merchant": "good1.fides-sim.test",
+        "kind": "good",
+        "decision": "ASK",
+        "tier": "new",
+        "rules": [
+          "similar-incident"
+        ],
+        "paid": false,
+        "burned": false
+      },
+      {
+        "round": 3,
+        "agent": "agent3",
+        "merchant": "good4.fides-sim.test",
+        "kind": "good",
+        "decision": "ASK",
+        "tier": "new",
+        "rules": [
+          "similar-incident"
+        ],
+        "paid": false,
+        "burned": false
+      },
+      {
+        "round": 3,
+        "agent": "agent19",
+        "merchant": "good1.fides-sim.test",
+        "kind": "good",
+        "decision": "ASK",
+        "tier": "new",
+        "rules": [
+          "similar-incident"
+        ],
+        "paid": false,
+        "burned": false
+      },
+      {
+        "round": 3,
+        "agent": "agent8",
+        "merchant": "good2.fides-sim.test",
+        "kind": "good",
+        "decision": "ASK",
+        "tier": "new",
+        "rules": [
+          "similar-incident"
+        ],
+        "paid": true,
+        "burned": false
+      },
+      {
+        "round": 3,
+        "agent": "agent20",
+        "merchant": "good3.fides-sim.test",
+        "kind": "good",
+        "decision": "ASK",
+        "tier": "new",
+        "rules": [
+          "similar-incident"
+        ],
+        "paid": true,
+        "burned": false
+      },
+      {
+        "round": 3,
+        "agent": "agent1",
+        "merchant": "malicious1.fides-sim.test",
+        "kind": "malicious",
+        "decision": "ASK",
+        "tier": "new",
+        "rules": [
+          "similar-incident"
+        ],
+        "paid": true,
+        "burned": false
+      },
+      {
+        "round": 3,
+        "agent": "agent18",
+        "merchant": "good4.fides-sim.test",
+        "kind": "good",
+        "decision": "ASK",
+        "tier": "new",
+        "rules": [
+          "similar-incident"
+        ],
+        "paid": true,
+        "burned": false
+      },
+      {
+        "round": 3,
+        "agent": "agent7",
+        "merchant": "good3.fides-sim.test",
+        "kind": "good",
+        "decision": "ASK",
+        "tier": "new",
+        "rules": [
+          "similar-incident"
+        ],
+        "paid": true,
+        "burned": false
+      },
+      {
+        "round": 3,
+        "agent": "agent10",
+        "merchant": "malicious1.fides-sim.test",
+        "kind": "malicious",
+        "decision": "ASK",
+        "tier": "new",
+        "rules": [
+          "similar-incident"
+        ],
+        "paid": true,
+        "burned": false
+      },
+      {
+        "round": 3,
+        "agent": "agent4",
+        "merchant": "good3.fides-sim.test",
+        "kind": "good",
+        "decision": "ASK",
+        "tier": "new",
+        "rules": [
+          "similar-incident"
+        ],
+        "paid": true,
+        "burned": false
+      },
+      {
+        "round": 3,
+        "agent": "agent6",
+        "merchant": "flaky1.fides-sim.test",
+        "kind": "flaky",
+        "decision": "PAY_CAPPED",
+        "tier": "burned",
+        "rules": [
+          "shared-burn"
+        ],
+        "paid": true,
+        "burned": true
+      },
+      {
         "round": 3,
         "agent": "agent9",
         "merchant": "good2.fides-sim.test",
         "kind": "good",
         "decision": "ASK",
+        "tier": "new",
         "rules": [
           "similar-incident"
         ],
@@ -646,6 +699,7 @@
         "merchant": "malicious1.fides-sim.test",
         "kind": "malicious",
         "decision": "ASK",
+        "tier": "new",
         "rules": [
           "similar-incident"
         ],
@@ -658,6 +712,7 @@
         "merchant": "malicious1.fides-sim.test",
         "kind": "malicious",
         "decision": "ASK",
+        "tier": "new",
         "rules": [
           "similar-incident"
         ],
@@ -670,6 +725,7 @@
         "merchant": "good4.fides-sim.test",
         "kind": "good",
         "decision": "ASK",
+        "tier": "new",
         "rules": [
           "similar-incident"
         ],
@@ -682,6 +738,7 @@
         "merchant": "good1.fides-sim.test",
         "kind": "good",
         "decision": "ASK",
+        "tier": "new",
         "rules": [
           "similar-incident"
         ],
@@ -694,6 +751,7 @@
         "merchant": "flaky1.fides-sim.test",
         "kind": "flaky",
         "decision": "REFUSE",
+        "tier": "burned",
         "rules": [
           "shared-burns"
         ],
@@ -706,6 +764,7 @@
         "merchant": "good4.fides-sim.test",
         "kind": "good",
         "decision": "ASK",
+        "tier": "new",
         "rules": [
           "similar-incident"
         ],
@@ -718,6 +777,7 @@
         "merchant": "good1.fides-sim.test",
         "kind": "good",
         "decision": "ASK",
+        "tier": "new",
         "rules": [
           "similar-incident"
         ],
@@ -730,6 +790,7 @@
         "merchant": "flaky1.fides-sim.test",
         "kind": "flaky",
         "decision": "REFUSE",
+        "tier": "burned",
         "rules": [
           "shared-burns"
         ],
@@ -742,6 +803,7 @@
         "merchant": "good4.fides-sim.test",
         "kind": "good",
         "decision": "ASK",
+        "tier": "new",
         "rules": [
           "similar-incident"
         ],
@@ -754,6 +816,7 @@
         "merchant": "good2.fides-sim.test",
         "kind": "good",
         "decision": "ASK",
+        "tier": "new",
         "rules": [
           "similar-incident"
         ],
@@ -766,6 +829,7 @@
         "merchant": "good3.fides-sim.test",
         "kind": "good",
         "decision": "ASK",
+        "tier": "new",
         "rules": [
           "similar-incident"
         ],
@@ -778,6 +842,7 @@
         "merchant": "good3.fides-sim.test",
         "kind": "good",
         "decision": "ASK",
+        "tier": "new",
         "rules": [
           "similar-incident"
         ],
@@ -790,6 +855,7 @@
         "merchant": "flaky1.fides-sim.test",
         "kind": "flaky",
         "decision": "REFUSE",
+        "tier": "burned",
         "rules": [
           "shared-burns"
         ],
@@ -802,6 +868,7 @@
         "merchant": "good3.fides-sim.test",
         "kind": "good",
         "decision": "ASK",
+        "tier": "new",
         "rules": [
           "similar-incident"
         ],
@@ -814,6 +881,7 @@
         "merchant": "malicious1.fides-sim.test",
         "kind": "malicious",
         "decision": "ASK",
+        "tier": "new",
         "rules": [
           "similar-incident"
         ],
@@ -826,6 +894,7 @@
         "merchant": "good2.fides-sim.test",
         "kind": "good",
         "decision": "ASK",
+        "tier": "new",
         "rules": [
           "similar-incident"
         ],
@@ -838,6 +907,7 @@
         "merchant": "malicious1.fides-sim.test",
         "kind": "malicious",
         "decision": "ASK",
+        "tier": "new",
         "rules": [
           "similar-incident"
         ],
@@ -850,6 +920,7 @@
         "merchant": "flaky1.fides-sim.test",
         "kind": "flaky",
         "decision": "REFUSE",
+        "tier": "burned",
         "rules": [
           "shared-burns"
         ],
@@ -862,6 +933,7 @@
         "merchant": "good4.fides-sim.test",
         "kind": "good",
         "decision": "ASK",
+        "tier": "new",
         "rules": [
           "similar-incident"
         ],
@@ -874,6 +946,7 @@
         "merchant": "good4.fides-sim.test",
         "kind": "good",
         "decision": "ASK",
+        "tier": "new",
         "rules": [
           "similar-incident"
         ],
@@ -886,6 +959,7 @@
         "merchant": "good3.fides-sim.test",
         "kind": "good",
         "decision": "ASK",
+        "tier": "new",
         "rules": [
           "similar-incident"
         ],
@@ -898,6 +972,7 @@
         "merchant": "malicious1.fides-sim.test",
         "kind": "malicious",
         "decision": "ASK",
+        "tier": "new",
         "rules": [
           "similar-incident"
         ],
@@ -910,6 +985,7 @@
         "merchant": "good1.fides-sim.test",
         "kind": "good",
         "decision": "ASK",
+        "tier": "new",
         "rules": [
           "similar-incident"
         ],
@@ -922,6 +998,7 @@
         "merchant": "good3.fides-sim.test",
         "kind": "good",
         "decision": "ASK",
+        "tier": "new",
         "rules": [
           "similar-incident"
         ],
@@ -934,6 +1011,7 @@
         "merchant": "flaky1.fides-sim.test",
         "kind": "flaky",
         "decision": "REFUSE",
+        "tier": "burned",
         "rules": [
           "shared-burns"
         ],
@@ -946,6 +1024,7 @@
         "merchant": "good4.fides-sim.test",
         "kind": "good",
         "decision": "ASK",
+        "tier": "new",
         "rules": [
           "similar-incident"
         ],
@@ -958,6 +1037,7 @@
         "merchant": "good2.fides-sim.test",
         "kind": "good",
         "decision": "ASK",
+        "tier": "new",
         "rules": [
           "similar-incident"
         ],
@@ -970,6 +1050,7 @@
         "merchant": "good1.fides-sim.test",
         "kind": "good",
         "decision": "ASK",
+        "tier": "new",
         "rules": [
           "similar-incident"
         ],
@@ -982,6 +1063,7 @@
         "merchant": "good2.fides-sim.test",
         "kind": "good",
         "decision": "ASK",
+        "tier": "new",
         "rules": [
           "similar-incident"
         ],
@@ -994,6 +1076,7 @@
         "merchant": "good4.fides-sim.test",
         "kind": "good",
         "decision": "ASK",
+        "tier": "new",
         "rules": [
           "similar-incident"
         ],
@@ -1006,6 +1089,7 @@
         "merchant": "good4.fides-sim.test",
         "kind": "good",
         "decision": "ASK",
+        "tier": "new",
         "rules": [
           "similar-incident"
         ],
@@ -1018,6 +1102,7 @@
         "merchant": "good2.fides-sim.test",
         "kind": "good",
         "decision": "ASK",
+        "tier": "new",
         "rules": [
           "similar-incident"
         ],
@@ -1030,6 +1115,7 @@
         "merchant": "good3.fides-sim.test",
         "kind": "good",
         "decision": "ASK",
+        "tier": "new",
         "rules": [
           "similar-incident"
         ],
@@ -1042,6 +1128,7 @@
         "merchant": "flaky1.fides-sim.test",
         "kind": "flaky",
         "decision": "REFUSE",
+        "tier": "burned",
         "rules": [
           "shared-burns"
         ],
@@ -1054,6 +1141,7 @@
         "merchant": "flaky1.fides-sim.test",
         "kind": "flaky",
         "decision": "REFUSE",
+        "tier": "burned",
         "rules": [
           "shared-burns"
         ],
@@ -1066,6 +1154,7 @@
         "merchant": "good3.fides-sim.test",
         "kind": "good",
         "decision": "ASK",
+        "tier": "new",
         "rules": [
           "similar-incident"
         ],
@@ -1078,6 +1167,7 @@
         "merchant": "good1.fides-sim.test",
         "kind": "good",
         "decision": "ASK",
+        "tier": "new",
         "rules": [
           "similar-incident"
         ],
@@ -1090,6 +1180,7 @@
         "merchant": "flaky1.fides-sim.test",
         "kind": "flaky",
         "decision": "PAY_CAPPED",
+        "tier": "burned",
         "rules": [
           "shared-burn"
         ],
@@ -1102,6 +1193,7 @@
         "merchant": "malicious1.fides-sim.test",
         "kind": "malicious",
         "decision": "ASK",
+        "tier": "new",
         "rules": [
           "similar-incident"
         ],
@@ -1114,6 +1206,7 @@
         "merchant": "flaky1.fides-sim.test",
         "kind": "flaky",
         "decision": "REFUSE",
+        "tier": "burned",
         "rules": [
           "shared-burns"
         ],
@@ -1126,6 +1219,7 @@
         "merchant": "good1.fides-sim.test",
         "kind": "good",
         "decision": "ASK",
+        "tier": "new",
         "rules": [
           "similar-incident"
         ],
@@ -1138,6 +1232,7 @@
         "merchant": "good2.fides-sim.test",
         "kind": "good",
         "decision": "ASK",
+        "tier": "new",
         "rules": [
           "similar-incident"
         ],
@@ -1150,6 +1245,7 @@
         "merchant": "good3.fides-sim.test",
         "kind": "good",
         "decision": "ASK",
+        "tier": "new",
         "rules": [
           "similar-incident"
         ],
@@ -1162,6 +1258,7 @@
         "merchant": "malicious1.fides-sim.test",
         "kind": "malicious",
         "decision": "PAY",
+        "tier": "established",
         "rules": [
           "tier"
         ],
@@ -1174,6 +1271,7 @@
         "merchant": "malicious1.fides-sim.test",
         "kind": "malicious",
         "decision": "PAY",
+        "tier": "established",
         "rules": [
           "tier"
         ],
@@ -1186,6 +1284,7 @@
         "merchant": "malicious1.fides-sim.test",
         "kind": "malicious",
         "decision": "PAY",
+        "tier": "established",
         "rules": [
           "tier"
         ],
@@ -1198,6 +1297,7 @@
         "merchant": "good3.fides-sim.test",
         "kind": "good",
         "decision": "ASK",
+        "tier": "new",
         "rules": [
           "similar-incident"
         ],
@@ -1210,6 +1310,7 @@
         "merchant": "flaky1.fides-sim.test",
         "kind": "flaky",
         "decision": "REFUSE",
+        "tier": "burned",
         "rules": [
           "shared-burns"
         ],
@@ -1222,6 +1323,7 @@
         "merchant": "good3.fides-sim.test",
         "kind": "good",
         "decision": "ASK",
+        "tier": "new",
         "rules": [
           "similar-incident"
         ],
@@ -1234,6 +1336,7 @@
         "merchant": "flaky1.fides-sim.test",
         "kind": "flaky",
         "decision": "REFUSE",
+        "tier": "burned",
         "rules": [
           "shared-burns"
         ],
@@ -1246,6 +1349,7 @@
         "merchant": "good1.fides-sim.test",
         "kind": "good",
         "decision": "ASK",
+        "tier": "new",
         "rules": [
           "similar-incident"
         ],
@@ -1258,6 +1362,7 @@
         "merchant": "good1.fides-sim.test",
         "kind": "good",
         "decision": "ASK",
+        "tier": "new",
         "rules": [
           "similar-incident"
         ],
@@ -1270,6 +1375,7 @@
         "merchant": "good3.fides-sim.test",
         "kind": "good",
         "decision": "ASK",
+        "tier": "new",
         "rules": [
           "similar-incident"
         ],
@@ -1282,6 +1388,7 @@
         "merchant": "malicious1.fides-sim.test",
         "kind": "malicious",
         "decision": "REFUSE",
+        "tier": "established",
         "rules": [
           "address"
         ],
@@ -1294,6 +1401,7 @@
         "merchant": "good4.fides-sim.test",
         "kind": "good",
         "decision": "PAY",
+        "tier": "established",
         "rules": [
           "tier"
         ],
@@ -1306,6 +1414,7 @@
         "merchant": "good2.fides-sim.test",
         "kind": "good",
         "decision": "PAY",
+        "tier": "established",
         "rules": [
           "tier"
         ],
@@ -1318,6 +1427,7 @@
         "merchant": "good2.fides-sim.test",
         "kind": "good",
         "decision": "PAY",
+        "tier": "established",
         "rules": [
           "tier"
         ],
@@ -1330,6 +1440,7 @@
         "merchant": "good3.fides-sim.test",
         "kind": "good",
         "decision": "ASK",
+        "tier": "new",
         "rules": [
           "similar-incident"
         ],
@@ -1342,6 +1453,7 @@
         "merchant": "good3.fides-sim.test",
         "kind": "good",
         "decision": "ASK",
+        "tier": "new",
         "rules": [
           "similar-incident"
         ],
@@ -1354,6 +1466,7 @@
         "merchant": "good4.fides-sim.test",
         "kind": "good",
         "decision": "PAY",
+        "tier": "established",
         "rules": [
           "tier"
         ],
@@ -1366,6 +1479,7 @@
         "merchant": "good3.fides-sim.test",
         "kind": "good",
         "decision": "PAY",
+        "tier": "established",
         "rules": [
           "tier"
         ],
@@ -1378,6 +1492,7 @@
         "merchant": "good3.fides-sim.test",
         "kind": "good",
         "decision": "PAY",
+        "tier": "established",
         "rules": [
           "tier"
         ],
@@ -1390,6 +1505,7 @@
         "merchant": "good3.fides-sim.test",
         "kind": "good",
         "decision": "PAY",
+        "tier": "established",
         "rules": [
           "tier"
         ],
@@ -1402,6 +1518,7 @@
         "merchant": "good2.fides-sim.test",
         "kind": "good",
         "decision": "PAY",
+        "tier": "established",
         "rules": [
           "tier"
         ],
@@ -1414,6 +1531,7 @@
         "merchant": "good1.fides-sim.test",
         "kind": "good",
         "decision": "ASK",
+        "tier": "new",
         "rules": [
           "similar-incident"
         ],
@@ -1426,6 +1544,7 @@
         "merchant": "flaky1.fides-sim.test",
         "kind": "flaky",
         "decision": "REFUSE",
+        "tier": "burned",
         "rules": [
           "shared-burns"
         ],
@@ -1438,6 +1557,7 @@
         "merchant": "malicious1.fides-sim.test",
         "kind": "malicious",
         "decision": "REFUSE",
+        "tier": "established",
         "rules": [
           "address"
         ],
@@ -1450,6 +1570,7 @@
         "merchant": "good4.fides-sim.test",
         "kind": "good",
         "decision": "PAY",
+        "tier": "established",
         "rules": [
           "tier"
         ],
@@ -1462,6 +1583,7 @@
         "merchant": "good3.fides-sim.test",
         "kind": "good",
         "decision": "PAY",
+        "tier": "established",
         "rules": [
           "tier"
         ],
@@ -1474,6 +1596,7 @@
         "merchant": "flaky1.fides-sim.test",
         "kind": "flaky",
         "decision": "REFUSE",
+        "tier": "burned",
         "rules": [
           "shared-burns"
         ],
@@ -1486,6 +1609,7 @@
         "merchant": "flaky1.fides-sim.test",
         "kind": "flaky",
         "decision": "REFUSE",
+        "tier": "burned",
         "rules": [
           "shared-burns"
         ],
@@ -1498,6 +1622,7 @@
         "merchant": "good1.fides-sim.test",
         "kind": "good",
         "decision": "ASK",
+        "tier": "new",
         "rules": [
           "similar-incident"
         ],
@@ -1510,6 +1635,7 @@
         "merchant": "good4.fides-sim.test",
         "kind": "good",
         "decision": "PAY",
+        "tier": "established",
         "rules": [
           "tier"
         ],
@@ -1522,6 +1648,7 @@
         "merchant": "flaky1.fides-sim.test",
         "kind": "flaky",
         "decision": "REFUSE",
+        "tier": "burned",
         "rules": [
           "shared-burns"
         ],
@@ -1534,6 +1661,7 @@
         "merchant": "good4.fides-sim.test",
         "kind": "good",
         "decision": "PAY",
+        "tier": "established",
         "rules": [
           "tier"
         ],
@@ -1546,6 +1674,7 @@
         "merchant": "good4.fides-sim.test",
         "kind": "good",
         "decision": "PAY",
+        "tier": "established",
         "rules": [
           "tier"
         ],
@@ -1558,6 +1687,7 @@
         "merchant": "flaky1.fides-sim.test",
         "kind": "flaky",
         "decision": "REFUSE",
+        "tier": "burned",
         "rules": [
           "shared-burns"
         ],
@@ -1570,6 +1700,7 @@
         "merchant": "good4.fides-sim.test",
         "kind": "good",
         "decision": "PAY",
+        "tier": "established",
         "rules": [
           "tier"
         ],
@@ -1582,6 +1713,7 @@
         "merchant": "good3.fides-sim.test",
         "kind": "good",
         "decision": "PAY",
+        "tier": "established",
         "rules": [
           "tier"
         ],
@@ -1594,6 +1726,7 @@
         "merchant": "good1.fides-sim.test",
         "kind": "good",
         "decision": "ASK",
+        "tier": "new",
         "rules": [
           "similar-incident"
         ],
@@ -1606,6 +1739,7 @@
         "merchant": "flaky1.fides-sim.test",
         "kind": "flaky",
         "decision": "REFUSE",
+        "tier": "burned",
         "rules": [
           "shared-burns"
         ],
@@ -1618,6 +1752,7 @@
         "merchant": "good2.fides-sim.test",
         "kind": "good",
         "decision": "PAY",
+        "tier": "established",
         "rules": [
           "tier"
         ],
@@ -1630,6 +1765,7 @@
         "merchant": "good2.fides-sim.test",
         "kind": "good",
         "decision": "PAY",
+        "tier": "established",
         "rules": [
           "tier"
         ],
@@ -1642,6 +1778,7 @@
         "merchant": "good4.fides-sim.test",
         "kind": "good",
         "decision": "PAY",
+        "tier": "established",
         "rules": [
           "tier"
         ],
@@ -1654,6 +1791,7 @@
         "merchant": "good3.fides-sim.test",
         "kind": "good",
         "decision": "PAY",
+        "tier": "established",
         "rules": [
           "tier"
         ],
@@ -1666,6 +1804,7 @@
         "merchant": "good4.fides-sim.test",
         "kind": "good",
         "decision": "PAY",
+        "tier": "established",
         "rules": [
           "tier"
         ],
@@ -1678,6 +1817,7 @@
         "merchant": "flaky1.fides-sim.test",
         "kind": "flaky",
         "decision": "REFUSE",
+        "tier": "burned",
         "rules": [
           "shared-burns"
         ],
@@ -1690,6 +1830,7 @@
         "merchant": "good1.fides-sim.test",
         "kind": "good",
         "decision": "PAY",
+        "tier": "established",
         "rules": [
           "tier"
         ],
@@ -1702,6 +1843,7 @@
         "merchant": "good2.fides-sim.test",
         "kind": "good",
         "decision": "PAY",
+        "tier": "established",
         "rules": [
           "tier"
         ],
@@ -1714,6 +1856,7 @@
         "merchant": "good1.fides-sim.test",
         "kind": "good",
         "decision": "PAY",
+        "tier": "established",
         "rules": [
           "tier"
         ],
@@ -1726,6 +1869,7 @@
         "merchant": "malicious1.fides-sim.test",
         "kind": "malicious",
         "decision": "REFUSE",
+        "tier": "established",
         "rules": [
           "address"
         ],
@@ -1738,6 +1882,7 @@
         "merchant": "good2.fides-sim.test",
         "kind": "good",
         "decision": "PAY",
+        "tier": "established",
         "rules": [
           "tier"
         ],
@@ -1750,6 +1895,7 @@
         "merchant": "good4.fides-sim.test",
         "kind": "good",
         "decision": "PAY",
+        "tier": "established",
         "rules": [
           "tier"
         ],
@@ -1762,6 +1908,7 @@
         "merchant": "malicious1.fides-sim.test",
         "kind": "malicious",
         "decision": "REFUSE",
+        "tier": "established",
         "rules": [
           "address"
         ],
@@ -1774,6 +1921,7 @@
         "merchant": "good1.fides-sim.test",
         "kind": "good",
         "decision": "PAY",
+        "tier": "established",
         "rules": [
           "tier"
         ],
@@ -1786,6 +1934,7 @@
         "merchant": "good2.fides-sim.test",
         "kind": "good",
         "decision": "PAY",
+        "tier": "established",
         "rules": [
           "tier"
         ],
@@ -1798,6 +1947,7 @@
         "merchant": "good2.fides-sim.test",
         "kind": "good",
         "decision": "PAY",
+        "tier": "established",
         "rules": [
           "tier"
         ],
@@ -1810,6 +1960,7 @@
         "merchant": "good2.fides-sim.test",
         "kind": "good",
         "decision": "PAY",
+        "tier": "established",
         "rules": [
           "tier"
         ],
@@ -1822,6 +1973,7 @@
         "merchant": "flaky1.fides-sim.test",
         "kind": "flaky",
         "decision": "REFUSE",
+        "tier": "burned",
         "rules": [
           "shared-burns"
         ],
@@ -1834,6 +1986,7 @@
         "merchant": "good1.fides-sim.test",
         "kind": "good",
         "decision": "PAY",
+        "tier": "established",
         "rules": [
           "tier"
         ],
@@ -1846,6 +1999,7 @@
         "merchant": "good4.fides-sim.test",
         "kind": "good",
         "decision": "PAY",
+        "tier": "established",
         "rules": [
           "tier"
         ],
@@ -1858,6 +2012,7 @@
         "merchant": "malicious1.fides-sim.test",
         "kind": "malicious",
         "decision": "REFUSE",
+        "tier": "established",
         "rules": [
           "address"
         ],
@@ -1870,6 +2025,7 @@
         "merchant": "good4.fides-sim.test",
         "kind": "good",
         "decision": "PAY",
+        "tier": "established",
         "rules": [
           "tier"
         ],
@@ -1882,6 +2038,7 @@
         "merchant": "good3.fides-sim.test",
         "kind": "good",
         "decision": "PAY",
+        "tier": "established",
         "rules": [
           "tier"
         ],
@@ -1894,6 +2051,7 @@
         "merchant": "good3.fides-sim.test",
         "kind": "good",
         "decision": "PAY",
+        "tier": "established",
         "rules": [
           "tier"
         ],
@@ -1906,6 +2064,7 @@
         "merchant": "flaky1.fides-sim.test",
         "kind": "flaky",
         "decision": "REFUSE",
+        "tier": "burned",
         "rules": [
           "shared-burns"
         ],
@@ -1918,6 +2077,7 @@
         "merchant": "flaky1.fides-sim.test",
         "kind": "flaky",
         "decision": "REFUSE",
+        "tier": "burned",
         "rules": [
           "shared-burns"
         ],
@@ -1930,6 +2090,7 @@
         "merchant": "malicious1.fides-sim.test",
         "kind": "malicious",
         "decision": "REFUSE",
+        "tier": "established",
         "rules": [
           "address"
         ],
@@ -1942,6 +2103,7 @@
         "merchant": "good2.fides-sim.test",
         "kind": "good",
         "decision": "PAY",
+        "tier": "established",
         "rules": [
           "tier"
         ],
@@ -1954,6 +2116,7 @@
         "merchant": "good2.fides-sim.test",
         "kind": "good",
         "decision": "PAY",
+        "tier": "established",
         "rules": [
           "tier"
         ],
@@ -1966,6 +2129,7 @@
         "merchant": "good3.fides-sim.test",
         "kind": "good",
         "decision": "PAY",
+        "tier": "established",
         "rules": [
           "tier"
         ],
@@ -1978,6 +2142,7 @@
         "merchant": "good4.fides-sim.test",
         "kind": "good",
         "decision": "PAY",
+        "tier": "established",
         "rules": [
           "tier"
         ],
@@ -1990,6 +2155,7 @@
         "merchant": "good3.fides-sim.test",
         "kind": "good",
         "decision": "PAY",
+        "tier": "established",
         "rules": [
           "tier"
         ],
@@ -2002,6 +2168,7 @@
         "merchant": "good2.fides-sim.test",
         "kind": "good",
         "decision": "PAY",
+        "tier": "established",
         "rules": [
           "tier"
         ],
@@ -2014,6 +2181,7 @@
         "merchant": "good2.fides-sim.test",
         "kind": "good",
         "decision": "PAY",
+        "tier": "established",
         "rules": [
           "tier"
         ],
@@ -2026,6 +2194,7 @@
         "merchant": "good3.fides-sim.test",
         "kind": "good",
         "decision": "PAY",
+        "tier": "established",
         "rules": [
           "tier"
         ],
@@ -2038,6 +2207,7 @@
         "merchant": "good2.fides-sim.test",
         "kind": "good",
         "decision": "PAY",
+        "tier": "trusted",
         "rules": [
           "tier"
         ],
@@ -2050,6 +2220,7 @@
         "merchant": "good1.fides-sim.test",
         "kind": "good",
         "decision": "PAY",
+        "tier": "established",
         "rules": [
           "tier"
         ],
@@ -2062,6 +2233,7 @@
         "merchant": "good1.fides-sim.test",
         "kind": "good",
         "decision": "PAY",
+        "tier": "established",
         "rules": [
           "tier"
         ],
@@ -2074,6 +2246,7 @@
         "merchant": "good3.fides-sim.test",
         "kind": "good",
         "decision": "PAY",
+        "tier": "established",
         "rules": [
           "tier"
         ],
@@ -2086,6 +2259,7 @@
         "merchant": "good2.fides-sim.test",
         "kind": "good",
         "decision": "PAY",
+        "tier": "trusted",
         "rules": [
           "tier"
         ],
@@ -2098,6 +2272,7 @@
         "merchant": "good4.fides-sim.test",
         "kind": "good",
         "decision": "PAY",
+        "tier": "trusted",
         "rules": [
           "tier"
         ],
@@ -2110,6 +2285,7 @@
         "merchant": "good4.fides-sim.test",
         "kind": "good",
         "decision": "PAY",
+        "tier": "trusted",
         "rules": [
           "tier"
         ],
@@ -2122,6 +2298,7 @@
         "merchant": "flaky1.fides-sim.test",
         "kind": "flaky",
         "decision": "REFUSE",
+        "tier": "burned",
         "rules": [
           "shared-burns"
         ],
@@ -2134,6 +2311,7 @@
         "merchant": "good2.fides-sim.test",
         "kind": "good",
         "decision": "PAY",
+        "tier": "established",
         "rules": [
           "tier"
         ],
@@ -2146,6 +2324,7 @@
         "merchant": "good3.fides-sim.test",
         "kind": "good",
         "decision": "PAY",
+        "tier": "established",
         "rules": [
           "tier"
         ],
@@ -2158,6 +2337,7 @@
         "merchant": "good2.fides-sim.test",
         "kind": "good",
         "decision": "PAY",
+        "tier": "trusted",
         "rules": [
           "tier"
         ],
@@ -2170,6 +2350,7 @@
         "merchant": "good1.fides-sim.test",
         "kind": "good",
         "decision": "PAY",
+        "tier": "established",
         "rules": [
           "tier"
         ],
@@ -2182,6 +2363,7 @@
         "merchant": "good3.fides-sim.test",
         "kind": "good",
         "decision": "PAY",
+        "tier": "established",
         "rules": [
           "tier"
         ],
@@ -2194,6 +2376,7 @@
         "merchant": "good2.fides-sim.test",
         "kind": "good",
         "decision": "PAY",
+        "tier": "trusted",
         "rules": [
           "tier"
         ],
@@ -2206,6 +2389,7 @@
         "merchant": "flaky1.fides-sim.test",
         "kind": "flaky",
         "decision": "REFUSE",
+        "tier": "burned",
         "rules": [
           "shared-burns"
         ],
@@ -2218,6 +2402,7 @@
         "merchant": "flaky1.fides-sim.test",
         "kind": "flaky",
         "decision": "REFUSE",
+        "tier": "burned",
         "rules": [
           "shared-burns"
         ],
@@ -2230,6 +2415,7 @@
         "merchant": "malicious1.fides-sim.test",
         "kind": "malicious",
         "decision": "REFUSE",
+        "tier": "established",
         "rules": [
           "address"
         ],
@@ -2242,6 +2428,7 @@
         "merchant": "good3.fides-sim.test",
         "kind": "good",
         "decision": "PAY",
+        "tier": "trusted",
         "rules": [
           "tier"
         ],
@@ -2254,6 +2441,7 @@
         "merchant": "good1.fides-sim.test",
         "kind": "good",
         "decision": "PAY",
+        "tier": "established",
         "rules": [
           "tier"
         ],
@@ -2266,6 +2454,7 @@
         "merchant": "flaky1.fides-sim.test",
         "kind": "flaky",
         "decision": "REFUSE",
+        "tier": "burned",
         "rules": [
           "shared-burns"
         ],
@@ -2278,6 +2467,7 @@
         "merchant": "good4.fides-sim.test",
         "kind": "good",
         "decision": "PAY",
+        "tier": "trusted",
         "rules": [
           "tier"
         ],
@@ -2290,6 +2480,7 @@
         "merchant": "good4.fides-sim.test",
         "kind": "good",
         "decision": "PAY",
+        "tier": "trusted",
         "rules": [
           "tier"
         ],
@@ -2302,6 +2493,7 @@
         "merchant": "good2.fides-sim.test",
         "kind": "good",
         "decision": "PAY",
+        "tier": "trusted",
         "rules": [
           "tier"
         ],
@@ -2314,6 +2506,7 @@
         "merchant": "malicious1.fides-sim.test",
         "kind": "malicious",
         "decision": "REFUSE",
+        "tier": "established",
         "rules": [
           "address"
         ],
@@ -2326,6 +2519,7 @@
         "merchant": "good4.fides-sim.test",
         "kind": "good",
         "decision": "PAY",
+        "tier": "trusted",
         "rules": [
           "tier"
         ],
@@ -2338,6 +2532,7 @@
         "merchant": "good4.fides-sim.test",
         "kind": "good",
         "decision": "PAY",
+        "tier": "trusted",
         "rules": [
           "tier"
         ],
@@ -2350,6 +2545,7 @@
         "merchant": "good3.fides-sim.test",
         "kind": "good",
         "decision": "PAY",
+        "tier": "trusted",
         "rules": [
           "tier"
         ],
@@ -2362,6 +2558,7 @@
         "merchant": "malicious1.fides-sim.test",
         "kind": "malicious",
         "decision": "REFUSE",
+        "tier": "established",
         "rules": [
           "address"
         ],
@@ -2374,6 +2571,7 @@
         "merchant": "flaky1.fides-sim.test",
         "kind": "flaky",
         "decision": "REFUSE",
+        "tier": "burned",
         "rules": [
           "shared-burns"
         ],
@@ -2386,6 +2584,7 @@
         "merchant": "malicious1.fides-sim.test",
         "kind": "malicious",
         "decision": "REFUSE",
+        "tier": "established",
         "rules": [
           "address"
         ],
@@ -2398,6 +2597,7 @@
         "merchant": "malicious1.fides-sim.test",
         "kind": "malicious",
         "decision": "REFUSE",
+        "tier": "established",
         "rules": [
           "address"
         ],
@@ -2410,6 +2610,7 @@
         "merchant": "good4.fides-sim.test",
         "kind": "good",
         "decision": "PAY",
+        "tier": "trusted",
         "rules": [
           "tier"
         ],
@@ -2422,6 +2623,7 @@
         "merchant": "good1.fides-sim.test",
         "kind": "good",
         "decision": "PAY",
+        "tier": "established",
         "rules": [
           "tier"
         ],
@@ -2434,6 +2636,7 @@
         "merchant": "flaky1.fides-sim.test",
         "kind": "flaky",
         "decision": "REFUSE",
+        "tier": "burned",
         "rules": [
           "shared-burns"
         ],
@@ -2446,6 +2649,7 @@
         "merchant": "good1.fides-sim.test",
         "kind": "good",
         "decision": "PAY",
+        "tier": "established",
         "rules": [
           "tier"
         ],
@@ -2458,6 +2662,7 @@
         "merchant": "malicious1.fides-sim.test",
         "kind": "malicious",
         "decision": "REFUSE",
+        "tier": "established",
         "rules": [
           "address"
         ],
@@ -2470,6 +2675,7 @@
         "merchant": "good1.fides-sim.test",
         "kind": "good",
         "decision": "PAY",
+        "tier": "established",
         "rules": [
           "tier"
         ],
@@ -2482,6 +2688,7 @@
         "merchant": "good4.fides-sim.test",
         "kind": "good",
         "decision": "PAY",
+        "tier": "trusted",
         "rules": [
           "tier"
         ],
@@ -2494,6 +2701,7 @@
         "merchant": "good4.fides-sim.test",
         "kind": "good",
         "decision": "PAY",
+        "tier": "trusted",
         "rules": [
           "tier"
         ],
@@ -2506,6 +2714,7 @@
         "merchant": "good2.fides-sim.test",
         "kind": "good",
         "decision": "PAY",
+        "tier": "trusted",
         "rules": [
           "tier"
         ],
@@ -2518,6 +2727,7 @@
         "merchant": "malicious1.fides-sim.test",
         "kind": "malicious",
         "decision": "REFUSE",
+        "tier": "established",
         "rules": [
           "address"
         ],
@@ -2530,6 +2740,7 @@
         "merchant": "flaky1.fides-sim.test",
         "kind": "flaky",
         "decision": "REFUSE",
+        "tier": "burned",
         "rules": [
           "shared-burns"
         ],
@@ -2542,6 +2753,7 @@
         "merchant": "good1.fides-sim.test",
         "kind": "good",
         "decision": "PAY",
+        "tier": "established",
         "rules": [
           "tier"
         ],
@@ -2554,6 +2766,7 @@
         "merchant": "flaky1.fides-sim.test",
         "kind": "flaky",
         "decision": "REFUSE",
+        "tier": "burned",
         "rules": [
           "shared-burns"
         ],
@@ -2566,6 +2779,7 @@
         "merchant": "good1.fides-sim.test",
         "kind": "good",
         "decision": "PAY",
+        "tier": "established",
         "rules": [
           "tier"
         ],
@@ -2578,6 +2792,7 @@
         "merchant": "good3.fides-sim.test",
         "kind": "good",
         "decision": "PAY",
+        "tier": "trusted",
         "rules": [
           "tier"
         ],
@@ -2590,6 +2805,7 @@
         "merchant": "good4.fides-sim.test",
         "kind": "good",
         "decision": "PAY",
+        "tier": "trusted",
         "rules": [
           "tier"
         ],
@@ -2602,6 +2818,7 @@
         "merchant": "good3.fides-sim.test",
         "kind": "good",
         "decision": "PAY",
+        "tier": "trusted",
         "rules": [
           "tier"
         ],
@@ -2614,6 +2831,7 @@
         "merchant": "malicious1.fides-sim.test",
         "kind": "malicious",
         "decision": "REFUSE",
+        "tier": "established",
         "rules": [
           "address"
         ],
@@ -2626,6 +2844,7 @@
         "merchant": "good1.fides-sim.test",
         "kind": "good",
         "decision": "PAY",
+        "tier": "trusted",
         "rules": [
           "tier"
         ],
@@ -2638,6 +2857,7 @@
         "merchant": "good3.fides-sim.test",
         "kind": "good",
         "decision": "PAY",
+        "tier": "trusted",
         "rules": [
           "tier"
         ],
@@ -2650,6 +2870,7 @@
         "merchant": "good1.fides-sim.test",
         "kind": "good",
         "decision": "PAY",
+        "tier": "trusted",
         "rules": [
           "tier"
         ],
@@ -2662,6 +2883,7 @@
         "merchant": "malicious1.fides-sim.test",
         "kind": "malicious",
         "decision": "REFUSE",
+        "tier": "established",
         "rules": [
           "address"
         ],
@@ -2674,6 +2896,7 @@
         "merchant": "good3.fides-sim.test",
         "kind": "good",
         "decision": "PAY",
+        "tier": "trusted",
         "rules": [
           "tier"
         ],
@@ -2686,6 +2909,7 @@
         "merchant": "malicious1.fides-sim.test",
         "kind": "malicious",
         "decision": "REFUSE",
+        "tier": "established",
         "rules": [
           "address"
         ],
@@ -2698,6 +2922,7 @@
         "merchant": "good3.fides-sim.test",
         "kind": "good",
         "decision": "PAY",
+        "tier": "trusted",
         "rules": [
           "tier"
         ],
@@ -2710,6 +2935,7 @@
         "merchant": "good3.fides-sim.test",
         "kind": "good",
         "decision": "PAY",
+        "tier": "trusted",
         "rules": [
           "tier"
         ],
@@ -2722,6 +2948,7 @@
         "merchant": "good3.fides-sim.test",
         "kind": "good",
         "decision": "PAY",
+        "tier": "trusted",
         "rules": [
           "tier"
         ],
@@ -2734,6 +2961,7 @@
         "merchant": "flaky1.fides-sim.test",
         "kind": "flaky",
         "decision": "REFUSE",
+        "tier": "burned",
         "rules": [
           "shared-burns"
         ],
@@ -2746,6 +2974,7 @@
         "merchant": "good4.fides-sim.test",
         "kind": "good",
         "decision": "PAY",
+        "tier": "trusted",
         "rules": [
           "tier"
         ],
@@ -2758,6 +2987,7 @@
         "merchant": "flaky1.fides-sim.test",
         "kind": "flaky",
         "decision": "PAY_CAPPED",
+        "tier": "burned",
         "rules": [
           "shared-burn"
         ],
@@ -2770,6 +3000,7 @@
         "merchant": "malicious1.fides-sim.test",
         "kind": "malicious",
         "decision": "REFUSE",
+        "tier": "established",
         "rules": [
           "address"
         ],
@@ -2782,6 +3013,7 @@
         "merchant": "flaky1.fides-sim.test",
         "kind": "flaky",
         "decision": "REFUSE",
+        "tier": "burned",
         "rules": [
           "shared-burns"
         ],
@@ -2794,6 +3026,7 @@
         "merchant": "good3.fides-sim.test",
         "kind": "good",
         "decision": "PAY",
+        "tier": "trusted",
         "rules": [
           "tier"
         ],
@@ -2806,6 +3039,7 @@
         "merchant": "good4.fides-sim.test",
         "kind": "good",
         "decision": "PAY",
+        "tier": "trusted",
         "rules": [
           "tier"
         ],
@@ -2818,6 +3052,7 @@
         "merchant": "good1.fides-sim.test",
         "kind": "good",
         "decision": "PAY",
+        "tier": "trusted",
         "rules": [
           "tier"
         ],
@@ -2830,6 +3065,7 @@
         "merchant": "good3.fides-sim.test",
         "kind": "good",
         "decision": "PAY",
+        "tier": "trusted",
         "rules": [
           "tier"
         ],
@@ -2842,6 +3078,7 @@
         "merchant": "good3.fides-sim.test",
         "kind": "good",
         "decision": "PAY",
+        "tier": "trusted",
         "rules": [
           "tier"
         ],
@@ -2854,6 +3091,7 @@
         "merchant": "good2.fides-sim.test",
         "kind": "good",
         "decision": "PAY",
+        "tier": "trusted",
         "rules": [
           "tier"
         ],
@@ -2866,6 +3104,7 @@
         "merchant": "good3.fides-sim.test",
         "kind": "good",
         "decision": "PAY",
+        "tier": "trusted",
         "rules": [
           "tier"
         ],
@@ -2878,6 +3117,7 @@
         "merchant": "good3.fides-sim.test",
         "kind": "good",
         "decision": "PAY",
+        "tier": "trusted",
         "rules": [
           "tier"
         ],
@@ -2890,6 +3130,7 @@
         "merchant": "good3.fides-sim.test",
         "kind": "good",
         "decision": "PAY",
+        "tier": "trusted",
         "rules": [
           "tier"
         ],
@@ -2902,6 +3143,7 @@
         "merchant": "good4.fides-sim.test",
         "kind": "good",
         "decision": "PAY",
+        "tier": "trusted",
         "rules": [
           "tier"
         ],
@@ -2918,7 +3160,9 @@
       "mode": "detached",
       "pApprove": 0.8,
       "turnAtRound": 6,
-      "flakyRate": 0.4
+      "flakyRate": 0.4,
+      "maxLatencyMs": 150,
+      "lateMs": 400
     },
     "burns": 17,
     "paid": 192,
@@ -2942,6 +3186,7 @@
         "merchant": "flaky1.fides-sim.test",
         "kind": "flaky",
         "decision": "ASK",
+        "tier": "new",
         "rules": [
           "tier"
         ],
@@ -2954,6 +3199,7 @@
         "merchant": "good4.fides-sim.test",
         "kind": "good",
         "decision": "ASK",
+        "tier": "new",
         "rules": [
           "tier"
         ],
@@ -2966,6 +3212,7 @@
         "merchant": "malicious1.fides-sim.test",
         "kind": "malicious",
         "decision": "ASK",
+        "tier": "new",
         "rules": [
           "tier"
         ],
@@ -2978,6 +3225,7 @@
         "merchant": "good3.fides-sim.test",
         "kind": "good",
         "decision": "ASK",
+        "tier": "new",
         "rules": [
           "tier"
         ],
@@ -2990,6 +3238,7 @@
         "merchant": "good2.fides-sim.test",
         "kind": "good",
         "decision": "ASK",
+        "tier": "new",
         "rules": [
           "tier"
         ],
@@ -3002,6 +3251,7 @@
         "merchant": "flaky1.fides-sim.test",
         "kind": "flaky",
         "decision": "ASK",
+        "tier": "new",
         "rules": [
           "tier"
         ],
@@ -3014,6 +3264,7 @@
         "merchant": "good3.fides-sim.test",
         "kind": "good",
         "decision": "ASK",
+        "tier": "new",
         "rules": [
           "tier"
         ],
@@ -3026,6 +3277,7 @@
         "merchant": "good1.fides-sim.test",
         "kind": "good",
         "decision": "ASK",
+        "tier": "new",
         "rules": [
           "tier"
         ],
@@ -3038,6 +3290,7 @@
         "merchant": "good4.fides-sim.test",
         "kind": "good",
         "decision": "ASK",
+        "tier": "new",
         "rules": [
           "tier"
         ],
@@ -3050,6 +3303,7 @@
         "merchant": "malicious1.fides-sim.test",
         "kind": "malicious",
         "decision": "ASK",
+        "tier": "new",
         "rules": [
           "tier"
         ],
@@ -3062,6 +3316,7 @@
         "merchant": "good2.fides-sim.test",
         "kind": "good",
         "decision": "ASK",
+        "tier": "new",
         "rules": [
           "tier"
         ],
@@ -3074,6 +3329,7 @@
         "merchant": "good4.fides-sim.test",
         "kind": "good",
         "decision": "ASK",
+        "tier": "new",
         "rules": [
           "tier"
         ],
@@ -3086,6 +3342,7 @@
         "merchant": "good4.fides-sim.test",
         "kind": "good",
         "decision": "ASK",
+        "tier": "new",
         "rules": [
           "tier"
         ],
@@ -3098,6 +3355,7 @@
         "merchant": "good1.fides-sim.test",
         "kind": "good",
         "decision": "ASK",
+        "tier": "new",
         "rules": [
           "tier"
         ],
@@ -3110,6 +3368,7 @@
         "merchant": "flaky1.fides-sim.test",
         "kind": "flaky",
         "decision": "ASK",
+        "tier": "new",
         "rules": [
           "tier"
         ],
@@ -3122,6 +3381,7 @@
         "merchant": "malicious1.fides-sim.test",
         "kind": "malicious",
         "decision": "ASK",
+        "tier": "new",
         "rules": [
           "tier"
         ],
@@ -3134,6 +3394,7 @@
         "merchant": "malicious1.fides-sim.test",
         "kind": "malicious",
         "decision": "ASK",
+        "tier": "new",
         "rules": [
           "tier"
         ],
@@ -3146,6 +3407,7 @@
         "merchant": "flaky1.fides-sim.test",
         "kind": "flaky",
         "decision": "ASK",
+        "tier": "new",
         "rules": [
           "tier"
         ],
@@ -3158,6 +3420,7 @@
         "merchant": "good2.fides-sim.test",
         "kind": "good",
         "decision": "ASK",
+        "tier": "new",
         "rules": [
           "tier"
         ],
@@ -3170,6 +3433,7 @@
         "merchant": "good4.fides-sim.test",
         "kind": "good",
         "decision": "ASK",
+        "tier": "new",
         "rules": [
           "tier"
         ],
@@ -3182,6 +3446,7 @@
         "merchant": "malicious1.fides-sim.test",
         "kind": "malicious",
         "decision": "ASK",
+        "tier": "new",
         "rules": [
           "tier"
         ],
@@ -3194,6 +3459,7 @@
         "merchant": "good2.fides-sim.test",
         "kind": "good",
         "decision": "ASK",
+        "tier": "new",
         "rules": [
           "tier"
         ],
@@ -3206,6 +3472,7 @@
         "merchant": "good4.fides-sim.test",
         "kind": "good",
         "decision": "ASK",
+        "tier": "new",
         "rules": [
           "tier"
         ],
@@ -3218,6 +3485,7 @@
         "merchant": "malicious1.fides-sim.test",
         "kind": "malicious",
         "decision": "ASK",
+        "tier": "new",
         "rules": [
           "tier"
         ],
@@ -3230,6 +3498,7 @@
         "merchant": "good2.fides-sim.test",
         "kind": "good",
         "decision": "ASK",
+        "tier": "new",
         "rules": [
           "tier"
         ],
@@ -3242,6 +3511,7 @@
         "merchant": "malicious1.fides-sim.test",
         "kind": "malicious",
         "decision": "ASK",
+        "tier": "new",
         "rules": [
           "tier"
         ],
@@ -3254,6 +3524,7 @@
         "merchant": "good3.fides-sim.test",
         "kind": "good",
         "decision": "ASK",
+        "tier": "new",
         "rules": [
           "tier"
         ],
@@ -3266,6 +3537,7 @@
         "merchant": "malicious1.fides-sim.test",
         "kind": "malicious",
         "decision": "ASK",
+        "tier": "new",
         "rules": [
           "tier"
         ],
@@ -3278,6 +3550,7 @@
         "merchant": "malicious1.fides-sim.test",
         "kind": "malicious",
         "decision": "ASK",
+        "tier": "new",
         "rules": [
           "tier"
         ],
@@ -3290,6 +3563,7 @@
         "merchant": "flaky1.fides-sim.test",
         "kind": "flaky",
         "decision": "ASK",
+        "tier": "new",
         "rules": [
           "tier"
         ],
@@ -3302,6 +3576,7 @@
         "merchant": "flaky1.fides-sim.test",
         "kind": "flaky",
         "decision": "ASK",
+        "tier": "new",
         "rules": [
           "tier"
         ],
@@ -3314,6 +3589,7 @@
         "merchant": "malicious1.fides-sim.test",
         "kind": "malicious",
         "decision": "ASK",
+        "tier": "new",
         "rules": [
           "tier"
         ],
@@ -3326,6 +3602,7 @@
         "merchant": "flaky1.fides-sim.test",
         "kind": "flaky",
         "decision": "ASK",
+        "tier": "new",
         "rules": [
           "own-history"
         ],
@@ -3338,6 +3615,7 @@
         "merchant": "good1.fides-sim.test",
         "kind": "good",
         "decision": "ASK",
+        "tier": "new",
         "rules": [
           "tier"
         ],
@@ -3350,6 +3628,7 @@
         "merchant": "good2.fides-sim.test",
         "kind": "good",
         "decision": "ASK",
+        "tier": "new",
         "rules": [
           "tier"
         ],
@@ -3362,6 +3641,7 @@
         "merchant": "malicious1.fides-sim.test",
         "kind": "malicious",
         "decision": "ASK",
+        "tier": "new",
         "rules": [
           "tier"
         ],
@@ -3374,6 +3654,7 @@
         "merchant": "malicious1.fides-sim.test",
         "kind": "malicious",
         "decision": "ASK",
+        "tier": "new",
         "rules": [
           "tier"
         ],
@@ -3386,6 +3667,7 @@
         "merchant": "good4.fides-sim.test",
         "kind": "good",
         "decision": "ASK",
+        "tier": "new",
         "rules": [
           "tier"
         ],
@@ -3398,6 +3680,7 @@
         "merchant": "good4.fides-sim.test",
         "kind": "good",
         "decision": "ASK",
+        "tier": "new",
         "rules": [
           "tier"
         ],
@@ -3410,6 +3693,7 @@
         "merchant": "good1.fides-sim.test",
         "kind": "good",
         "decision": "ASK",
+        "tier": "new",
         "rules": [
           "tier"
         ],
@@ -3422,6 +3706,7 @@
         "merchant": "good2.fides-sim.test",
         "kind": "good",
         "decision": "ASK",
+        "tier": "new",
         "rules": [
           "tier"
         ],
@@ -3434,6 +3719,7 @@
         "merchant": "good3.fides-sim.test",
         "kind": "good",
         "decision": "ASK",
+        "tier": "new",
         "rules": [
           "tier"
         ],
@@ -3446,6 +3732,7 @@
         "merchant": "good1.fides-sim.test",
         "kind": "good",
         "decision": "ASK",
+        "tier": "new",
         "rules": [
           "tier"
         ],
@@ -3458,6 +3745,7 @@
         "merchant": "good4.fides-sim.test",
         "kind": "good",
         "decision": "ASK",
+        "tier": "new",
         "rules": [
           "tier"
         ],
@@ -3470,6 +3758,7 @@
         "merchant": "good1.fides-sim.test",
         "kind": "good",
         "decision": "ASK",
+        "tier": "new",
         "rules": [
           "tier"
         ],
@@ -3482,6 +3771,7 @@
         "merchant": "good2.fides-sim.test",
         "kind": "good",
         "decision": "ASK",
+        "tier": "new",
         "rules": [
           "tier"
         ],
@@ -3494,6 +3784,7 @@
         "merchant": "malicious1.fides-sim.test",
         "kind": "malicious",
         "decision": "ASK",
+        "tier": "new",
         "rules": [
           "tier"
         ],
@@ -3506,6 +3797,7 @@
         "merchant": "malicious1.fides-sim.test",
         "kind": "malicious",
         "decision": "ASK",
+        "tier": "new",
         "rules": [
           "tier"
         ],
@@ -3518,6 +3810,7 @@
         "merchant": "good4.fides-sim.test",
         "kind": "good",
         "decision": "ASK",
+        "tier": "new",
         "rules": [
           "tier"
         ],
@@ -3530,6 +3823,7 @@
         "merchant": "good1.fides-sim.test",
         "kind": "good",
         "decision": "ASK",
+        "tier": "new",
         "rules": [
           "tier"
         ],
@@ -3542,6 +3836,7 @@
         "merchant": "flaky1.fides-sim.test",
         "kind": "flaky",
         "decision": "ASK",
+        "tier": "new",
         "rules": [
           "tier"
         ],
@@ -3554,6 +3849,7 @@
         "merchant": "good1.fides-sim.test",
         "kind": "good",
         "decision": "ASK",
+        "tier": "new",
         "rules": [
           "tier"
         ],
@@ -3566,6 +3862,7 @@
         "merchant": "flaky1.fides-sim.test",
         "kind": "flaky",
         "decision": "ASK",
+        "tier": "new",
         "rules": [
           "tier"
         ],
@@ -3578,6 +3875,7 @@
         "merchant": "good4.fides-sim.test",
         "kind": "good",
         "decision": "ASK",
+        "tier": "new",
         "rules": [
           "tier"
         ],
@@ -3590,6 +3888,7 @@
         "merchant": "good3.fides-sim.test",
         "kind": "good",
         "decision": "ASK",
+        "tier": "new",
         "rules": [
           "tier"
         ],
@@ -3602,6 +3901,7 @@
         "merchant": "good3.fides-sim.test",
         "kind": "good",
         "decision": "ASK",
+        "tier": "new",
         "rules": [
           "tier"
         ],
@@ -3614,6 +3914,7 @@
         "merchant": "malicious1.fides-sim.test",
         "kind": "malicious",
         "decision": "ASK",
+        "tier": "new",
         "rules": [
           "tier"
         ],
@@ -3626,6 +3927,7 @@
         "merchant": "good3.fides-sim.test",
         "kind": "good",
         "decision": "ASK",
+        "tier": "new",
         "rules": [
           "tier"
         ],
@@ -3638,6 +3940,7 @@
         "merchant": "flaky1.fides-sim.test",
         "kind": "flaky",
         "decision": "ASK",
+        "tier": "new",
         "rules": [
           "tier"
         ],
@@ -3650,6 +3953,7 @@
         "merchant": "good1.fides-sim.test",
         "kind": "good",
         "decision": "ASK",
+        "tier": "new",
         "rules": [
           "tier"
         ],
@@ -3662,6 +3966,7 @@
         "merchant": "flaky1.fides-sim.test",
         "kind": "flaky",
         "decision": "ASK",
+        "tier": "new",
         "rules": [
           "own-history"
         ],
@@ -3674,6 +3979,7 @@
         "merchant": "good4.fides-sim.test",
         "kind": "good",
         "decision": "ASK",
+        "tier": "new",
         "rules": [
           "tier"
         ],
@@ -3686,6 +3992,7 @@
         "merchant": "good4.fides-sim.test",
         "kind": "good",
         "decision": "ASK",
+        "tier": "new",
         "rules": [
           "tier"
         ],
@@ -3698,6 +4005,7 @@
         "merchant": "good4.fides-sim.test",
         "kind": "good",
         "decision": "ASK",
+        "tier": "new",
         "rules": [
           "tier"
         ],
@@ -3710,6 +4018,7 @@
         "merchant": "good3.fides-sim.test",
         "kind": "good",
         "decision": "ASK",
+        "tier": "new",
         "rules": [
           "tier"
         ],
@@ -3722,6 +4031,7 @@
         "merchant": "malicious1.fides-sim.test",
         "kind": "malicious",
         "decision": "ASK",
+        "tier": "new",
         "rules": [
           "tier"
         ],
@@ -3734,6 +4044,7 @@
         "merchant": "good1.fides-sim.test",
         "kind": "good",
         "decision": "ASK",
+        "tier": "new",
         "rules": [
           "tier"
         ],
@@ -3746,6 +4057,7 @@
         "merchant": "good3.fides-sim.test",
         "kind": "good",
         "decision": "ASK",
+        "tier": "new",
         "rules": [
           "tier"
         ],
@@ -3758,6 +4070,7 @@
         "merchant": "flaky1.fides-sim.test",
         "kind": "flaky",
         "decision": "ASK",
+        "tier": "new",
         "rules": [
           "tier"
         ],
@@ -3770,6 +4083,7 @@
         "merchant": "good3.fides-sim.test",
         "kind": "good",
         "decision": "ASK",
+        "tier": "new",
         "rules": [
           "tier"
         ],
@@ -3782,6 +4096,7 @@
         "merchant": "good2.fides-sim.test",
         "kind": "good",
         "decision": "ASK",
+        "tier": "new",
         "rules": [
           "tier"
         ],
@@ -3794,6 +4109,7 @@
         "merchant": "flaky1.fides-sim.test",
         "kind": "flaky",
         "decision": "ASK",
+        "tier": "new",
         "rules": [
           "own-history"
         ],
@@ -3806,6 +4122,7 @@
         "merchant": "good4.fides-sim.test",
         "kind": "good",
         "decision": "ASK",
+        "tier": "new",
         "rules": [
           "tier"
         ],
@@ -3818,6 +4135,7 @@
         "merchant": "good3.fides-sim.test",
         "kind": "good",
         "decision": "ASK",
+        "tier": "new",
         "rules": [
           "tier"
         ],
@@ -3830,6 +4148,7 @@
         "merchant": "malicious1.fides-sim.test",
         "kind": "malicious",
         "decision": "ASK",
+        "tier": "new",
         "rules": [
           "tier"
         ],
@@ -3842,6 +4161,7 @@
         "merchant": "malicious1.fides-sim.test",
         "kind": "malicious",
         "decision": "ASK",
+        "tier": "new",
         "rules": [
           "tier"
         ],
@@ -3854,6 +4174,7 @@
         "merchant": "flaky1.fides-sim.test",
         "kind": "flaky",
         "decision": "ASK",
+        "tier": "new",
         "rules": [
           "tier"
         ],
@@ -3866,6 +4187,7 @@
         "merchant": "good4.fides-sim.test",
         "kind": "good",
         "decision": "ASK",
+        "tier": "new",
         "rules": [
           "tier"
         ],
@@ -3878,6 +4200,7 @@
         "merchant": "good2.fides-sim.test",
         "kind": "good",
         "decision": "ASK",
+        "tier": "new",
         "rules": [
           "tier"
         ],
@@ -3890,6 +4213,7 @@
         "merchant": "good4.fides-sim.test",
         "kind": "good",
         "decision": "ASK",
+        "tier": "new",
         "rules": [
           "tier"
         ],
@@ -3902,6 +4226,7 @@
         "merchant": "malicious1.fides-sim.test",
         "kind": "malicious",
         "decision": "ASK",
+        "tier": "new",
         "rules": [
           "tier"
         ],
@@ -3914,6 +4239,7 @@
         "merchant": "flaky1.fides-sim.test",
         "kind": "flaky",
         "decision": "ASK",
+        "tier": "new",
         "rules": [
           "tier"
         ],
@@ -3926,6 +4252,7 @@
         "merchant": "good1.fides-sim.test",
         "kind": "good",
         "decision": "ASK",
+        "tier": "new",
         "rules": [
           "tier"
         ],
@@ -3938,6 +4265,7 @@
         "merchant": "good1.fides-sim.test",
         "kind": "good",
         "decision": "ASK",
+        "tier": "new",
         "rules": [
           "tier"
         ],
@@ -3950,6 +4278,7 @@
         "merchant": "flaky1.fides-sim.test",
         "kind": "flaky",
         "decision": "ASK",
+        "tier": "new",
         "rules": [
           "tier"
         ],
@@ -3962,6 +4291,7 @@
         "merchant": "malicious1.fides-sim.test",
         "kind": "malicious",
         "decision": "ASK",
+        "tier": "new",
         "rules": [
           "tier"
         ],
@@ -3974,6 +4304,7 @@
         "merchant": "good3.fides-sim.test",
         "kind": "good",
         "decision": "ASK",
+        "tier": "new",
         "rules": [
           "tier"
         ],
@@ -3986,6 +4317,7 @@
         "merchant": "flaky1.fides-sim.test",
         "kind": "flaky",
         "decision": "ASK",
+        "tier": "burned",
         "rules": [
           "own-history"
         ],
@@ -3998,6 +4330,7 @@
         "merchant": "flaky1.fides-sim.test",
         "kind": "flaky",
         "decision": "ASK",
+        "tier": "new",
         "rules": [
           "tier"
         ],
@@ -4010,6 +4343,7 @@
         "merchant": "good4.fides-sim.test",
         "kind": "good",
         "decision": "ASK",
+        "tier": "new",
         "rules": [
           "tier"
         ],
@@ -4022,6 +4356,7 @@
         "merchant": "good2.fides-sim.test",
         "kind": "good",
         "decision": "ASK",
+        "tier": "new",
         "rules": [
           "tier"
         ],
@@ -4034,6 +4369,7 @@
         "merchant": "flaky1.fides-sim.test",
         "kind": "flaky",
         "decision": "ASK",
+        "tier": "new",
         "rules": [
           "own-history"
         ],
@@ -4046,6 +4382,7 @@
         "merchant": "good2.fides-sim.test",
         "kind": "good",
         "decision": "ASK",
+        "tier": "new",
         "rules": [
           "tier"
         ],
@@ -4058,6 +4395,7 @@
         "merchant": "good3.fides-sim.test",
         "kind": "good",
         "decision": "ASK",
+        "tier": "new",
         "rules": [
           "tier"
         ],
@@ -4070,6 +4408,7 @@
         "merchant": "flaky1.fides-sim.test",
         "kind": "flaky",
         "decision": "ASK",
+        "tier": "new",
         "rules": [
           "tier"
         ],
@@ -4082,6 +4421,7 @@
         "merchant": "good1.fides-sim.test",
         "kind": "good",
         "decision": "ASK",
+        "tier": "new",
         "rules": [
           "tier"
         ],
@@ -4094,6 +4434,7 @@
         "merchant": "good4.fides-sim.test",
         "kind": "good",
         "decision": "ASK",
+        "tier": "new",
         "rules": [
           "tier"
         ],
@@ -4106,6 +4447,7 @@
         "merchant": "good2.fides-sim.test",
         "kind": "good",
         "decision": "ASK",
+        "tier": "new",
         "rules": [
           "tier"
         ],
@@ -4118,6 +4460,7 @@
         "merchant": "good4.fides-sim.test",
         "kind": "good",
         "decision": "ASK",
+        "tier": "new",
         "rules": [
           "tier"
         ],
@@ -4130,6 +4473,7 @@
         "merchant": "good1.fides-sim.test",
         "kind": "good",
         "decision": "ASK",
+        "tier": "new",
         "rules": [
           "tier"
         ],
@@ -4142,6 +4486,7 @@
         "merchant": "malicious1.fides-sim.test",
         "kind": "malicious",
         "decision": "ASK",
+        "tier": "new",
         "rules": [
           "tier"
         ],
@@ -4154,6 +4499,7 @@
         "merchant": "good3.fides-sim.test",
         "kind": "good",
         "decision": "ASK",
+        "tier": "new",
         "rules": [
           "tier"
         ],
@@ -4166,6 +4512,7 @@
         "merchant": "good2.fides-sim.test",
         "kind": "good",
         "decision": "ASK",
+        "tier": "new",
         "rules": [
           "tier"
         ],
@@ -4178,6 +4525,7 @@
         "merchant": "good2.fides-sim.test",
         "kind": "good",
         "decision": "ASK",
+        "tier": "new",
         "rules": [
           "tier"
         ],
@@ -4190,6 +4538,7 @@
         "merchant": "good3.fides-sim.test",
         "kind": "good",
         "decision": "ASK",
+        "tier": "new",
         "rules": [
           "tier"
         ],
@@ -4202,6 +4551,7 @@
         "merchant": "good4.fides-sim.test",
         "kind": "good",
         "decision": "ASK",
+        "tier": "new",
         "rules": [
           "tier"
         ],
@@ -4214,6 +4564,7 @@
         "merchant": "good1.fides-sim.test",
         "kind": "good",
         "decision": "ASK",
+        "tier": "new",
         "rules": [
           "tier"
         ],
@@ -4226,6 +4577,7 @@
         "merchant": "good3.fides-sim.test",
         "kind": "good",
         "decision": "ASK",
+        "tier": "new",
         "rules": [
           "tier"
         ],
@@ -4238,6 +4590,7 @@
         "merchant": "good1.fides-sim.test",
         "kind": "good",
         "decision": "ASK",
+        "tier": "new",
         "rules": [
           "tier"
         ],
@@ -4250,6 +4603,7 @@
         "merchant": "good3.fides-sim.test",
         "kind": "good",
         "decision": "ASK",
+        "tier": "new",
         "rules": [
           "tier"
         ],
@@ -4262,6 +4616,7 @@
         "merchant": "good4.fides-sim.test",
         "kind": "good",
         "decision": "ASK",
+        "tier": "new",
         "rules": [
           "tier"
         ],
@@ -4274,6 +4629,7 @@
         "merchant": "flaky1.fides-sim.test",
         "kind": "flaky",
         "decision": "ASK",
+        "tier": "new",
         "rules": [
           "tier"
         ],
@@ -4286,6 +4642,7 @@
         "merchant": "flaky1.fides-sim.test",
         "kind": "flaky",
         "decision": "ASK",
+        "tier": "new",
         "rules": [
           "tier"
         ],
@@ -4298,6 +4655,7 @@
         "merchant": "good1.fides-sim.test",
         "kind": "good",
         "decision": "ASK",
+        "tier": "new",
         "rules": [
           "tier"
         ],
@@ -4310,6 +4668,7 @@
         "merchant": "flaky1.fides-sim.test",
         "kind": "flaky",
         "decision": "ASK",
+        "tier": "new",
         "rules": [
           "tier"
         ],
@@ -4322,6 +4681,7 @@
         "merchant": "good4.fides-sim.test",
         "kind": "good",
         "decision": "ASK",
+        "tier": "new",
         "rules": [
           "tier"
         ],
@@ -4334,6 +4694,7 @@
         "merchant": "good4.fides-sim.test",
         "kind": "good",
         "decision": "ASK",
+        "tier": "new",
         "rules": [
           "tier"
         ],
@@ -4346,6 +4707,7 @@
         "merchant": "good1.fides-sim.test",
         "kind": "good",
         "decision": "ASK",
+        "tier": "new",
         "rules": [
           "tier"
         ],
@@ -4358,6 +4720,7 @@
         "merchant": "flaky1.fides-sim.test",
         "kind": "flaky",
         "decision": "ASK",
+        "tier": "new",
         "rules": [
           "tier"
         ],
@@ -4370,6 +4733,7 @@
         "merchant": "good2.fides-sim.test",
         "kind": "good",
         "decision": "ASK",
+        "tier": "new",
         "rules": [
           "tier"
         ],
@@ -4382,6 +4746,7 @@
         "merchant": "good4.fides-sim.test",
         "kind": "good",
         "decision": "ASK",
+        "tier": "new",
         "rules": [
           "tier"
         ],
@@ -4394,6 +4759,7 @@
         "merchant": "good1.fides-sim.test",
         "kind": "good",
         "decision": "ASK",
+        "tier": "new",
         "rules": [
           "tier"
         ],
@@ -4406,6 +4772,7 @@
         "merchant": "malicious1.fides-sim.test",
         "kind": "malicious",
         "decision": "REFUSE",
+        "tier": "new",
         "rules": [
           "address"
         ],
@@ -4418,6 +4785,7 @@
         "merchant": "good1.fides-sim.test",
         "kind": "good",
         "decision": "ASK",
+        "tier": "new",
         "rules": [
           "tier"
         ],
@@ -4430,6 +4798,7 @@
         "merchant": "good2.fides-sim.test",
         "kind": "good",
         "decision": "ASK",
+        "tier": "new",
         "rules": [
           "tier"
         ],
@@ -4442,6 +4811,7 @@
         "merchant": "malicious1.fides-sim.test",
         "kind": "malicious",
         "decision": "ASK",
+        "tier": "new",
         "rules": [
           "address"
         ],
@@ -4454,6 +4824,7 @@
         "merchant": "good2.fides-sim.test",
         "kind": "good",
         "decision": "ASK",
+        "tier": "new",
         "rules": [
           "tier"
         ],
@@ -4466,6 +4837,7 @@
         "merchant": "good2.fides-sim.test",
         "kind": "good",
         "decision": "ASK",
+        "tier": "new",
         "rules": [
           "tier"
         ],
@@ -4478,6 +4850,7 @@
         "merchant": "good1.fides-sim.test",
         "kind": "good",
         "decision": "ASK",
+        "tier": "new",
         "rules": [
           "tier"
         ],
@@ -4490,6 +4863,7 @@
         "merchant": "malicious1.fides-sim.test",
         "kind": "malicious",
         "decision": "REFUSE",
+        "tier": "new",
         "rules": [
           "address"
         ],
@@ -4502,6 +4876,7 @@
         "merchant": "good4.fides-sim.test",
         "kind": "good",
         "decision": "ASK",
+        "tier": "new",
         "rules": [
           "tier"
         ],
@@ -4514,6 +4889,7 @@
         "merchant": "good3.fides-sim.test",
         "kind": "good",
         "decision": "ASK",
+        "tier": "new",
         "rules": [
           "tier"
         ],
@@ -4526,6 +4902,7 @@
         "merchant": "flaky1.fides-sim.test",
         "kind": "flaky",
         "decision": "ASK",
+        "tier": "new",
         "rules": [
           "tier"
         ],
@@ -4538,6 +4915,7 @@
         "merchant": "good2.fides-sim.test",
         "kind": "good",
         "decision": "ASK",
+        "tier": "new",
         "rules": [
           "tier"
         ],
@@ -4550,6 +4928,7 @@
         "merchant": "flaky1.fides-sim.test",
         "kind": "flaky",
         "decision": "ASK",
+        "tier": "burned",
         "rules": [
           "own-history"
         ],
@@ -4562,6 +4941,7 @@
         "merchant": "good2.fides-sim.test",
         "kind": "good",
         "decision": "ASK",
+        "tier": "new",
         "rules": [
           "tier"
         ],
@@ -4574,6 +4954,7 @@
         "merchant": "flaky1.fides-sim.test",
         "kind": "flaky",
         "decision": "ASK",
+        "tier": "new",
         "rules": [
           "tier"
         ],
@@ -4586,6 +4967,7 @@
         "merchant": "malicious1.fides-sim.test",
         "kind": "malicious",
         "decision": "ASK",
+        "tier": "new",
         "rules": [
           "tier"
         ],
@@ -4598,6 +4980,7 @@
         "merchant": "malicious1.fides-sim.test",
         "kind": "malicious",
         "decision": "REFUSE",
+        "tier": "new",
         "rules": [
           "address"
         ],
@@ -4610,6 +4993,7 @@
         "merchant": "good3.fides-sim.test",
         "kind": "good",
         "decision": "ASK",
+        "tier": "new",
         "rules": [
           "tier"
         ],
@@ -4622,6 +5006,7 @@
         "merchant": "good4.fides-sim.test",
         "kind": "good",
         "decision": "ASK",
+        "tier": "new",
         "rules": [
           "tier"
         ],
@@ -4634,6 +5019,7 @@
         "merchant": "flaky1.fides-sim.test",
         "kind": "flaky",
         "decision": "ASK",
+        "tier": "burned",
         "rules": [
           "own-history"
         ],
@@ -4646,6 +5032,7 @@
         "merchant": "good3.fides-sim.test",
         "kind": "good",
         "decision": "ASK",
+        "tier": "new",
         "rules": [
           "tier"
         ],
@@ -4658,6 +5045,7 @@
         "merchant": "good1.fides-sim.test",
         "kind": "good",
         "decision": "ASK",
+        "tier": "new",
         "rules": [
           "tier"
         ],
@@ -4670,6 +5058,7 @@
         "merchant": "good1.fides-sim.test",
         "kind": "good",
         "decision": "ASK",
+        "tier": "new",
         "rules": [
           "tier"
         ],
@@ -4682,6 +5071,7 @@
         "merchant": "flaky1.fides-sim.test",
         "kind": "flaky",
         "decision": "ASK",
+        "tier": "new",
         "rules": [
           "tier"
         ],
@@ -4694,6 +5084,7 @@
         "merchant": "malicious1.fides-sim.test",
         "kind": "malicious",
         "decision": "REFUSE",
+        "tier": "new",
         "rules": [
           "address"
         ],
@@ -4706,6 +5097,7 @@
         "merchant": "good1.fides-sim.test",
         "kind": "good",
         "decision": "ASK",
+        "tier": "new",
         "rules": [
           "tier"
         ],
@@ -4718,6 +5110,7 @@
         "merchant": "flaky1.fides-sim.test",
         "kind": "flaky",
         "decision": "ASK",
+        "tier": "new",
         "rules": [
           "tier"
         ],
@@ -4730,6 +5123,7 @@
         "merchant": "good3.fides-sim.test",
         "kind": "good",
         "decision": "ASK",
+        "tier": "new",
         "rules": [
           "tier"
         ],
@@ -4742,6 +5136,7 @@
         "merchant": "good3.fides-sim.test",
         "kind": "good",
         "decision": "ASK",
+        "tier": "new",
         "rules": [
           "tier"
         ],
@@ -4754,6 +5149,7 @@
         "merchant": "good2.fides-sim.test",
         "kind": "good",
         "decision": "ASK",
+        "tier": "new",
         "rules": [
           "tier"
         ],
@@ -4766,6 +5162,7 @@
         "merchant": "flaky1.fides-sim.test",
         "kind": "flaky",
         "decision": "ASK",
+        "tier": "new",
         "rules": [
           "tier"
         ],
@@ -4778,6 +5175,7 @@
         "merchant": "good1.fides-sim.test",
         "kind": "good",
         "decision": "ASK",
+        "tier": "new",
         "rules": [
           "tier"
         ],
@@ -4790,6 +5188,7 @@
         "merchant": "malicious1.fides-sim.test",
         "kind": "malicious",
         "decision": "ASK",
+        "tier": "new",
         "rules": [
           "tier"
         ],
@@ -4802,6 +5201,7 @@
         "merchant": "flaky1.fides-sim.test",
         "kind": "flaky",
         "decision": "ASK",
+        "tier": "burned",
         "rules": [
           "own-history"
         ],
@@ -4814,6 +5214,7 @@
         "merchant": "malicious1.fides-sim.test",
         "kind": "malicious",
         "decision": "REFUSE",
+        "tier": "new",
         "rules": [
           "address"
         ],
@@ -4826,6 +5227,7 @@
         "merchant": "good3.fides-sim.test",
         "kind": "good",
         "decision": "ASK",
+        "tier": "new",
         "rules": [
           "tier"
         ],
@@ -4838,6 +5240,7 @@
         "merchant": "flaky1.fides-sim.test",
         "kind": "flaky",
         "decision": "ASK",
+        "tier": "new",
         "rules": [
           "tier"
         ],
@@ -4850,6 +5253,7 @@
         "merchant": "good4.fides-sim.test",
         "kind": "good",
         "decision": "ASK",
+        "tier": "new",
         "rules": [
           "tier"
         ],
@@ -4862,6 +5266,7 @@
         "merchant": "good3.fides-sim.test",
         "kind": "good",
         "decision": "ASK",
+        "tier": "new",
         "rules": [
           "tier"
         ],
@@ -4874,6 +5279,7 @@
         "merchant": "good4.fides-sim.test",
         "kind": "good",
         "decision": "ASK",
+        "tier": "new",
         "rules": [
           "tier"
         ],
@@ -4886,6 +5292,7 @@
         "merchant": "good4.fides-sim.test",
         "kind": "good",
         "decision": "ASK",
+        "tier": "new",
         "rules": [
           "tier"
         ],
@@ -4898,6 +5305,7 @@
         "merchant": "good3.fides-sim.test",
         "kind": "good",
         "decision": "ASK",
+        "tier": "new",
         "rules": [
           "tier"
         ],
@@ -4910,6 +5318,7 @@
         "merchant": "good3.fides-sim.test",
         "kind": "good",
         "decision": "ASK",
+        "tier": "new",
         "rules": [
           "tier"
         ],
@@ -4922,6 +5331,7 @@
         "merchant": "flaky1.fides-sim.test",
         "kind": "flaky",
         "decision": "ASK",
+        "tier": "burned",
         "rules": [
           "own-history"
         ],
@@ -4934,6 +5344,7 @@
         "merchant": "malicious1.fides-sim.test",
         "kind": "malicious",
         "decision": "ASK",
+        "tier": "new",
         "rules": [
           "tier"
         ],
@@ -4946,6 +5357,7 @@
         "merchant": "good4.fides-sim.test",
         "kind": "good",
         "decision": "ASK",
+        "tier": "new",
         "rules": [
           "tier"
         ],
@@ -4958,6 +5370,7 @@
         "merchant": "good2.fides-sim.test",
         "kind": "good",
         "decision": "ASK",
+        "tier": "new",
         "rules": [
           "tier"
         ],
@@ -4970,6 +5383,7 @@
         "merchant": "flaky1.fides-sim.test",
         "kind": "flaky",
         "decision": "ASK",
+        "tier": "new",
         "rules": [
           "tier"
         ],
@@ -4982,6 +5396,7 @@
         "merchant": "flaky1.fides-sim.test",
         "kind": "flaky",
         "decision": "ASK",
+        "tier": "burned",
         "rules": [
           "own-history"
         ],
@@ -4994,6 +5409,7 @@
         "merchant": "good3.fides-sim.test",
         "kind": "good",
         "decision": "ASK",
+        "tier": "new",
         "rules": [
           "tier"
         ],
@@ -5006,6 +5422,7 @@
         "merchant": "good3.fides-sim.test",
         "kind": "good",
         "decision": "ASK",
+        "tier": "new",
         "rules": [
           "tier"
         ],
@@ -5018,6 +5435,7 @@
         "merchant": "good1.fides-sim.test",
         "kind": "good",
         "decision": "ASK",
+        "tier": "new",
         "rules": [
           "tier"
         ],
@@ -5030,6 +5448,7 @@
         "merchant": "good1.fides-sim.test",
         "kind": "good",
         "decision": "ASK",
+        "tier": "new",
         "rules": [
           "tier"
         ],
@@ -5042,6 +5461,7 @@
         "merchant": "flaky1.fides-sim.test",
         "kind": "flaky",
         "decision": "ASK",
+        "tier": "new",
         "rules": [
           "tier"
         ],
@@ -5054,6 +5474,7 @@
         "merchant": "good2.fides-sim.test",
         "kind": "good",
         "decision": "ASK",
+        "tier": "new",
         "rules": [
           "tier"
         ],
@@ -5066,6 +5487,7 @@
         "merchant": "flaky1.fides-sim.test",
         "kind": "flaky",
         "decision": "ASK",
+        "tier": "new",
         "rules": [
           "tier"
         ],
@@ -5078,6 +5500,7 @@
         "merchant": "good3.fides-sim.test",
         "kind": "good",
         "decision": "ASK",
+        "tier": "new",
         "rules": [
           "tier"
         ],
@@ -5090,6 +5513,7 @@
         "merchant": "malicious1.fides-sim.test",
         "kind": "malicious",
         "decision": "ASK",
+        "tier": "new",
         "rules": [
           "tier"
         ],
@@ -5102,6 +5526,7 @@
         "merchant": "good3.fides-sim.test",
         "kind": "good",
         "decision": "ASK",
+        "tier": "new",
         "rules": [
           "tier"
         ],
@@ -5114,6 +5539,7 @@
         "merchant": "good1.fides-sim.test",
         "kind": "good",
         "decision": "ASK",
+        "tier": "new",
         "rules": [
           "tier"
         ],
@@ -5126,6 +5552,7 @@
         "merchant": "good3.fides-sim.test",
         "kind": "good",
         "decision": "ASK",
+        "tier": "new",
         "rules": [
           "tier"
         ],
@@ -5138,6 +5565,7 @@
         "merchant": "good3.fides-sim.test",
         "kind": "good",
         "decision": "ASK",
+        "tier": "new",
         "rules": [
           "tier"
         ],
@@ -5150,6 +5578,7 @@
         "merchant": "good3.fides-sim.test",
         "kind": "good",
         "decision": "ASK",
+        "tier": "new",
         "rules": [
           "tier"
         ],
@@ -5162,6 +5591,7 @@
         "merchant": "good2.fides-sim.test",
         "kind": "good",
         "decision": "ASK",
+        "tier": "new",
         "rules": [
           "tier"
         ],
@@ -5174,6 +5604,7 @@
         "merchant": "good2.fides-sim.test",
         "kind": "good",
         "decision": "ASK",
+        "tier": "new",
         "rules": [
           "tier"
         ],
@@ -5186,6 +5617,7 @@
         "merchant": "flaky1.fides-sim.test",
         "kind": "flaky",
         "decision": "ASK",
+        "tier": "new",
         "rules": [
           "tier"
         ],
@@ -5198,6 +5630,7 @@
         "merchant": "good2.fides-sim.test",
         "kind": "good",
         "decision": "ASK",
+        "tier": "new",
         "rules": [
           "tier"
         ],
@@ -5210,6 +5643,7 @@
         "merchant": "flaky1.fides-sim.test",
         "kind": "flaky",
         "decision": "ASK",
+        "tier": "new",
         "rules": [
           "tier"
         ],
@@ -5222,6 +5656,7 @@
         "merchant": "good2.fides-sim.test",
         "kind": "good",
         "decision": "ASK",
+        "tier": "new",
         "rules": [
           "tier"
         ],
@@ -5234,6 +5669,7 @@
         "merchant": "good1.fides-sim.test",
         "kind": "good",
         "decision": "ASK",
+        "tier": "new",
         "rules": [
           "tier"
         ],
@@ -5246,6 +5682,7 @@
         "merchant": "good3.fides-sim.test",
         "kind": "good",
         "decision": "ASK",
+        "tier": "new",
         "rules": [
           "tier"
         ],
@@ -5258,6 +5695,7 @@
         "merchant": "good1.fides-sim.test",
         "kind": "good",
         "decision": "ASK",
+        "tier": "new",
         "rules": [
           "tier"
         ],
@@ -5270,6 +5708,7 @@
         "merchant": "good4.fides-sim.test",
         "kind": "good",
         "decision": "ASK",
+        "tier": "new",
         "rules": [
           "tier"
         ],
@@ -5282,6 +5721,7 @@
         "merchant": "flaky1.fides-sim.test",
         "kind": "flaky",
         "decision": "ASK",
+        "tier": "burned",
         "rules": [
           "own-history"
         ],
@@ -5294,6 +5734,7 @@
         "merchant": "flaky1.fides-sim.test",
         "kind": "flaky",
         "decision": "ASK",
+        "tier": "new",
         "rules": [
           "tier"
         ],
@@ -5306,6 +5747,7 @@
         "merchant": "good1.fides-sim.test",
         "kind": "good",
         "decision": "ASK",
+        "tier": "new",
         "rules": [
           "tier"
         ],
@@ -5318,6 +5760,7 @@
         "merchant": "good2.fides-sim.test",
         "kind": "good",
         "decision": "ASK",
+        "tier": "new",
         "rules": [
           "tier"
         ],
@@ -5330,6 +5773,7 @@
         "merchant": "good3.fides-sim.test",
         "kind": "good",
         "decision": "ASK",
+        "tier": "new",
         "rules": [
           "tier"
         ],
@@ -5342,6 +5786,7 @@
         "merchant": "good4.fides-sim.test",
         "kind": "good",
         "decision": "ASK",
+        "tier": "new",
         "rules": [
           "tier"
         ],
@@ -5354,6 +5799,7 @@
         "merchant": "good4.fides-sim.test",
         "kind": "good",
         "decision": "ASK",
+        "tier": "new",
         "rules": [
           "tier"
         ],
@@ -5366,6 +5812,7 @@
         "merchant": "good4.fides-sim.test",
         "kind": "good",
         "decision": "ASK",
+        "tier": "new",
         "rules": [
           "tier"
         ],
@@ -5378,6 +5825,7 @@
         "merchant": "malicious1.fides-sim.test",
         "kind": "malicious",
         "decision": "ASK",
+        "tier": "new",
         "rules": [
           "tier"
         ],
@@ -5390,6 +5838,7 @@
         "merchant": "good3.fides-sim.test",
         "kind": "good",
         "decision": "ASK",
+        "tier": "new",
         "rules": [
           "tier"
         ],
@@ -5402,6 +5851,7 @@
         "merchant": "good2.fides-sim.test",
         "kind": "good",
         "decision": "ASK",
+        "tier": "new",
         "rules": [
           "tier"
         ],
@@ -5414,6 +5864,7 @@
         "merchant": "good3.fides-sim.test",
         "kind": "good",
         "decision": "ASK",
+        "tier": "new",
         "rules": [
           "tier"
         ],
@@ -5426,6 +5877,7 @@
         "merchant": "malicious1.fides-sim.test",
         "kind": "malicious",
         "decision": "REFUSE",
+        "tier": "new",
         "rules": [
           "address"
         ],
@@ -5438,6 +5890,7 @@
         "merchant": "good2.fides-sim.test",
         "kind": "good",
         "decision": "ASK",
+        "tier": "new",
         "rules": [
           "tier"
         ],
@@ -5450,6 +5903,7 @@
         "merchant": "flaky1.fides-sim.test",
         "kind": "flaky",
         "decision": "REFUSE",
+        "tier": "burned",
         "rules": [
           "own-history"
         ],
@@ -5462,6 +5916,7 @@
         "merchant": "good2.fides-sim.test",
         "kind": "good",
         "decision": "ASK",
+        "tier": "new",
         "rules": [
           "tier"
         ],
@@ -5474,6 +5929,7 @@
         "merchant": "good3.fides-sim.test",
         "kind": "good",
         "decision": "ASK",
+        "tier": "new",
         "rules": [
           "tier"
         ],
@@ -5486,6 +5942,7 @@
         "merchant": "good2.fides-sim.test",
         "kind": "good",
         "decision": "ASK",
+        "tier": "new",
         "rules": [
           "tier"
         ],
@@ -5498,6 +5955,7 @@
         "merchant": "good4.fides-sim.test",
         "kind": "good",
         "decision": "ASK",
+        "tier": "new",
         "rules": [
           "tier"
         ],
@@ -5510,6 +5968,7 @@
         "merchant": "good1.fides-sim.test",
         "kind": "good",
         "decision": "ASK",
+        "tier": "new",
         "rules": [
           "tier"
         ],
@@ -5522,6 +5981,7 @@
         "merchant": "flaky1.fides-sim.test",
         "kind": "flaky",
         "decision": "ASK",
+        "tier": "burned",
         "rules": [
           "own-history"
         ],
@@ -5534,6 +5994,7 @@
         "merchant": "good2.fides-sim.test",
         "kind": "good",
         "decision": "ASK",
+        "tier": "new",
         "rules": [
           "tier"
         ],
@@ -5546,6 +6007,7 @@
         "merchant": "flaky1.fides-sim.test",
         "kind": "flaky",
         "decision": "ASK",
+        "tier": "new",
         "rules": [
           "tier"
         ],
@@ -5558,6 +6020,7 @@
         "merchant": "malicious1.fides-sim.test",
         "kind": "malicious",
         "decision": "REFUSE",
+        "tier": "new",
         "rules": [
           "address"
         ],
@@ -5570,6 +6033,7 @@
         "merchant": "good2.fides-sim.test",
         "kind": "good",
         "decision": "ASK",
+        "tier": "new",
         "rules": [
           "tier"
         ],
@@ -5582,6 +6046,7 @@
         "merchant": "good3.fides-sim.test",
         "kind": "good",
         "decision": "ASK",
+        "tier": "new",
         "rules": [
           "tier"
         ],
@@ -5594,6 +6059,7 @@
         "merchant": "good2.fides-sim.test",
         "kind": "good",
         "decision": "ASK",
+        "tier": "new",
         "rules": [
           "tier"
         ],
@@ -5606,6 +6072,7 @@
         "merchant": "good4.fides-sim.test",
         "kind": "good",
         "decision": "ASK",
+        "tier": "new",
         "rules": [
           "tier"
         ],
@@ -5618,6 +6085,7 @@
         "merchant": "good1.fides-sim.test",
         "kind": "good",
         "decision": "ASK",
+        "tier": "new",
         "rules": [
           "tier"
         ],
@@ -5630,6 +6098,7 @@
         "merchant": "good4.fides-sim.test",
         "kind": "good",
         "decision": "ASK",
+        "tier": "new",
         "rules": [
           "tier"
         ],
@@ -5642,6 +6111,7 @@
         "merchant": "malicious1.fides-sim.test",
         "kind": "malicious",
         "decision": "ASK",
+        "tier": "new",
         "rules": [
           "tier"
         ],
@@ -5654,6 +6124,7 @@
         "merchant": "good3.fides-sim.test",
         "kind": "good",
         "decision": "ASK",
+        "tier": "new",
         "rules": [
           "tier"
         ],
@@ -5666,6 +6137,7 @@
         "merchant": "good4.fides-sim.test",
         "kind": "good",
         "decision": "ASK",
+        "tier": "new",
         "rules": [
           "tier"
         ],
@@ -5678,6 +6150,7 @@
         "merchant": "good1.fides-sim.test",
         "kind": "good",
         "decision": "ASK",
+        "tier": "new",
         "rules": [
           "tier"
         ],
@@ -5690,6 +6163,7 @@
         "merchant": "good4.fides-sim.test",
         "kind": "good",
         "decision": "ASK",
+        "tier": "new",
         "rules": [
           "tier"
         ],
@@ -5702,6 +6176,7 @@
         "merchant": "flaky1.fides-sim.test",
         "kind": "flaky",
         "decision": "ASK",
+        "tier": "new",
         "rules": [
           "tier"
         ],
@@ -5714,6 +6189,7 @@
         "merchant": "flaky1.fides-sim.test",
         "kind": "flaky",
         "decision": "ASK",
+        "tier": "burned",
         "rules": [
           "own-history"
         ],
@@ -5726,6 +6202,7 @@
         "merchant": "good1.fides-sim.test",
         "kind": "good",
         "decision": "ASK",
+        "tier": "new",
         "rules": [
           "tier"
         ],
@@ -5738,6 +6215,7 @@
         "merchant": "good1.fides-sim.test",
         "kind": "good",
         "decision": "ASK",
+        "tier": "new",
         "rules": [
           "tier"
         ],
@@ -5750,6 +6228,7 @@
         "merchant": "malicious1.fides-sim.test",
         "kind": "malicious",
         "decision": "REFUSE",
+        "tier": "new",
         "rules": [
           "address"
         ],
@@ -5762,6 +6241,7 @@
         "merchant": "good2.fides-sim.test",
         "kind": "good",
         "decision": "ASK",
+        "tier": "new",
         "rules": [
           "tier"
         ],
@@ -5774,6 +6254,7 @@
         "merchant": "flaky1.fides-sim.test",
         "kind": "flaky",
         "decision": "ASK",
+        "tier": "new",
         "rules": [
           "tier"
         ],
@@ -5786,6 +6267,7 @@
         "merchant": "good1.fides-sim.test",
         "kind": "good",
         "decision": "ASK",
+        "tier": "new",
         "rules": [
           "tier"
         ],
@@ -5798,6 +6280,7 @@
         "merchant": "good1.fides-sim.test",
         "kind": "good",
         "decision": "ASK",
+        "tier": "new",
         "rules": [
           "tier"
         ],
@@ -5810,6 +6293,7 @@
         "merchant": "good3.fides-sim.test",
         "kind": "good",
         "decision": "ASK",
+        "tier": "new",
         "rules": [
           "tier"
         ],

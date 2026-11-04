@@ -229,7 +229,7 @@ export class PayingAgent {
     const outcome = {
       merchantHost: host, payTo: challenge.recipient, txDigest, amount: quotedRaw.toString(), quotedAmount: quotedRaw.toString(),
       asset: challenge.currency, requestHash: hashRequest('GET', url), responseHash: ex.responseHash, responseBytes: ex.responseBytes,
-      latencyMs, checks: ex.checks, issuedAt, idempotencyKey: key, ownerId: agent,
+      latencyMs, checks: ex.checks, issuedAt, idempotencyKey: key, ownerId: agent, decisionId: check.decisionId,
     };
     let receipt: ReportReceipt | undefined;
     let reportError: string | undefined;
