@@ -1,27 +1,26 @@
 // Publish the Fides anchor Move package and emit one test report.
-// Usage: node packages/move/publish.mjs [testnet|mainnet]   (default testnet)
+// Usage: node packages/move/publish.mjs [testnet|mainnet] [--dry]
+//   --dry  compile and check the bytecode and the publisher, spend nothing.
 // Signs with SUI_PRIVATE_KEY_A from .env. Never prints key values.
-// Needs the Sui CLI only to compile: set SUI_CLI to its path (default ~/.tools/sui-cli/bin/sui.exe).
-import { readFileSync } from 'node:fs';
+// The Sui CLI is only used to compile: set SUI_CLI to its path (default ~/.tools/sui-cli/bin/sui.exe).
+// On success the package id is saved to packages/move/deployments.json under the network name.
+import { readFileSync, writeFileSync, existsSync } from 'node:fs';
 import { execFileSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import { homedir } from 'node:os';
 import { join } from 'node:path';
+import { createHash } from 'node:crypto';
 import { SuiGrpcClient } from '@mysten/sui/grpc';
 import { Transaction } from '@mysten/sui/transactions';
 import { Ed25519Keypair } from '@mysten/sui/keypairs/ed25519';
 import { decodeSuiPrivateKey } from '@mysten/sui/cryptography';
-import { createHash } from 'node:crypto';
+import { getProfile } from '../chain/profile.mjs';
 
-const network = process.argv[2] ?? 'testnet';
-if (!['testnet', 'mainnet'].includes(network)) throw new Error('network must be testnet or mainnet');
+const args = process.argv.slice(2);
+const dry = args.includes('--dry');
+const profile = getProfile(args.find((a) => !a.startsWith('--')));
 
-const env = {};
-for (const l of readFileSync(fileURLToPath(new URL('../../.env', import.meta.url)), 'utf8').split(/\r?\n/)) {
-  const m = l.match(/^([A-Z0-9_]+)=(.*)$/);
-  if (m) env[m[1]] = m[2].trim();
-}
-const { secretKey } = decodeSuiPrivateKey(env.SUI_PRIVATE_KEY_A);
+const { secretKey } = decodeSuiPrivateKey(profile.env.SUI_PRIVATE_KEY_A);
 const keypair = Ed25519Keypair.fromSecretKey(secretKey);
 const sender = keypair.toSuiAddress();
 
@@ -33,13 +32,14 @@ const built = JSON.parse(
     stdio: ['ignore', 'pipe', 'ignore'],
   }),
 );
+console.log(`network ${profile.name}, publisher ${sender}`);
+console.log(`built ${built.modules.length} module(s), ${built.dependencies.length} dependencies`);
+if (dry) {
+  console.log('DRY RUN: nothing published');
+  process.exit(0);
+}
 
-const client = new SuiGrpcClient({
-  network,
-  baseUrl: network === 'mainnet' ? 'https://fullnode.mainnet.sui.io:443' : 'https://fullnode.testnet.sui.io:443',
-});
-
-console.log(`network ${network}, publisher ${sender}`);
+const client = new SuiGrpcClient({ network: profile.suiNetwork, baseUrl: profile.fullnodeUrl });
 
 const pub = new Transaction();
 pub.setSender(sender);
@@ -60,8 +60,13 @@ if (!pkg) {
 }
 console.log('PACKAGE_ID', pkg.objectId);
 
-// One test report so check 5 can read an event back through Tatum.
-const evidence = createHash('sha256').update('fides day1 check5 test evidence').digest();
+const depPath = join(pkgDir, 'deployments.json');
+const deployments = existsSync(depPath) ? JSON.parse(readFileSync(depPath, 'utf8')) : {};
+deployments[profile.name] = { packageId: pkg.objectId, publishDigest: pubTx.digest, publisher: sender };
+writeFileSync(depPath, JSON.stringify(deployments, null, 2) + '\n');
+
+// One test report so the event can be read back through Tatum.
+const evidence = createHash('sha256').update('fides day1 anchor test evidence').digest();
 const tx = new Transaction();
 tx.setSender(sender);
 tx.moveCall({
@@ -77,3 +82,4 @@ const res = await client.signAndExecuteTransaction({ transaction: tx, signer: ke
 const rt = res.Transaction ?? res.FailedTransaction;
 console.log('report status', rt.status.success ? 'success' : 'FAILED', 'digest', rt.digest);
 console.log('EVIDENCE_SHA256', evidence.toString('hex'));
+process.exit(rt.status.success ? 0 : 1);
