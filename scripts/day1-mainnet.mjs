@@ -124,11 +124,14 @@ if (!pub.ok || !results.packageId || !results.reportDigest) {
   process.exit(1);
 }
 let ev = null;
+const floor = results.payment?.checkpoint ? Number(results.payment.checkpoint) - 1 : 0;
 for (let i = 0; i < 6 && !ev; i++) {
   await sleep(2500);
   const d = await tatumGraphql(
     profile,
-    `{ events(first: 5, filter: { type: "${results.packageId}::anchor::Report" }) { nodes { transaction { digest } sender { address } contents { json } } } }`,
+    // Bounded below: Tatum's mainnet node has pruned old checkpoints, and an unbounded scan fails there. The package was
+    // published after the payment of check 4, so that payment's checkpoint is a safe floor.
+    `{ events(first: 5, filter: { type: "${results.packageId}::anchor::Report"${floor ? `, afterCheckpoint: ${floor}` : ''} }) { nodes { transaction { digest } sender { address } contents { json } } } }`,
   );
   ev = d.events.nodes.find((n) => n.transaction.digest === results.reportDigest) ?? null;
 }

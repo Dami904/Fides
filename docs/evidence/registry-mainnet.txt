@@ -1,0 +1,220 @@
+Registry on Sui mainnet, 2026-11-05. Real Walrus Memory relayer (namespace fides-ui-20261105b, the shared record of the mainnet UI run) and Tatum.
+Command: FIDES_NETWORK=mainnet FIDES_MEMORY_NAMESPACE=fides-ui-20261105b PORT=4210 pnpm registry   (read-only: it never pays or writes)
+
+--- GET /v1/merchants/flaky.fides-demo.test (first call, cold cache: about 10 s)
+{
+ "host": "flaky.fides-demo.test",
+ "assessment": {
+  "tier": "burned",
+  "cleanCount": 1,
+  "burnCount": 3,
+  "wilson": 0.024548335950525826,
+  "confidence": 0.2782616818435081,
+  "cannotSay": false
+ },
+ "refresh": {
+  "sharedRecord": "attached",
+  "verified": 4,
+  "rejected": 1,
+  "pending": 0,
+  "malformed": 0,
+  "fromCache": false,
+  "refreshedAt": 1793905343613,
+  "anchors": {
+   "state": "complete",
+   "notRecalled": [
+    {
+     "evidenceId": "f025b2f1bcde9832d0211e4c45748fc35ff9ce9dcc1d5234bd11bb447c0febf5",
+     "reporter": "0x1e27871ad624952bd034c7bb6b995f927ea494537603dc82b9fef6b537c6f4ec",
+     "verdict": "burned",
+     "anchorTx": "Gk1kW2sYUFr4r8joMWQb2EicvkFR1rcaFBz8S3D76nya",
+     "paymentTx": "bB6s8uT4GJiV2Jxoe5fu1rosZn3iXcFZTci4ARRaZrS",
+     "anchoredAt": "2026-11-05T18:53:30.586Z"
+    },
+    {
+     "evidenceId": "ebeff573f6defb32d341022baeee6e93aabbab8716fb409a8778f3edd2531e31",
+     "reporter": "0x1e27871ad624952bd034c7bb6b995f927ea494537603dc82b9fef6b537c6f4ec",
+     "verdict": "clean",
+     "anchorTx": "5Fi3bca1AFzVTky7KjSbcnfvrk6rNWeYiW38SBAwYiYb",
+     "paymentTx": "CDCZ7Q5zAL2n4pCVnL2VCiSNseXK1ZseNC85UsRnyXwL",
+     "anchoredAt": "2026-11-05T18:52:17.843Z"
+    },
+    {
+     "evidenceId": "6b7396f9d2c2f191bf79743058069d789c218a2cad8d3f4c9dac89366553edd1",
+     "reporter": "0x1e27871ad624952bd034c7bb6b995f927ea494537603dc82b9fef6b537c6f4ec",
+     "verdict": "clean",
+     "anchorTx": "GmTKEkXKPH5VLS2iY4fNbpRsqp7W9aYmvk9GvnQ1brsg",
+     "paymentTx": "9FtR7W7hg72sUSEreTAjPDVzufCUdkPz2tJMGrBykwZ1",
+     "anchoredAt": "2026-11-05T18:51:17.028Z"
+    },
+    {
+     "evidenceId": "1b2cd250275aa5839c5ef15860b946e880724702aa55e0469d0a5b2a9531e7ae",
+     "reporter": "0x1e27871ad624952bd034c7bb6b995f927ea494537603dc82b9fef6b537c6f4ec",
+     "verdict": "clean",
+     "anchorTx": "6BQZ4iQNMGzSVPfKgwxwYtcvp11Man3GBW7Ax3EQiep8",
+     "paymentTx": "CRgdP89BY1Nzra3NM3QHX1gnzrCNtmEfjWwi5wKfrWrN",
+     "anchoredAt": "2026-11-05T18:50:18.878Z"
+    },
+    {
+     "evidenceId": "0283f82066db469d816780ca17e29f8cdfa51acd600dab0871b787508de2c930",
+     "reporter": "0x7624f7b643800780e968bab41d59664e6f31772e94cbfdca117552f932629e7c",
+     "verdict": "burned",
+     "anchorTx": "DmhrhrwcAH3rBPoSJqZxHVHpEfLQSJoB6dahiUQ3iNUD",
+     "paymentTx": "8ZmHi59MJPWojyCZF7HQBgFfh67TeZJtBxJUpAZmPyUw",
+     "anchoredAt": "2026-11-05T10:21:22.891Z"
+    },
+    {
+     "evidenceId": "63949eca92288f0d0d1acd2a0c439e3ce53ae0822bbc5a8fa00d4944dca44719",
+     "reporter": "0x7624f7b643800780e968bab41d59664e6f31772e94cbfdca117552f932629e7c",
+     "verdict": "burned",
+     "anchorTx": "HoBh5UZ7xdSQt5rnZuRjD39mqbnCKcEGByWeQyKd67aC",
+     "paymentTx": "5XCaiJ3q3hp88bVf1uavWkt4j9GQ4dap1PLPFnLmSPRR",
+     "anchoredAt": "2026-11-05T10:20:26.813Z"
+    },
+    {
+     "evidenceId": "f0bf37eb4355804ca80467338e42165028d83c53cf60f8558d5f16184c7d6bb8",
+     "reporter": "0x34c40318c2e953b18cbd2df24305433ac87cca54e39d2cc151176a0928d9f100",
+     "verdict": "burned",
+     "anchorTx": "thS7aCWfQGRdjCebixYVVvpPByPCPRoULhc5xozpM13",
+     "paymentTx": "CEC7xtoKbZAVbgQRrWL8BzyUtgojTCXdobwnWc5Guui4",
+     "anchoredAt": "2026-11-05T10:19:57.941Z"
+    },
+    {
+     "evidenceId": "b9ea32fb865b5ca51a0b23b07ef6a52507ee60b8e676dae8a6ccbd5f3265ade5",
+     "reporter": "0x1e27871ad624952bd034c7bb6b995f927ea494537603dc82b9fef6b537c6f4ec",
+     "verdict": "burned",
+     "anchorTx": "GwLpD528pZhfg2vjWqyd899DGzEGPbT28euGxDYGyQ3k",
+     "paymentTx": "EAzJgSNh1PNVVYW38jNY59M9JriGBXHuP95Kgnr5o6yE",
+     "anchoredAt": "2026-11-05T10:19:33.297Z"
+    },
+    {
+     "evidenceId": "e83ac216e0d1e679f1503d8683d6071779993d17b55ffe000065794800c7ab00",
+     "reporter": "0x1e27871ad624952bd034c7bb6b995f927ea494537603dc82b9fef6b537c6f4ec",
+     "verdict": "clean",
+     "anchorTx": "5uNgMQyub92HL9siRV8kBVZrW4e6TzfHXvhareTBzRxu",
+     "paymentTx": "CUwm6MWkREm7YAcfwwgUpkxEmk5H2juVkxacKcaNSPpj",
+     "anchoredAt": "2026-11-05T10:18:32.031Z"
+    },
+    {
+     "evidenceId": "dd52a8efd686403b4ba10e11967e9d617e6e3a8abcae6340cb05f164672d310b",
+     "reporter": "0x1e27871ad624952bd034c7bb6b995f927ea494537603dc82b9fef6b537c6f4ec",
+     "verdict": "clean",
+     "anchorTx": "5RouXFngxgz9o6yxsSsEbtPBM7hbKGvBePcf7pzbkKKt",
+     "paymentTx": "GYZGFCCs39TC6kvXAQJtBuKE7btsj8Dm974N4y933fmg",
+     "anchoredAt": "2026-11-04T16:03:58.683Z"
+    },
+    {
+     "evidenceId": "89cf29f8295257197ab9d0823afde3d3f51f963a56845a7fa7cc6a6e055b93d5",
+     "reporter": "0x7624f7b643800780e968bab41d59664e6f31772e94cbfdca117552f932629e7c",
+     "verdict": "burned",
+     "anchorTx": "DwNYRj64Krm9vGx1Wz13srbBmQjH9KYgnnpPeabufJBE",
+     "paymentTx": "DvuLVquEkahAv2oc2smVsxqZj1ynzG1J8aMFNk1m2WkS",
+     "anchoredAt": "2026-11-04T16:03:44.881Z"
+    },
+    {
+     "evidenceId": "ee552ab526d409ac519185c72063917705ef883d5fc4f3ada15564dc74536df8",
+     "reporter": "0x34c40318c2e953b18cbd2df24305433ac87cca54e39d2cc151176a0928d9f100",
+     "verdict": "burned",
+     "anchorTx": "6CHG2HaFtCMYMnjxTZjpDKf86FyFh9N92o7cpugnWust",
+     "paymentTx": "2BkgRMmc8FrQ6A7XKcMGaYfkBg76vqPhyUDuRf6bbPNZ",
+     "anchoredAt": "2026-11-04T16:03:39.206Z"
+    },
+    {
+     "evidenceId": "fab7593017529782d817d6e2e722373b909437d299ac16e8f9045013069a1765",
+     "reporter": "0x1e27871ad624952bd034c7bb6b995f927ea494537603dc82b9fef6b537c6f4ec",
+     "verdict": "clean",
+     "anchorTx": "6eJLVjKf5Z6ecMrZYkUCWinGPw63UUPDogg6zaeBLfoq",
+     "paymentTx": "8KEHTsxHJsxXPbe9JeNwKpZKcooGpCdPtQ5zC6Tx6qwh",
+     "anchoredAt": "2026-11-04T16:03:34.633Z"
+    },
+    {
+     "evidenceId": "607a1e4d37e59efc93cf762afdd3e73630044b2d0400b047e422b14bc4434996",
+     "reporter": "0x34c40318c2e953b18cbd2df24305433ac87cca54e39d2cc151176a0928d9f100",
+     "verdict": "clean",
+     "anchorTx": "D5WZQwqbGwnomBtsjkRPRoADDSozoW4YhZprM3Z2oYqp",
+     "paymentTx": "7GbDireZjbFKeNb25Mqz9BZmv1Zy5zHH5VXS2EmFAZP5",
+     "anchoredAt": "2026-11-04T16:02:15.118Z"
+    },
+    {
+     "evidenceId": "d3596a1627b2e6a1a89250714b0de0964017194d35e11acf34f6c0292bda5746",
+     "reporter": "0x7624f7b643800780e968bab41d59664e6f31772e94cbfdca117552f932629e7c",
+     "verdict": "burned",
+     "anchorTx": "456VZR4Roz6ertWXyZaWNRvPX98u3iNaCnndoKMSnj95",
+     "paymentTx": "AsvXomGxgUGdY7GnJ2QPmTEsJJCssC7iygApvA6x4maM",
+     "anchoredAt": "2026-11-04T15:51:04.707Z"
+    },
+    {
+     "evidenceId": "30396dbf7ace240480d386b0eb9abb5472ee31d1cc8ce4c50704f15659f05941",
+     "reporter": "0x34c40318c2e953b18cbd2df24305433ac87cca54e39d2cc151176a0928d9f100",
+     "verdict": "burned",
+     "anchorTx": "6cYLKZrraCRRsYViw34hjLisgsjAZFdThNcED7oC2BDx",
+     "paymentTx": "9KiwfVHbFPrtk4Wdjtb1saqY8AgFN7N1Hgz78q9gaVVK",
+     "anchoredAt": "2026-11-04T15:50:28.284Z"
+    },
+    {
+     "evidenceId": "35c47cdcd6453082107960c1396d25a14f1d28129cd8ebc8a70b69a8fa37bebb",
+     "reporter": "0x1e27871ad624952bd034c7bb6b995f927ea494537603dc82b9fef6b537c6f4ec",
+     "verdict": "burned",
+     "anchorTx": "5Rx9u5djcHQ8u1wvwLPQ1WeTwpMuJf8VsvfejheWmCYm",
+     "paymentTx": "G1fvTLYEZmBmi7BPJEs1RvdZubvZp6fBrzsycqf4sN5F",
+     "anchoredAt": "2026-11-04T15:49:57.500Z"
+    },
+    {
+     "evidenceId": "449137765d3ca22a3eb5003d208847faf4bbc52ea28e670d4db129a35d0bd570",
+     "reporter": "0x1e27871ad624952bd034c7bb6b995f927ea494537603dc82b9fef6b537c6f4ec",
+     "verdict": "clean",
+     "anchorTx": "5qtisq8HDVucBJmw3A2A6ZyqVAQPWqdefCgjjKX64pF4",
+     "paymentTx": "DASXrXsxvfn7DYoBZan8XYySikXeERsCYfmNZpbUHV22",
+     "anchoredAt": "2026-11-04T15:48:59.202Z"
+    }
+   ]
+  }
+ },
+ "stale": false,
+ "evidence": [
+  {
+   "id": "16afd6f22d4e",
+   "verdict": "burned",
+   "status": "rejected",
+   "rejectReason": "no anchor event found for this evidence (it may not be indexed yet)"
+  },
+  {
+   "id": "a8cf12fb805e",
+   "verdict": "burned",
+   "status": "verified",
+   "rejectReason": null
+  },
+  {
+   "id": "5e53414eb834",
+   "verdict": "burned",
+   "status": "verified",
+   "rejectReason": null
+  },
+  {
+   "id": "b83d9058b1ee",
+   "verdict": "burned",
+   "status": "verified",
+   "rejectReason": null
+  },
+  {
+   "id": "3b429eebf260",
+   "verdict": "clean",
+   "status": "verified",
+   "rejectReason": null
+  }
+ ]
+}
+
+--- GET /v1/evidence/a8cf12fb805e.../verify
+ok: true
+  format         ok   well formed, 1087 bytes, canonical
+  hash           ok   sha256 a8cf12fb805e9e362987be3766af1766bce3feabb8230b9589a83a936389c38d matches the Sui anchor
+  signature      ok   signed by reporter 0x7624f7b643800780e968bab41d59664e6f31772e94cbfdca117552f932629e7c
+  anchor-sender  ok   anchor event sender equals the reporter
+  payment        ok   final in checkpoint 341884989, sender is the reporter, 10000 paid to 0x6bb4c83392650cbd167bac4140ad7688a798a3c4347b0a21bf2d63a50de7071e
+
+--- GET /v1/merchants/never-seen.example (a host nobody reported)
+assessment: tier new, 0 clean, 0 burns, cannotSay true. refresh.sharedRecord: attached, verified 0, rejected 0, pending 0.
+(The shared record was reachable and has nothing about this host, so the answer is "cannot say", not "no reports".)
+
+Repeat call to the first merchant: 0.08 s, served from the cache.

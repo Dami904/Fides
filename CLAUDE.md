@@ -38,6 +38,8 @@ pnpm check:secrets               # scan staged files for key-like strings (check
 pnpm merchants                   # the three mock merchants on 127.0.0.1:4101-4103
 pnpm demo                        # the scripted demo, simulated, no network
 pnpm demo:live                   # the same on Sui testnet with real payments (-- --memory=live writes real memories)
+pnpm demo:rule6                  # rule 6 shown once: a PAY becomes an ASK citing another merchant's memory (-- --live --memory=live for mainnet)
+node scripts/balances.mjs        # SUI and USDC per wallet, read-only
 pnpm sim                         # the simulation (-- --seeds=5 --agents=20 --rounds=12 --no-rule6)
 pnpm registry                    # verifying registry and lookup page on 127.0.0.1:4200 (-- --memory=fake for an empty record)
 pnpm --filter @fides/mcp start   # MCP over stdio (-- --http with FIDES_MCP_TOKEN for HTTP)
@@ -47,7 +49,7 @@ pnpm day1:mainnet:run            # spends cents: one MPP payment and one anchor 
 ```
 
 ```bash
-pnpm web                         # the UI (React and Vite) on fixtures; pnpm web:build builds it
+pnpm web                         # the UI (React and Vite) on fixtures; pnpm web:build builds it, pnpm web:build:hosted builds what the hosted site shows (the recorded mainnet run)
 pnpm web:live                    # the UI on a fresh engine run (-- --live for Sui testnet)
 pnpm mockups                     # the four early UI mockups on http://127.0.0.1:4400/ (open /mockups/index.html)
 pnpm fixtures                    # re-export the real demo and simulation data the mockups read (apps/web/fixtures)
