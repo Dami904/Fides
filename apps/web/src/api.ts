@@ -8,6 +8,8 @@ import type { Attempt, CheckResult, DemoFixture, Honesty, MerchantView, SharedSt
 export interface FidesApi {
   mode: 'fixtures' | 'live';
   honesty(): Honesty;
+  /** Where to see a payment on a public explorer. Undefined when the run was simulated: there is nothing on chain to show. */
+  explorerTx?(digest: string): string;
   /** Every attempt an agent made, oldest first. */
   listDecisions(): Promise<Attempt[]>;
   /** A and C on one merchant, and B's verdict with the shared record attached, detached and unreachable. */
@@ -108,6 +110,7 @@ export function apiFrom(demo: DemoFixture, sim: SimFixture, src: ApiSource): Fid
   return {
     mode: src.mode,
     honesty: () => src.honesty,
+    ...(demo.mode === 'live' ? { explorerTx: (digest: string) => `https://suiscan.xyz/${encodeURIComponent(demo.network)}/tx/${encodeURIComponent(digest)}` } : {}),
     ...(src.probe ? { probeSplit: src.probe } : {}),
     listDecisions: async () => all,
     listMerchants: async () => [demo.merchants.flaky, demo.merchants.malicious, demo.merchants.good],
@@ -121,9 +124,9 @@ export function apiFrom(demo: DemoFixture, sim: SimFixture, src: ApiSource): Fid
       const chk = Object.fromEntries(demo.steps[6]!.checks.map((c) => [c.label, c.check]));
       const states: SplitView['states'] = {
         // B's own check in step 3, before B was ever burned: the record alone made it refuse.
-        attached: { check: demo.steps[2]!.results.find((r) => r.agent === 'B')?.check ?? chk.attached!, loss: 0, says: 'B reads the signed records, verifies each against Sui and Tatum, and sees two independent burns.', next: 'B pays nothing. Nobody has to be asked.' },
+        attached: { check: demo.steps[2]!.results.find((r) => r.agent === 'B')?.check ?? chk.attached!, loss: 0, says: 'B reads the signed records, verifies each against Sui and Tatum, and sees the independent burns.', next: 'B pays nothing. Nobody has to be asked.' },
         detached: { check: bDetached.check!, loss: 0.01, says: 'B has lost access to the shared record. Nothing was deleted: B simply cannot see it.', next: 'B has no history, so it asks a person. The person approves, B pays 0.01 USDC, and the merchant returns junk.' },
-        unreachable: { check: chk.unreachable!, loss: 0, says: 'The shared record cannot be reached. That is not the same as "no reports", and B does not treat it that way.', next: 'B answers from its own history only, and will not pay on its own.' },
+        unreachable: { check: chk.unreachable ?? null, loss: 0, says: 'The shared record cannot be reached. That is not the same as "no reports", and B does not treat it that way.', next: 'B answers from its own history only, and will not pay on its own.' },
       };
       return {
         host,

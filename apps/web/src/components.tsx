@@ -1,7 +1,47 @@
-import { useCallback, useEffect, useRef, useState, type ReactNode } from 'react';
+import { Component, useCallback, useEffect, useRef, useState, type ReactNode } from 'react';
 import type { FidesApi } from './api';
 import { glyphCells, href, short, type Route } from './lib';
 import type { Decision, VerifyStep } from './types';
+
+// ---------- icons: one stroke set, drawn on a 20 pixel grid ----------
+const ICONS = {
+  split: 'M4 4h5v12H4zM11 4h5v12h-5z',
+  feed: 'M4 5h12M4 10h12M4 15h8',
+  merchants: 'M3.5 8 5 4h10l1.5 4M4.5 8v8h11V8M3.5 8a2.2 2.2 0 0 0 4.3 0 2.2 2.2 0 0 0 4.4 0 2.2 2.2 0 0 0 4.3 0M8 16v-4h4v4',
+  simulation: 'M4 16V10M10 16V4M16 16V7',
+  arrow: 'M4 10h12M11 5l5 5-5 5',
+  back: 'M16 10H4M9 5l-5 5 5 5',
+  check: 'M4.5 10.5 8.5 14.5 15.5 6',
+  cross: 'M5.5 5.5l9 9M14.5 5.5l-9 9',
+  sun: 'M10 6.5a3.5 3.5 0 1 0 0 7 3.5 3.5 0 0 0 0-7zM10 2.5v1.5M10 16v1.5M2.5 10H4M16 10h1.5M4.7 4.7l1 1M14.3 14.3l1 1M4.7 15.3l1-1M14.3 5.7l1-1',
+  moon: 'M16.5 12A7 7 0 0 1 8 3.5 7 7 0 1 0 16.5 12z',
+  play: 'M6 4.5v11l9-5.5z',
+  pause: 'M7 4.5v11M13 4.5v11',
+  replay: 'M4 10a6 6 0 1 0 2-4.5M4 3.5v3h3',
+  link: 'M8 12l4-4M9 5.5l1-1a3.5 3.5 0 0 1 5 5l-1 1M11 14.5l-1 1a3.5 3.5 0 0 1-5-5l1-1',
+  unlink: 'M9 5.5l1-1a3.5 3.5 0 0 1 5 5l-1 1M11 14.5l-1 1a3.5 3.5 0 0 1-5-5l1-1M3 3l14 14',
+  shield: 'M10 2.5 16 5v4.5c0 4-2.5 6.7-6 8-3.5-1.3-6-4-6-8V5zM7.2 10l2 2 3.6-4',
+  scale: 'M10 3v14M6 17h8M4 6h12M4 6l-2 5a2.5 2.5 0 0 0 4 0zM16 6l-2 5a2.5 2.5 0 0 0 4 0z',
+  signal: 'M3 10a7 7 0 0 1 14 0M6 10a4 4 0 0 1 8 0M3 3l14 14',
+} as const;
+
+export function Icon({ name, size = 18 }: { name: keyof typeof ICONS; size?: number }) {
+  return (
+    <svg className="icon" width={size} height={size} viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <path d={ICONS[name]} />
+    </svg>
+  );
+}
+
+function Mark({ size = 28 }: { size?: number }) {
+  return (
+    <svg className="mark-logo" width={size} height={size} viewBox="0 0 32 32" aria-hidden="true">
+      <rect width="32" height="32" rx="9" fill="var(--brand)" />
+      <path d="M11 24V10.5A2.5 2.5 0 0 1 13.5 8H22M11 16h8" fill="none" stroke="var(--brand-ink)" strokeWidth="3" strokeLinecap="round" />
+      <circle cx="21.5" cy="22.5" r="2.5" fill="var(--brand-ink)" />
+    </svg>
+  );
+}
 
 // ---------- hash seal: a hexagon with a glyph drawn from the hash ----------
 export type SealStatus = 'verified' | 'rejected' | 'pending';
@@ -15,9 +55,9 @@ export function Seal({ id, status = 'verified', size = 30 }: { id: string; statu
   return (
     <span className="seal" role="img" aria-label={`${status} record ${short(id)}`}>
       <svg width={size} height={size} viewBox="0 0 40 40" aria-hidden="true">
-        <polygon points={hex} fill={`color-mix(in srgb, ${col} 12%, var(--surface))`} stroke={col} strokeWidth="1.8" strokeDasharray={status === 'pending' ? '3 2.5' : undefined} />
-        <g fill={col}>{glyphCells(id || '0000000000000000').map(([c, r]) => <rect key={`${c}${r}`} x={9.2 + c * 4.3} y={9.2 + r * 4.3} width="3.5" height="3.5" />)}</g>
-        {status === 'rejected' && <path d="M5 35 L35 5" stroke="var(--red)" strokeWidth="2.6" strokeLinecap="square" />}
+        <polygon points={hex} fill={`color-mix(in srgb, ${col} 12%, var(--surface))`} stroke={col} strokeWidth="1.8" strokeLinejoin="round" strokeDasharray={status === 'pending' ? '3 2.5' : undefined} />
+        <g fill={col}>{glyphCells(id || '0000000000000000').map(([c, r]) => <rect key={`${c}${r}`} x={9.2 + c * 4.3} y={9.2 + r * 4.3} width="3.5" height="3.5" rx="0.7" />)}</g>
+        {status === 'rejected' && <path d="M5 35 L35 5" stroke="var(--red)" strokeWidth="2.6" strokeLinecap="round" />}
       </svg>
     </span>
   );
@@ -26,46 +66,50 @@ export function Seal({ id, status = 'verified', size = 30 }: { id: string; statu
 export function Chip({ id, status = 'verified' }: { id: string; status?: SealStatus }) {
   return (
     <span className={`chip${status === 'rejected' ? ' rejected' : ''}`} title={id}>
-      <Seal id={id} status={status} size={22} />
+      <Seal id={id} status={status} size={18} />
       {short(id)}
     </span>
   );
 }
 
-// ---------- verdict badge ----------
-const STAMP: Record<Decision, [string, string]> = { PAY: ['pay', 'Pay'], PAY_CAPPED: ['capped', 'Pay, capped'], ASK: ['ask', 'Ask'], REFUSE: ['refuse', 'Refuse'] };
+// ---------- verdict badge: an icon, a word and a colour, never colour alone ----------
+const STAMP: Record<Decision, [string, string, keyof typeof ICONS]> = {
+  PAY: ['pay', 'Pay', 'check'],
+  PAY_CAPPED: ['capped', 'Pay, capped', 'check'],
+  ASK: ['ask', 'Ask', 'feed'],
+  REFUSE: ['refuse', 'Refuse', 'cross'],
+};
 export const flagOf = (d: Decision) => (d === 'REFUSE' ? 'flag-red' : d === 'ASK' ? 'flag-ochre' : 'flag-green');
 
 export function Stamp({ decision, big, sub, press }: { decision: Decision; big?: boolean; sub?: string; press?: boolean }) {
-  const [cls, label] = STAMP[decision];
+  const [cls, label, icon] = STAMP[decision];
   return (
-    <span key={decision} className={`stamp ${cls}${big ? ' big' : ''}${press ? ' press' : ''}`} role="img" aria-label={`verdict: ${label}`}>
-      {label}
+    <span key={decision} className={`stamp ${cls}${big ? ' big' : ''}${press ? ' press' : ''}`} role="img" aria-label={`verdict: ${label}${sub ? `, ${sub}` : ''}`}>
+      {decision === 'ASK' ? <b className="q" aria-hidden="true">?</b> : <Icon name={icon} size={big ? 18 : 13} />}
+      <span>{label}</span>
       {sub && <small>{sub}</small>}
     </span>
   );
 }
 
 export function Meter({ value }: { value: number }) {
-  const on = Math.round(Math.max(0, Math.min(1, value)) * 10);
-  return (
-    <span className="meter" role="img" aria-label={`evidence behind it: ${Math.round(value * 100)} percent`}>
-      {Array.from({ length: 10 }, (_, i) => <i key={i} className={i < on ? 'on' : ''} />)}
-    </span>
-  );
+  const pct = Math.round(Math.max(0, Math.min(1, value)) * 100);
+  return <span className="meter" role="img" aria-label={`evidence behind it: ${pct} percent`}><i style={{ width: `${pct}%` }} /></span>;
 }
 
 export function Pill({ tone, state, title, children }: { tone?: 'ok' | 'bad' | 'warn'; state?: boolean; title?: string; children: ReactNode }) {
   return <span className={`pill${state ? ' state' : ''}${tone ? ` ${tone}` : ''}`} title={title}>{children}</span>;
 }
 
-// ---------- page shell ----------
-const NAV: [string, string, Route['name'][]][] = [
-  [href.feed, 'Feed', ['feed', 'decision']],
-  [href.split, 'A / B', ['split']],
-  [href.merchants, 'Merchants', ['merchants', 'merchant', 'evidence']],
-  [href.simulation, 'Simulation', ['simulation']],
-];
+/** A screen that throws shows the error instead of blanking the whole page. Keyed by route, so moving on clears it. */
+export class ScreenBoundary extends Component<{ children: ReactNode }, { error: string | null }> {
+  override state = { error: null as string | null };
+  static getDerivedStateFromError(e: Error) { return { error: e.message }; }
+  override render() {
+    if (this.state.error) return <div className="notice bad">This screen hit an error: {this.state.error}. This is a fault in the page, not a result from Fides. <a href={href.home}>Back to the overview</a>.</div>;
+    return this.props.children;
+  }
+}
 
 /** Load once per key. A failure is kept as an error to show, never turned into an empty result. */
 export function useLoad<T>(load: () => Promise<T>, key: unknown[]): { data: T | null; error: string | null } {
@@ -79,6 +123,15 @@ export function useLoad<T>(load: () => Promise<T>, key: unknown[]): { data: T | 
   return state;
 }
 
+export function Loading() {
+  return (
+    <div className="skeleton" role="status">
+      <span className="sr">Loading.</span>
+      <i /><i /><i />
+    </div>
+  );
+}
+
 export function Crumbs({ trail }: { trail: [string, string?][] }) {
   return (
     <nav className="crumbs" aria-label="Breadcrumb">
@@ -89,12 +142,46 @@ export function Crumbs({ trail }: { trail: [string, string?][] }) {
   );
 }
 
+// ---------- the shell: a site header on the home page, a sidebar in the app ----------
+const NAV: [string, string, keyof typeof ICONS, Route['name'][]][] = [
+  [href.split, 'A / B split', 'split', ['split']],
+  [href.feed, 'Decision feed', 'feed', ['feed', 'decision']],
+  [href.merchants, 'Merchants', 'merchants', ['merchants', 'merchant', 'evidence']],
+  [href.simulation, 'Simulation', 'simulation', ['simulation']],
+];
+
 function readTheme(): 'dark' | 'light' {
   try {
-    return localStorage.getItem('fides-theme') === 'light' ? 'light' : 'dark';
+    return localStorage.getItem('fides-theme') === 'dark' ? 'dark' : 'light';
   } catch {
-    return 'dark';
+    return 'light';
   }
+}
+
+function ThemeButton({ theme, toggle }: { theme: 'dark' | 'light'; toggle: () => void }) {
+  return (
+    <button className="icon-btn" type="button" onClick={toggle} aria-label={`Switch to the ${theme === 'dark' ? 'light' : 'dark'} theme`} title={`Switch to the ${theme === 'dark' ? 'light' : 'dark'} theme`}>
+      <Icon name={theme === 'dark' ? 'sun' : 'moon'} />
+    </button>
+  );
+}
+
+/** What is real on this screen: always one click away, on every page. */
+function Honesty({ api }: { api: FidesApi }) {
+  const honesty = api.honesty();
+  const allReal = honesty.items.every((i) => i.real);
+  const settlement = honesty.items.find((i) => i.key === 'Settlement');
+  // Name the network only when the payments in this run were really on it.
+  const label = api.mode === 'fixtures' ? 'Recorded run' : settlement?.real ? `Live on ${settlement.value}` : 'Live, simulated';
+  return (
+    <details className="honesty">
+      <summary><span className={`dot${allReal || settlement?.real ? ' real' : ''}`} />{label}</summary>
+      <div className="pop" role="note" aria-label="What is real on this screen">
+        <div className="lead">What is real here</div>
+        {honesty.items.map((i) => <div key={i.key} className="row"><span className={`dot${i.real ? ' real' : ''}`} /><span>{i.key}</span><b>{i.value}</b></div>)}
+      </div>
+    </details>
+  );
 }
 
 export function Shell({ api, route, children }: { api: FidesApi; route: Route; children: ReactNode }) {
@@ -109,50 +196,91 @@ export function Shell({ api, route, children }: { api: FidesApi; route: Route; c
       localStorage.setItem('fides-theme', t); // only a choice made by the person is saved
     } catch { /* private window */ }
   };
-  const honesty = api.honesty();
-  const allReal = honesty.items.every((i) => i.real);
-  return (
-    <>
-      <header className="top">
-        <div className="top-in">
-          <a className="brand" href={href.home} aria-current={route.name === 'home' ? 'page' : undefined}>
-            <Seal id="fides1234567890ab" size={26} />
-            <span>Fides</span>
-          </a>
-          <nav className="nav" aria-label="Screens">
-            {NAV.map(([to, label, names]) => <a key={to} href={to} aria-current={names.includes(route.name) ? 'page' : undefined}>{label}</a>)}
-          </nav>
-          <details className="honesty">
-            <summary><span className={`dot${allReal ? ' real' : ''}`} />{api.mode === 'fixtures' ? 'Recorded run' : 'Live'}</summary>
-            <div className="pop" role="note" aria-label="What is real on this screen">
-              <div className="lead">What is real here</div>
-              {honesty.items.map((i) => <div key={i.key} className="row"><span className={`dot${i.real ? ' real' : ''}`} />{i.key}<b>{i.value}</b></div>)}
+  const brand = (
+    <a className="brand" href={href.home} aria-current={route.name === 'home' ? 'page' : undefined}>
+      <Mark />
+      <span>Fides</span>
+    </a>
+  );
+
+  if (route.name === 'home') {
+    return (
+      <div className="site">
+        <a className="skip" href="#content" onClick={(e) => { e.preventDefault(); document.getElementById('content')?.focus(); }}>Skip to content</a>
+        <header className="site-head">
+          <div className="site-head-in">
+            {brand}
+            <nav className="site-nav" aria-label="Screens">
+              {NAV.map(([to, label]) => <a key={to} href={to}>{label}</a>)}
+            </nav>
+            <div className="site-tools">
+              <Honesty api={api} />
+              <ThemeButton theme={theme} toggle={toggle} />
+              <a className="btn primary small" href={href.split}>Open the demo</a>
             </div>
-          </details>
-          <button className="theme" type="button" onClick={toggle} aria-label="Switch between the dark and light themes">{theme === 'dark' ? 'Light' : 'Dark'}</button>
-        </div>
-      </header>
-      <div className="frame">{children}</div>
-      <footer className="site">
-        <div className="frame">
-          <div className="about">
-            <a className="brand" href={href.home}><Seal id="fides1234567890ab" size={22} /><span>Fides</span></a>
-            <p className="muted">A credit bureau for machine payments on Sui. Evidence anchored on Sui, read through Tatum, remembered in Walrus Memory.</p>
           </div>
-          <div><h4>Explore</h4><a href={href.split}>A / B split</a><a href={href.feed}>Decision feed</a><a href={href.merchants}>Merchants</a><a href={href.simulation}>Simulation</a></div>
-          <div><h4>Under the hood</h4><span>Seven decision rules</span><span>Five checks per record</span><span>SDK, LLM tools, MCP</span></div>
+        </header>
+        <main id="content" tabIndex={-1}>{children}</main>
+        <footer className="site-foot">
+          <div className="wrap foot-grid">
+            <div className="about">
+              {brand}
+              <p>A credit bureau for machine payments on Sui. Evidence anchored on Sui, read through Tatum, remembered in Walrus Memory.</p>
+            </div>
+            <div><h4>Explore</h4>{NAV.map(([to, label]) => <a key={to} href={to}>{label}</a>)}</div>
+            <div><h4>Under the hood</h4><span>Seven decision rules</span><span>Five checks per record</span><span>SDK, LLM tools, MCP</span></div>
+          </div>
+        </footer>
+      </div>
+    );
+  }
+
+  return (
+    <div className="app">
+      <aside className="side">
+        {brand}
+        <nav className="side-nav" aria-label="Screens">
+          {NAV.map(([to, label, icon, names]) => (
+            <a key={to} href={to} aria-current={names.includes(route.name) ? 'page' : undefined}><Icon name={icon} />{label}</a>
+          ))}
+        </nav>
+        <div className="side-foot">
+          <Honesty api={api} />
+          <ThemeButton theme={theme} toggle={toggle} />
         </div>
-      </footer>
-    </>
+      </aside>
+      <div className="app-top">
+        {brand}
+        <div className="site-tools"><Honesty api={api} /><ThemeButton theme={theme} toggle={toggle} /></div>
+      </div>
+      <main className="app-main" id="content" tabIndex={-1}>
+        <div className="app-in">{children}</div>
+      </main>
+      <nav className="tabbar" aria-label="Screens, phone layout">
+        {NAV.map(([to, label, icon, names]) => (
+          <a key={to} href={to} aria-current={names.includes(route.name) ? 'page' : undefined}><Icon name={icon} size={20} /><span>{label.replace('Decision feed', 'Feed').replace('A / B split', 'A / B')}</span></a>
+        ))}
+      </nav>
+    </div>
   );
 }
 
 export function PageHead({ title, children, aside, crumbs }: { title: ReactNode; children?: ReactNode; aside?: ReactNode; crumbs?: [string, string?][] }) {
   return (
     <div className="page-head">
-      <div>{crumbs && <Crumbs trail={crumbs} />}<h1>{title}</h1>{children && <p>{children}</p>}</div>
-      {aside}
+      <div className="page-head-copy">{crumbs && <Crumbs trail={crumbs} />}<h1>{title}</h1>{children && <div className="page-sub">{children}</div>}</div>
+      {aside && <div className="page-aside">{aside}</div>}
     </div>
+  );
+}
+
+/** Where to go from here, so nobody has to work out the order of the story. */
+export function NextStep({ to, label, hint }: { to: string; label: string; hint: string }) {
+  return (
+    <a className="next-step" href={to}>
+      <span><small>Next</small><b>{label}</b><span>{hint}</span></span>
+      <Icon name="arrow" size={20} />
+    </a>
   );
 }
 
@@ -166,7 +294,7 @@ export function Seg<T extends string>({ value, options, onChange, label, radio }
   );
 }
 
-// ---------- re-verify: the steps appear one at a time, the way a clerk ticks a ledger ----------
+// ---------- re-verify: the steps arrive one at a time ----------
 export function useVerify(api: FidesApi) {
   const [steps, setSteps] = useState<VerifyStep[]>([]);
   const [running, setRunning] = useState(false);
@@ -192,22 +320,4 @@ export function useVerify(api: FidesApi) {
     }
   }, [api]);
   return { steps, running, done, run };
-}
-
-export function StepLog({ steps, done }: { steps: VerifyStep[]; done: boolean | null }) {
-  if (!steps.length) return null;
-  return (
-    <>
-      <ol className="steps" aria-live="polite">
-        {steps.map((s) => (
-          <li key={s.name} className={`in ${s.ok ? 'pass' : 'fail'}`} aria-label={`${s.name}: ${s.ok ? 'passed' : 'failed'}`}>
-            <span className="mark" aria-hidden="true">{s.ok ? '✓' : '✕'}</span>
-            <span className="nm">{s.name}</span>
-            <span className="dt">{s.detail}</span>
-          </li>
-        ))}
-      </ol>
-      {done !== null && <div className={`verdict-line ${done ? 'pass' : 'fail'}`}>{done ? 'Passes every check. It counts.' : 'Fails a check. It is not counted.'}</div>}
-    </>
-  );
 }

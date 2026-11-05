@@ -64,7 +64,8 @@ export interface MerchantView {
 export interface SplitView {
   host: string;
   earlier: { agent: string; label: string; result: string; ok: boolean; evidenceId: string }[];
-  states: Record<SharedState, { check: CheckResult; loss: number; says: string; next: string }>;
+  /** check is null when the run has no answer for that state: a run on the real relayer cannot switch it off. */
+  states: Record<SharedState, { check: CheckResult | null; loss: number; says: string; next: string }>;
   lossOthers: { A: number; C: number };
 }
 export interface Honesty { items: { key: string; value: string; real: boolean }[] }

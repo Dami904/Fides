@@ -3,9 +3,6 @@ import { createRoot } from 'react-dom/client';
 import { App } from './App';
 import { liveApi } from './api';
 import './styles.css';
-import './screens.css';
-import './extra.css';
-import './pages.css';
 
 const root = createRoot(document.getElementById('root')!);
 // pnpm web:live sets VITE_FIDES_API. Without it the UI runs on the recorded fixtures.
@@ -19,7 +16,7 @@ if (!base) {
     // Fail loudly: an unreachable live API is shown as that, never quietly replaced by the fixtures.
     (e: Error) =>
       root.render(
-        <main style={{ maxWidth: 640, margin: '15vh auto', padding: '0 16px', fontFamily: 'system-ui, sans-serif' }}>
+        <main className="fatal">
           <div className="notice bad">
             <strong>The live API could not be reached.</strong>
             <p>{e.message}</p>

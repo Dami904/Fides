@@ -165,20 +165,20 @@ describe('the fixtures API', () => {
 
   it('the split view: B refuses with the record, asks without it, and does not pay when it cannot reach it', async () => {
     const s = await api.getSplit();
-    expect(s.states.attached.check.verdict.decision).toBe('REFUSE');
-    expect(s.states.attached.check.verdict.citations.evidenceIds).toHaveLength(2);
-    expect(s.states.detached.check.verdict.decision).toBe('ASK');
-    expect(s.states.detached.check.verdict.citations.evidenceIds).toEqual([]);
+    expect(s.states.attached.check!.verdict.decision).toBe('REFUSE');
+    expect(s.states.attached.check!.verdict.citations.evidenceIds).toHaveLength(2);
+    expect(s.states.detached.check!.verdict.decision).toBe('ASK');
+    expect(s.states.detached.check!.verdict.citations.evidenceIds).toEqual([]);
     expect(s.states.detached.loss).toBe(0.01);
-    expect(s.states.unreachable.check.sharedState).toBe('unreachable');
-    expect(['PAY', 'PAY_CAPPED']).not.toContain(s.states.unreachable.check.verdict.decision);
+    expect(s.states.unreachable.check!.sharedState).toBe('unreachable');
+    expect(['PAY', 'PAY_CAPPED']).not.toContain(s.states.unreachable.check!.verdict.decision);
     expect(s.states.attached.loss).toBe(0);
   });
 
   it('what B cites on the split view are the records A and C reported', async () => {
     const s = await api.getSplit();
     const reported = new Set(s.earlier.map((e) => e.evidenceId));
-    for (const id of s.states.attached.check.verdict.citations.evidenceIds) expect(reported.has(id)).toBe(true);
+    for (const id of s.states.attached.check!.verdict.citations.evidenceIds) expect(reported.has(id)).toBe(true);
   });
 
   it('the flaky merchant is burned, shows a rejected record, and the malicious one raises an address alert', async () => {

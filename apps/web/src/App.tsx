@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { fixturesApi, type FidesApi } from './api';
-import { Shell } from './components';
+import { ScreenBoundary, Shell } from './components';
 import { parseRoute, type Route } from './lib';
 import { Decision } from './screens/Decision';
 import { Evidence } from './screens/Evidence';
@@ -22,6 +22,7 @@ export function App({ api: given }: { api?: FidesApi } = {}) {
   }, []);
   return (
     <Shell api={api} route={route}>
+      <ScreenBoundary key={JSON.stringify(route)}>
       {route.name === 'home' && <Home api={api} />}
       {route.name === 'feed' && <Feed api={api} />}
       {route.name === 'decision' && <Decision api={api} index={route.index} />}
@@ -30,6 +31,7 @@ export function App({ api: given }: { api?: FidesApi } = {}) {
       {route.name === 'merchant' && <Merchant api={api} host={route.host} />}
       {route.name === 'evidence' && <Evidence api={api} id={route.id} />}
       {route.name === 'simulation' && <Simulation api={api} />}
+      </ScreenBoundary>
     </Shell>
   );
 }

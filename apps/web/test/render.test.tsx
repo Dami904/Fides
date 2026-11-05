@@ -85,7 +85,7 @@ describe('the A / B split with a live engine behind it', () => {
       // A live answer that differs from the recording: the detached state refuses instead of asking.
       probeSplit: async (state) => {
         asked.push(state);
-        const check = structuredClone(split.states[state].check);
+        const check = structuredClone(split.states[state].check!);
         if (state === 'detached') check.verdict.decision = 'REFUSE';
         return { check, checkedAt: '2026-11-04T12:34:56.000Z' };
       },
@@ -97,6 +97,42 @@ describe('the A / B split with a live engine behind it', () => {
     await clickState(page, 'Detached');
     expect(asked).toContain('detached');
     expect(page.textContent).toMatch(/Follows from the decision above/);
+  });
+
+  it('a run on the real relayer has no unreachable answer: it says so, and the screen does not fall over', async () => {
+    const split = await base.getSplit();
+    const api: FidesApi = {
+      ...base,
+      mode: 'live',
+      getSplit: async () => ({ ...split, states: { ...split.states, unreachable: { ...split.states.unreachable, check: null } } }),
+      probeSplit: async (state) => {
+        if (state === 'unreachable') throw new Error('this server uses the real Walrus Memory relayer');
+        return { check: split.states[state].check!, checkedAt: '2026-11-04T12:34:56.000Z' };
+      },
+    };
+    const page = await show('#/split', api);
+    await clickState(page, 'Unreachable');
+    await act(() => new Promise((r) => setTimeout(r, 20)));
+    expect(page.textContent).toMatch(/no honest answer for this state/);
+    expect(page.textContent).toMatch(/There is no recorded decision for this state either/);
+    expect(page.textContent).not.toMatch(/hit an error/);
+    await clickState(page, 'Attached');
+    await act(() => new Promise((r) => setTimeout(r, 20)));
+    expect(page.textContent).not.toMatch(/no honest answer/);
+  });
+
+  it('a screen that throws shows the error instead of a blank page', async () => {
+    const quiet = console.error;
+    console.error = () => undefined;
+    try {
+      const api: FidesApi = { ...base, getSplit: async () => ({}) as never };
+      const page = await show('#/split', api);
+      await act(() => new Promise((r) => setTimeout(r, 20)));
+      expect(page.textContent).toMatch(/This screen hit an error/);
+      expect(page.textContent).toMatch(/fixtures|recorded/i); // the shell and its honesty label survive
+    } finally {
+      console.error = quiet;
+    }
   });
 
   it('a live check that fails says so and keeps the recorded decision', async () => {

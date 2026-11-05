@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import type { FidesApi } from '../api';
-import { PageHead, Seg, Stamp, useLoad } from '../components';
+import { Icon, Loading, NextStep, PageHead, Seg, Stamp, useLoad } from '../components';
 import { href, usd } from '../lib';
 import type { Attempt } from '../types';
 
@@ -11,7 +11,7 @@ function outcome(a: Attempt): [string, string] {
   if (a.reported?.verdict === 'burned') return ['burned', 'bad'];
   if (a.reported) return ['delivered', 'ok'];
   if (a.paid) return ['paid', 'ok'];
-  return ['not paid', 'muted'];
+  return ['not paid', 'none'];
 }
 
 function Row({ a, n, fresh }: { a: Attempt; n: number; fresh: boolean }) {
@@ -19,14 +19,14 @@ function Row({ a, n, fresh }: { a: Attempt; n: number; fresh: boolean }) {
   const [what, tone] = outcome(a);
   return (
     <a className={`row${fresh ? ' enter' : ''}`} href={href.decision(n)}>
-      <span className="n mono">{String(n + 1).padStart(2, '0')}</span>
+      <span className="c-n mono">{String(n + 1).padStart(2, '0')}</span>
       <span className="who">{a.agent}</span>
-      <span className="host mono">{a.host}</span>
-      <span className="price">{usd(a.amount)}</span>
-      <span className="v">{c && <Stamp decision={c.decision} />}</span>
-      <span className="why">{c?.reasons[0] ?? a.skipped?.why ?? ''}</span>
-      <span className={`out ${tone}`}>{what}</span>
-      <span className="go" aria-hidden="true">→</span>
+      <span className="c-host mono">{a.host}</span>
+      <span className="c-price mono">{usd(a.amount)}</span>
+      <span className="c-v">{c && <Stamp decision={c.decision} />}</span>
+      <span className="c-why">{c?.reasons[0] ?? a.skipped?.why ?? ''}</span>
+      <span className={`c-out ${tone}`}><i />{what}</span>
+      <span className="c-go" aria-hidden="true"><Icon name="arrow" size={15} /></span>
     </a>
   );
 }
@@ -62,33 +62,35 @@ export function Feed({ api }: { api: FidesApi }) {
 
   return (
     <>
-      <PageHead title="Decision feed" aside={<button className="btn" type="button" onClick={replay}>{shown !== null ? 'Replaying…' : 'Replay the run'}</button>}>
+      <PageHead title="Decision feed" aside={<button className="btn" type="button" onClick={replay}><Icon name="replay" size={16} />{shown !== null ? 'Replaying…' : 'Replay the run'}</button>}>
         Every time an agent was about to pay, Fides answered. Open any row for the full reasoning and the records it cites.
       </PageHead>
 
       {all && (
-        <div className="kpis" aria-label="Totals for the run">
+        <div className="kpis five" aria-label="Totals for the run">
           <div><b>{totals.attempts}</b><span>attempts</span></div>
-          <div><b className="green">{totals.paid}</b><span>paid</span></div>
-          <div><b className="ochre">{totals.asked}</b><span>asked a person</span></div>
-          <div><b className="red">{totals.refused}</b><span>refused</span></div>
-          <div><b className="red">{totals.burned}</b><span>burns reported</span></div>
+          <div><b>{totals.paid}</b><span><i className="d ok" />paid</span></div>
+          <div><b>{totals.asked}</b><span><i className="d warn" />asked a person</span></div>
+          <div><b>{totals.refused}</b><span><i className="d bad" />refused</span></div>
+          <div><b>{totals.burned}</b><span><i className="d bad" />burns reported</span></div>
         </div>
       )}
 
       <div className="toolbar">
-        <Seg label="Agent" value={agent} options={AGENTS} onChange={(v) => { stop(); setAgent(v); }} />
-        <Seg label="Verdict" value={decision} options={DECISIONS} onChange={(v) => { stop(); setDecision(v); }} />
-        <span className={`live${shown !== null ? ' on' : ''}`}><i /><span>{shown !== null ? 'Replaying' : 'Recorded run'}</span></span>
+        <div className="filter"><span>Agent</span><Seg label="Agent" value={agent} options={AGENTS} onChange={(v) => { stop(); setAgent(v); }} /></div>
+        <div className="filter"><span>Verdict</span><Seg label="Verdict" value={decision} options={DECISIONS} onChange={(v) => { stop(); setDecision(v); }} /></div>
+        <span className={`live${shown !== null ? ' on' : ''}`}><i /><span>{shown !== null ? 'Replaying' : api.mode === 'live' ? 'This server\'s run' : 'Recorded run'}</span></span>
       </div>
 
-      <main className="table" aria-live="polite">
-        <div className="row head" aria-hidden="true"><span>#</span><span /><span>merchant</span><span>usdc</span><span>verdict</span><span>why</span><span>outcome</span><span /></div>
+      <div className="table feed-table" aria-live="polite">
+        <div className="row head" aria-hidden="true"><span>#</span><span>agent</span><span>merchant</span><span>usdc</span><span>verdict</span><span>why</span><span>outcome</span><span /></div>
         {error && <div className="notice bad">The feed could not be loaded: {error}. This is an error, not an empty feed.</div>}
-        {!error && all === null && <p className="muted pad">Loading.</p>}
+        {!error && all === null && <Loading />}
         {all !== null && list.length === 0 && <p className="empty">{shown !== null ? 'Starting.' : 'Nothing matches these filters.'}</p>}
         {list.map((a, i) => <Row key={all!.indexOf(a)} a={a} n={all!.indexOf(a)} fresh={shown !== null && i === list.length - 1} />)}
-      </main>
+      </div>
+
+      <NextStep to={href.merchants} label="Merchant records" hint="What all of this adds up to for each merchant." />
     </>
   );
 }

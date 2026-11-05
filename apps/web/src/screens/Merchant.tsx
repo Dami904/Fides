@@ -1,5 +1,5 @@
 import type { FidesApi } from '../api';
-import { PageHead, Pill, Seal, Stamp, useLoad } from '../components';
+import { Icon, Loading, PageHead, Pill, Seal, Stamp, useLoad } from '../components';
 import { href, shortAddr } from '../lib';
 import type { EvidenceItem, Tier } from '../types';
 
@@ -10,10 +10,10 @@ function EvidenceRow({ e }: { e: EvidenceItem }) {
       <Seal id={e.id} status={rejected ? 'rejected' : 'verified'} size={28} />
       <b className={rejected || e.verdict === 'burned' ? 'red' : 'green'}>{rejected ? 'burned (claimed)' : e.verdict}</b>
       <Pill state tone={rejected ? 'bad' : 'ok'}>{rejected ? 'rejected' : 'verified'}</Pill>
-      <span className="why">{rejected ? e.rejectReason : e.problems[0] ?? 'Delivered as advertised.'}</span>
+      <span className="c-why">{rejected ? e.rejectReason : e.problems[0] ?? 'Delivered as advertised.'}</span>
       <span className="muted small">{rejected ? 'unknown reporter' : `agent ${e.agent}`}</span>
       <span className="mono tiny muted">{e.id.slice(0, 8)}</span>
-      <span className="go" aria-hidden="true">→</span>
+      <span className="c-go" aria-hidden="true"><Icon name="arrow" size={15} /></span>
     </a>
   );
 }
@@ -26,7 +26,7 @@ export function Merchant({ api, host }: { api: FidesApi; host: string }) {
   const rejected = m?.evidence.filter((e) => e.status === 'rejected') ?? [];
   return (
     <>
-      <PageHead crumbs={[['Merchants', href.merchants], [host]]} title={host} aside={m?.decision && <Stamp decision={m.decision} big sub="current verdict" />}>
+      <PageHead crumbs={[['Merchants', href.merchants], [host]]} title={<span className="mono-title">{host}</span>} aside={m?.decision && <Stamp decision={m.decision} big sub="current verdict" />}>
         {m && <span className="row-pills">
           <Pill state tone={m.tier === 'burned' ? 'bad' : m.tier === 'new' ? 'warn' : 'ok'}>tier: {m.tier}</Pill>
           {m.cannotSay && <Pill state tone="warn">cannot say: not enough history</Pill>}
@@ -34,22 +34,22 @@ export function Merchant({ api, host }: { api: FidesApi; host: string }) {
         </span>}
       </PageHead>
       {error && <div className="notice bad">This merchant could not be loaded: {error}. This is an error, not an empty record.</div>}
-      {!error && !m && <p className="muted pad">Loading.</p>}
+      {!error && !m && <Loading />}
       {m && (
-        <main>
+        <>
           {m.addressAlert && m.firstPaidAt && m.quotedNow && (
-            <div className="notice bad"><b>The payout address changed. </b>Quoted now: {shortAddr(m.quotedNow)}, not the address agents paid before ({shortAddr(m.firstPaidAt)}). The alert stays open until a person clears it.</div>
+            <div className="notice alert"><b>The payout address changed. </b>Quoted now: {shortAddr(m.quotedNow)}, not the address agents paid before ({shortAddr(m.firstPaidAt)}). The alert stays open until a person clears it.</div>
           )}
 
           <div className="merchant-top">
             <div className="kpis two">
-              <div><b className="green">{m.clean}</b><span>verified clean</span></div>
-              <div><b className={m.burned ? 'red' : ''}>{m.burned}</b><span>verified burns</span></div>
+              <div><b>{m.clean}</b><span><i className="d ok" />verified clean</span></div>
+              <div><b>{m.burned}</b><span><i className="d bad" />verified burns</span></div>
               <div><b>{m.reporters}</b><span>independent reporters</span></div>
-              <div><b className={m.rejectedCount ? 'red' : ''}>{m.rejectedCount}</b><span>rejected records</span></div>
+              <div><b>{m.rejectedCount}</b><span>{m.rejectedCount > 0 && <i className="d bad" />}rejected records</span></div>
             </div>
 
-            <section className="slip tier-card" aria-label="Tier">
+            <section className="panel tier-card" aria-label="Tier">
               <h2>Tier</h2>
               <ol className="ladder">
                 {TIERS.map(([k, label]) => <li key={k} className={m.tier === k ? 'here' : ''}><i />{label}</li>)}
@@ -58,7 +58,7 @@ export function Merchant({ api, host }: { api: FidesApi; host: string }) {
               <div className="seq">
                 <span className="lab">Reports, in order</span>
                 <div className="seq-row">
-                  {verified.map((r) => <a key={r.id} className={`seq-dot ${r.verdict}`} href={href.evidence(r.id)} title={`${r.verdict}, reported by agent ${r.agent}`}><Seal id={r.id} status="verified" size={22} /></a>)}
+                  {verified.map((r) => <a key={r.id} className={`seq-dot ${r.verdict}`} href={href.evidence(r.id)} title={`${r.verdict}, reported by agent ${r.agent}`}><Seal id={r.id} status="verified" size={24} /></a>)}
                   {!verified.length && <span className="muted small">No verified reports yet.</span>}
                 </div>
               </div>
@@ -74,12 +74,12 @@ export function Merchant({ api, host }: { api: FidesApi; host: string }) {
             </div>
             {rejected.length > 0 && (
               <>
-                <div className="section-row"><h3>Shown, never counted</h3><span className="muted small">Records that failed a check.</span></div>
+                <div className="section-row"><h2>Shown, never counted</h2><span className="muted small">Records that failed a check.</span></div>
                 <div className="table">{rejected.map((e) => <EvidenceRow key={e.id} e={e} />)}</div>
               </>
             )}
           </section>
-        </main>
+        </>
       )}
     </>
   );
