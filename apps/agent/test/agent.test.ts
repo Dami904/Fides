@@ -3,6 +3,7 @@ import type { Fides } from '@fides/sdk';
 import { PayingAgent, type AgentEvent } from '../src/agent.js';
 import { digestOfCredential, PaymentNotSentError, readChallenge } from '../src/mpp.js';
 import { runDemo } from '../src/demo.js';
+import { runRule6 } from '../src/rule6.js';
 import { simHarness, type Harness } from '../src/harness.js';
 
 const open: Harness[] = [];
@@ -215,5 +216,97 @@ describe('mpp helpers', () => {
     const cred = Buffer.from(JSON.stringify({ challenge: {}, payload: { digest: 'DIGEST1', signature: 's' } })).toString('base64url');
     expect(digestOfCredential(`Payment ${cred}`)).toBe('DIGEST1');
     expect(() => digestOfCredential('Payment ' + Buffer.from('{}').toString('base64url'))).toThrow(/no payment digest/);
+  });
+});
+
+describe('a report that could not be written is retried in the background, bounded', () => {
+  // A manual clock: nothing runs until the test fires the scheduled retry.
+  const clock = () => {
+    const pending: { fn: () => void; ms: number; id: number }[] = [];
+    let id = 0;
+    const cancelled: number[] = [];
+    return {
+      pending, cancelled,
+      schedule: (fn: () => void, ms: number) => { const h = { fn, ms, id: ++id }; pending.push(h); return h; },
+      cancel: (h: unknown) => { cancelled.push((h as { id: number }).id); const i = pending.indexOf(h as never); if (i >= 0) pending.splice(i, 1); },
+      fire: async () => {
+        const t = pending.shift()!;
+        t.fn();
+        await new Promise((r) => setTimeout(r, 25)); // let the retry pass finish
+        return t.ms;
+      },
+    };
+  };
+  const retried = (events: AgentEvent[]) => events.filter((e) => e.type === 'retried') as Extract<AgentEvent, { type: 'retried' }>[];
+
+  it('retries once the memory is back, reports the payment once, and stops', async () => {
+    const h = await sim();
+    const c = clock();
+    const events: AgentEvent[] = [];
+    const a = h.makeAgent('A', yes, (e) => events.push(e), { autoRetry: { baseDelayMs: 1000 }, schedule: c.schedule, cancel: c.cancel });
+    h.setMemoryDown(true);
+    const r = await a.agent.buy(h.merchants.good.resource);
+    expect(r.receipt?.status).toBe('partial');
+    expect(a.fides.unreported()).toHaveLength(1);
+    expect(c.pending).toHaveLength(1);
+    expect(c.pending[0]!.ms).toBe(1000);
+
+    h.setMemoryDown(false);
+    await c.fire();
+    expect(a.fides.unreported()).toHaveLength(0); // written, and no longer queued
+    expect(retried(events)).toEqual([{ type: 'retried', agent: 'A', reported: 1, stillQueued: 0, pass: 1 }]);
+    expect(c.pending).toHaveLength(0); // nothing left to do, so nothing is scheduled
+    // The one payment is one record: another agent finds it exactly once.
+    const b = h.makeAgent('B', () => false);
+    const st = await h.merchants.good.state();
+    const seen = await b.fides.check({ ownerId: 'B', merchantHost: h.merchants.good.host, payTo: st.payTo, amount: st.price, asset: 'x', network: 'sui', resource: '/' });
+    expect(seen.verdict.citations.evidenceIds).toHaveLength(1);
+  });
+
+  it('while the memory stays down it backs off, doubling each time, and gives up after maxPasses', async () => {
+    const h = await sim();
+    const c = clock();
+    const events: AgentEvent[] = [];
+    const a = h.makeAgent('A', yes, (e) => events.push(e), { autoRetry: { baseDelayMs: 1000, maxDelayMs: 3000, maxPasses: 4 }, schedule: c.schedule, cancel: c.cancel });
+    h.setMemoryDown(true);
+    await a.agent.buy(h.merchants.good.resource);
+    const delays: number[] = [];
+    while (c.pending.length) delays.push(await c.fire());
+    expect(delays).toEqual([1000, 2000, 3000, 3000]); // doubled, then capped
+    expect(retried(events).map((e) => [e.pass, e.reported, e.stillQueued])).toEqual([[1, 0, 1], [2, 0, 1], [3, 0, 1], [4, 0, 1]]);
+    expect(a.fides.unreported()).toHaveLength(1); // still queued: retryUnreported() finishes it on the next start
+    h.setMemoryDown(false);
+    expect((await a.agent.retryUnreported())[0]).toMatchObject({ reported: true });
+  });
+
+  it('is off unless asked for, and close() cancels a pending retry', async () => {
+    const h = await sim();
+    const off = clock();
+    const a = h.makeAgent('A', yes, undefined, { schedule: off.schedule, cancel: off.cancel });
+    h.setMemoryDown(true);
+    await a.agent.buy(h.merchants.good.resource);
+    expect(off.pending).toHaveLength(0);
+
+    const on = clock();
+    const b = h.makeAgent('B', yes, undefined, { autoRetry: {}, schedule: on.schedule, cancel: on.cancel });
+    await b.agent.buy(h.merchants.good.resource);
+    expect(on.pending).toHaveLength(1);
+    expect(on.pending[0]!.ms).toBe(30_000);
+    b.agent.close();
+    expect(on.pending).toHaveLength(0);
+    expect(on.cancelled).toHaveLength(1);
+  });
+});
+
+describe('rule 6 demo, simulated', () => {
+  it('turns a PAY into an ASK that cites a memory about a different merchant, and not when detached', async () => {
+    const h = await sim();
+    const r = await runRule6(h, { log: () => undefined });
+    expect(r.expectations.filter((e) => !e.ok)).toEqual([]);
+    expect(r.before.verdict.decision).toBe('PAY');
+    expect(r.after.verdict).toMatchObject({ decision: 'ASK', rulesFired: ['similar-incident'] });
+    expect(r.after.verdict.citations.memoryBlobIds.length).toBeGreaterThan(0);
+    expect(r.cited.every((c) => c.merchantHost !== h.merchants.good.host && c.pattern === 'clean_streak')).toBe(true);
+    expect(r.detached.verdict.citations.memoryBlobIds).toEqual([]);
   });
 });

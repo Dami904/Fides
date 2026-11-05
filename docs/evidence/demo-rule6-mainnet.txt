@@ -1,0 +1,32 @@
+Rule 6 on mainnet (live). Thresholds are eased so a short script can make a merchant "established". B never pays.
+
+== Step 1: A pays the steady merchant and the one that will betray, three times each
+  A -> good.fides-demo.test: ASK (cannot say: not enough history) [tier] -> person approves -> paid -> delivered as advertised -> reported clean c180b5d9 (complete)
+  A -> flaky.fides-demo.test: ASK (cannot say: not enough history) [tier] -> person approves -> paid -> delivered as advertised -> reported clean 1b2cd250 (complete)
+  A -> good.fides-demo.test: PAY [tier] citing c180b5d9 -> paid -> delivered as advertised -> reported clean 9bc089fa (complete)
+  A -> flaky.fides-demo.test: PAY [tier] citing 1b2cd250 -> paid -> delivered as advertised -> reported clean 6b7396f9 (complete)
+  A -> good.fides-demo.test: PAY [tier] citing c180b5d9, 9bc089fa -> paid -> delivered as advertised -> reported clean fa3517f9 (complete)
+  A -> flaky.fides-demo.test: PAY [tier] citing 1b2cd250, 6b7396f9 -> paid -> delivered as advertised -> reported clean ebeff573 (complete)
+
+== Step 2: B, who has never met either merchant, asks about the steady one
+  PAY [tier] established merchant: 3 clean outcomes, no burns
+  [ok] B would pay the steady merchant on its own, from the shared record alone
+
+== Step 3: the other merchant betrays after its clean streak
+  A -> flaky.fides-demo.test: PAY [tier] citing 1b2cd250, 6b7396f9, ebeff573 -> paid -> BURNED (schema is "wrong/v0", expected fides.news/v1; data is missing or not an object) -> reported burn f025b2f1 (complete)
+  [ok] A is burned by the merchant it had trusted, and reports it
+
+== Step 4: B asks about the steady merchant again. Nothing has changed about it.
+  ASK [similar-incident] 1 similar incident(s) at other merchants: clean_streak
+  [ok] the decision changes from PAY to ASK
+  [ok] rule 6 made it: similar-incident
+  [ok] it cites the recalled memory
+  [ok] the reason names the pattern that was recalled
+  cites memory cE9WgXpn1p about flaky.fides-demo.test, pattern clean_streak, recall distance 0.375 (limit 0.45)
+  [ok] every cited memory is about the other merchant
+
+== Step 5: B detaches the shared record: it cannot see the memory
+  ASK [tier] cannot say: not enough history to classify this merchant
+  [ok] detached, rule 6 does not fire and no memory is cited
+
+All expectations met.

@@ -8,7 +8,7 @@ import { fileURLToPath } from 'node:url';
 import { Ed25519Keypair } from '@mysten/sui/keypairs/ed25519';
 import { decodeSuiPrivateKey } from '@mysten/sui/cryptography';
 import { chainFromEnv, getNetwork, anchorPackageId } from '@fides/chain';
-import { parseAmount } from '@fides/core';
+import { parseAmount, type FidesConfig } from '@fides/core';
 import { createMemwalBackend, memwalConfigFromEnv, SharedRecord, type MemoryBackend } from '@fides/memory';
 import { fidesFromEnv, testing, type ChainApi, type Fides } from '@fides/sdk';
 import { MERCHANTS, mppGate, Merchant, seededRandom, walletsFromEnv, type Gate, type MerchantName, type MerchantState } from '@fides/merchants';
@@ -36,7 +36,7 @@ export interface Harness {
   mode: 'sim' | 'live';
   network: string;
   merchants: Record<MerchantName, MerchantHandle>;
-  makeAgent(name: string, ask: AskPolicy, onEvent?: (e: AgentEvent) => void, extra?: Partial<AgentOptions>): AgentHandle;
+  makeAgent(name: string, ask: AskPolicy, onEvent?: (e: AgentEvent) => void, extra?: Partial<AgentOptions>, config?: Partial<FidesConfig>): AgentHandle;
   /** Write arbitrary text into the shared memory, as anyone holding a delegate key could. */
   injectMemory(text: string): Promise<void>;
   /** A read-only view of the shared record, for Re-verify. */
@@ -114,8 +114,8 @@ export async function simHarness(o: { seed?: number; flakyTimeoutMs?: number } =
     mode: 'sim',
     network: 'sim',
     merchants,
-    makeAgent(name, ask, onEvent, extra) {
-      const a = testing.makeAgent(world, name);
+    makeAgent(name, ask, onEvent, extra, config) {
+      const a = testing.makeAgent(world, name, config);
       const agent = new PayingAgent({ name, fides: a.fides, payer: simPayer(world, a.address), askPolicy: ask, reportDelayMs: 0, sleep: async () => undefined, ...(onEvent ? { onEvent } : {}), ...extra });
       return { name, address: a.address, agent, fides: a.fides };
     },
@@ -168,10 +168,10 @@ export async function liveHarness(o: LiveOptions): Promise<Harness> {
     mode: 'live',
     network: network.name,
     merchants,
-    makeAgent(name, ask, onEvent, extra) {
+    makeAgent(name, ask, onEvent, extra, config) {
       const signer = signerOf(name);
-      const fides = fidesFromEnv(env, name, { statePath: ':memory:', memory: backendFor(name) });
-      const agent = new PayingAgent({ name, fides, payer: mppPayer({ signer, network: net, fullnodeUrl: network.fullnodeUrl }), askPolicy: ask, ...(onEvent ? { onEvent } : {}), ...extra });
+      const fides = fidesFromEnv(env, name, { statePath: ':memory:', memory: backendFor(name), ...(config ? { config } : {}) });
+      const agent = new PayingAgent({ name, fides, payer: mppPayer({ signer, network: net, fullnodeUrl: network.fullnodeUrl }), askPolicy: ask, autoRetry: {}, ...(onEvent ? { onEvent } : {}), ...extra });
       return { name, address: signer.toSuiAddress(), agent, fides };
     },
     injectMemory: async (text) => {

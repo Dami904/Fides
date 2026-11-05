@@ -35,6 +35,7 @@ export type AgentEvent =
   | { type: 'response'; agent: string; host: string; status: number | null; latencyMs: number; checks: Exchange['checks']; problems: string[] }
   | { type: 'reported'; agent: string; host: string; status: 'complete' | 'partial'; evidenceId: string; verdict: 'clean' | 'burned' }
   | { type: 'skipped'; agent: string; host: string | null; why: string }
+  | { type: 'retried'; agent: string; reported: number; stillQueued: number; pass: number }
   | { type: 'error'; agent: string; host: string | null; message: string };
 
 export interface BuyResult {
@@ -70,14 +71,27 @@ export interface AgentOptions {
   reportAttempts?: number;
   reportDelayMs?: number;
   sleep?: (ms: number) => Promise<void>;
+  /**
+   * Off unless given. When a payment could not be fully reported, retry it in the background: first after `baseDelayMs`,
+   * then twice as long each time up to `maxDelayMs`, for at most `maxPasses` passes (defaults 30 s, 10 min, 8). After that the
+   * report stays queued (it survives in the agent's state) for `retryUnreported()` on the next start. Never a tight loop,
+   * and nothing runs while the queue is empty. The timer does not keep the process alive; `close()` cancels it.
+   */
+  autoRetry?: { baseDelayMs?: number; maxDelayMs?: number; maxPasses?: number };
+  /** For tests: replace setTimeout. Returns something `cancel` can stop. */
+  schedule?: (fn: () => void, ms: number) => unknown;
+  cancel?: (handle: unknown) => void;
 }
 
 const TRANSIENT = /does not exist|not final/;
 const LOOPBACK = new Set(['127.0.0.1', 'localhost', '[::1]', '::1']);
 
 export class PayingAgent {
-  private o: Required<Omit<AgentOptions, 'onEvent' | 'askPolicy'>> & Pick<AgentOptions, 'onEvent' | 'askPolicy'>;
+  private o: Required<Omit<AgentOptions, 'onEvent' | 'askPolicy' | 'autoRetry'>> & Pick<AgentOptions, 'onEvent' | 'askPolicy' | 'autoRetry'>;
   private seq = 0;
+  private retryTimer: unknown;
+  private retryPass = 0;
+  private closed = false;
   readonly events: AgentEvent[] = [];
 
   constructor(opts: AgentOptions) {
@@ -88,6 +102,12 @@ export class PayingAgent {
       reportAttempts: 6,
       reportDelayMs: 2000,
       sleep: (ms) => new Promise((r) => setTimeout(r, ms)),
+      schedule: (fn, ms) => {
+        const t = setTimeout(fn, ms);
+        t.unref?.(); // a pending retry never keeps the process alive
+        return t;
+      },
+      cancel: (h) => clearTimeout(h as ReturnType<typeof setTimeout>),
       ...opts,
     };
   }
@@ -111,6 +131,38 @@ export class PayingAgent {
     const d = (await res.json()) as Partial<SchemaDoc>;
     if (!d.host || !d.schema || typeof d.maxAgeSeconds !== 'number' || !d.data) throw new Error('merchant schema document is malformed');
     return d as SchemaDoc;
+  }
+
+  /** Stop the background retry. Queued reports stay queued; retryUnreported() finishes them later. */
+  close(): void {
+    this.closed = true;
+    if (this.retryTimer !== undefined) this.o.cancel(this.retryTimer);
+    this.retryTimer = undefined;
+  }
+
+  /** Arm one background retry, if the option is on and none is pending. Called whenever something is queued. */
+  private scheduleRetry(): void {
+    const ar = this.o.autoRetry;
+    if (!ar || this.closed || this.retryTimer !== undefined) return;
+    const { baseDelayMs = 30_000, maxDelayMs = 600_000, maxPasses = 8 } = ar;
+    if (this.retryPass >= maxPasses) return;
+    const delay = Math.min(baseDelayMs * 2 ** this.retryPass, maxDelayMs);
+    this.retryTimer = this.o.schedule(() => {
+      this.retryTimer = undefined;
+      this.retryPass++;
+      void this.o.fides.retryUnreported().then(
+        (res) => {
+          const stillQueued = res.filter((r) => !r.reported).length;
+          this.emit({ type: 'retried', agent: this.name, reported: res.length - stillQueued, stillQueued, pass: this.retryPass });
+          if (stillQueued > 0) this.scheduleRetry();
+          else this.retryPass = 0;
+        },
+        (e: Error) => {
+          this.emit({ type: 'error', agent: this.name, host: null, message: `background retry failed: ${e.message}` });
+          this.scheduleRetry();
+        },
+      );
+    }, delay);
   }
 
   /** Report every payment that could not be reported earlier. One pass. */
@@ -250,11 +302,13 @@ export class PayingAgent {
         // Signed, but not anchored or not shared yet. Others cannot see it until it is: queue it so the retry finishes the job.
         const why = [receipt.steps.anchor.error, receipt.steps.memory.error, receipt.steps.memory.skipped].filter(Boolean).join('; ') || 'report only partly written';
         this.o.fides.queueUnreported(outcome, why);
+        this.scheduleRetry();
         this.emit({ type: 'error', agent, host, message: `report only partly written, queued for retry: ${why}` });
       }
     } else {
       // The payment happened and must not be forgotten: queue it so retryUnreported() reports it later.
       this.o.fides.queueUnreported(outcome, reportError ?? 'unknown error');
+      this.scheduleRetry();
       this.emit({ type: 'error', agent, host, message: `payment made but not reported yet, queued for retry: ${reportError}` });
     }
     return { agent, url, host, decision: v.decision, approved, paid: true, txDigest, status, exchange: ex, check, ...(receipt ? { receipt } : {}), ...(reportError ? { reportError } : {}) };
