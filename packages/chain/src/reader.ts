@@ -40,7 +40,12 @@ export class TatumChainReader implements ChainReader {
   /** Final transactions never change, so they are cached for the life of the process (saves the 3 req/s budget). */
   private finalCache = new Map<string, PaymentFacts>();
 
-  constructor(private client: TatumGraphql) {}
+  /**
+   * anchorFromCheckpoint: per anchor package, the checkpoint it was published in. An event scan with no lower bound fails
+   * on a node that has pruned old checkpoints ("requested data below earliest available"). A package has no events before
+   * its own publish, so this bound cannot hide one.
+   */
+  constructor(private client: TatumGraphql, private o: { anchorFromCheckpoint?: Record<string, number> } = {}) {}
 
   async getPayment(digest: string): Promise<PaymentFacts | null> {
     if (!DIGEST.test(digest)) throw new Error(`invalid transaction digest "${digest.slice(0, 20)}"`);
@@ -120,6 +125,7 @@ export class TatumChainReader implements ChainReader {
     const type = `${o.packageId}::anchor::Report`;
     if (!TYPE.test(type)) throw new Error('invalid anchor package id');
     if (o.sender && !ADDRESS.test(o.sender)) throw new Error('invalid sender address');
+    const from = this.o.anchorFromCheckpoint?.[o.packageId];
     const d = await this.client.query<{
       events: {
         pageInfo: { hasPreviousPage: boolean; startCursor: string | null };
@@ -127,7 +133,7 @@ export class TatumChainReader implements ChainReader {
       };
     }>(
       `query($f: EventFilter, $n: Int, $b: String) { events(last: $n, before: $b, filter: $f) { pageInfo { hasPreviousPage startCursor } nodes { timestamp transaction { digest } sender { address } contents { json } } } }`,
-      { f: { type, ...(o.sender ? { sender: o.sender } : {}) }, n: o.pageSize ?? 50, b: o.before ?? null },
+      { f: { type, ...(o.sender ? { sender: o.sender } : {}), ...(from !== undefined ? { afterCheckpoint: from - 1 } : {}) }, n: o.pageSize ?? 50, b: o.before ?? null },
     );
     const anchors = d.events.nodes.map((n): AnchorEvent => ({
       evidenceSha256: b64(n.contents.json.evidence_sha256).toString('hex'),

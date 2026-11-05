@@ -30,7 +30,13 @@ export function chainFromEnv(env: Record<string, string | undefined>): { network
   const apiKey = env[network.tatumKeyEnv] ?? env.TATUM_API_KEY;
   if (!apiKey) throw new Error(`${network.tatumKeyEnv} is not set`);
   const client = new TatumGraphql({ url: network.tatumGraphqlUrl, apiKey });
-  return { network, client, reader: new TatumChainReader(client) };
+  return { network, client, reader: new TatumChainReader(client, { anchorFromCheckpoint: anchorFloors() }) };
+}
+
+/** The checkpoint each published anchor package appeared in (packages/move/deployments.json). */
+function anchorFloors(): Record<string, number> {
+  const all = JSON.parse(readFileSync(new URL('../../move/deployments.json', import.meta.url), 'utf8')) as Record<string, { packageId: string; publishCheckpoint?: number }>;
+  return Object.fromEntries(Object.values(all).flatMap((d) => (d.publishCheckpoint !== undefined ? [[d.packageId, d.publishCheckpoint] as const] : [])));
 }
 
 /** The anchor package id published for this network (packages/move/deployments.json). Fails loudly if there is none. */

@@ -1,3 +1,4 @@
+import { readFileSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
 import { TatumChainReader } from '../src/reader.js';
 import { TatumError, TatumGraphql } from '../src/tatum.js';
@@ -209,6 +210,19 @@ describe('anchor events', () => {
     const { reader, calls } = rig([page([])]);
     await reader.listAnchors({ packageId: PKG, sender: '0xaaa', pageSize: 5 });
     expect(calls[0]!.body.variables).toMatchObject({ f: { type: `${PKG}::anchor::Report`, sender: '0xaaa' }, n: 5 });
+  });
+  it('bounds the scan at the checkpoint the package was published in: an unbounded scan fails on a pruned node', async () => {
+    const client = new TatumGraphql({ url: URL_, apiKey: KEY, minIntervalMs: 0, fetchImpl: (async (_u: string, init: RequestInit) => { sent.push(JSON.parse(init.body as string)); return new Response(JSON.stringify({ data: { events: { pageInfo: { hasPreviousPage: false, startCursor: null }, nodes: [] } } })); }) as unknown as typeof fetch });
+    const sent: { variables: { f: Record<string, unknown> } }[] = [];
+    const reader = new TatumChainReader(client, { anchorFromCheckpoint: { [PKG]: 1000 } });
+    await reader.listAnchors({ packageId: PKG });
+    expect(sent[0]!.variables.f.afterCheckpoint).toBe(999); // after is exclusive: the publish checkpoint itself stays in
+    await reader.listAnchors({ packageId: '0x' + 'ab'.repeat(32) });
+    expect(sent[1]!.variables.f).not.toHaveProperty('afterCheckpoint');
+  });
+  it('every published anchor package has a publish checkpoint recorded', () => {
+    const all = JSON.parse(readFileSync(new globalThis.URL('../../move/deployments.json', import.meta.url), 'utf8')) as Record<string, { publishCheckpoint?: number }>;
+    for (const d of Object.values(all)) expect(d.publishCheckpoint).toBeGreaterThan(0);
   });
   it('rejects a malformed package id', async () => {
     await expect(rig([]).reader.listAnchors({ packageId: '0x1"; drop' })).rejects.toThrow(/invalid anchor package id/);
