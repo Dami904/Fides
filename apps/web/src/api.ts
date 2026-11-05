@@ -1,6 +1,7 @@
 // The one interface the UI talks to (SPEC section 21). Two implementations: fixtures (recorded from the engine, no network)
 // and live (the registry and a demo server). The screens never know which one they have.
 import demoJson from '../fixtures/demo.json';
+import demoMainnetJson from '../fixtures/demo-mainnet.json';
 import simJson from '../fixtures/sim.json';
 import { attempts, parseSteps } from './lib';
 import type { Attempt, CheckResult, DemoFixture, Honesty, MerchantView, SharedState, SimFixture, SplitView, Tier, VerifyStep, EvidenceItem } from './types';
@@ -39,16 +40,34 @@ export interface ApiSource {
   probe?: (state: SharedState) => Promise<{ check: CheckResult; checkedAt: string }>;
 }
 
-export function fixturesApi(o: { stepDelayMs?: number } = {}): FidesApi {
-  return apiFrom(demoJson as unknown as DemoFixture, simJson as unknown as SimFixture, {
+/**
+ * The recordings. `sim` is the demo run on the simulated ledger (the default: no network, used by `pnpm web` and the tests).
+ * `mainnet` is a real run on Sui mainnet, recorded from the live server, which is what the hosted site shows. Either way
+ * this is a recording: Re-verify replays the recorded checks instead of running them.
+ */
+export type Recording = 'sim' | 'mainnet';
+
+export function fixturesApi(o: { stepDelayMs?: number; recording?: Recording } = {}): FidesApi {
+  const mainnet = o.recording === 'mainnet';
+  const demo = (mainnet ? demoMainnetJson : demoJson) as unknown as DemoFixture;
+  return apiFrom(demo, simJson as unknown as SimFixture, {
     mode: 'fixtures',
     honesty: {
-      items: [
-        { key: 'Data', value: 'recorded demo run', real: false },
-        { key: 'Settlement', value: 'simulated', real: false },
-        { key: 'Memory', value: 'in-process', real: false },
-        { key: 'Engine and signatures', value: 'real', real: true },
-      ],
+      items: mainnet
+        ? [
+            { key: 'Data', value: `recorded run, ${demo.generatedAt.slice(0, 10)}`, real: false },
+            { key: 'Settlement', value: 'Sui mainnet, real USDC', real: true },
+            { key: 'Memory', value: 'Walrus Memory', real: true },
+            { key: 'Re-verify', value: 'replays the recorded checks', real: false },
+            { key: 'Simulation board', value: 'simulated settlement', real: false },
+            { key: 'Engine and signatures', value: 'real', real: true },
+          ]
+        : [
+            { key: 'Data', value: 'recorded demo run', real: false },
+            { key: 'Settlement', value: 'simulated', real: false },
+            { key: 'Memory', value: 'in-process', real: false },
+            { key: 'Engine and signatures', value: 'real', real: true },
+          ],
     },
     ...(o.stepDelayMs !== undefined ? { stepDelayMs: o.stepDelayMs } : {}),
   });

@@ -13,7 +13,7 @@ import { Split } from './screens/Split';
 
 export function App({ api: given }: { api?: FidesApi } = {}) {
   // The one place the data source is chosen. Fixtures now; the live API replaces it without touching a screen.
-  const api = useMemo(() => given ?? fixturesApi(), [given]);
+  const api = useMemo(() => given ?? fixturesApi({ recording: import.meta.env.VITE_FIDES_FIXTURE === 'mainnet' ? 'mainnet' : 'sim' }), [given]);
   const [route, setRoute] = useState<Route>(() => parseRoute(location.hash));
   useEffect(() => {
     const on = () => { setRoute(parseRoute(location.hash)); scrollTo(0, 0); };

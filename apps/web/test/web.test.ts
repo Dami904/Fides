@@ -220,3 +220,31 @@ describe('the fixtures API', () => {
     expect((await api.getSimulation()).shared.config.agents).toBe(20);
   });
 });
+
+describe('the mainnet recording', () => {
+  const main = fixturesApi({ stepDelayMs: 0, recording: 'mainnet' });
+
+  it('is labelled as a recording of a real run, and links its payments to a public explorer', async () => {
+    const items = Object.fromEntries(main.honesty().items.map((i) => [i.key, i]));
+    expect(items.Data!.real).toBe(false); // a recording is never presented as live
+    expect(items.Data!.value).toMatch(/^recorded run, \d{4}-\d{2}-\d{2}$/);
+    expect(items.Settlement!.real).toBe(true);
+    expect(items['Re-verify']!.real).toBe(false);
+    expect(main.explorerTx!('ABC')).toBe('https://suiscan.xyz/mainnet/tx/ABC');
+    expect(fixturesApi().explorerTx).toBeUndefined(); // the simulated recording has nothing on chain to link to
+  });
+
+  it('carries the whole run: every attempt, its verdict, and signed records that replay', async () => {
+    const all = await main.listDecisions();
+    expect(all.length).toBeGreaterThanOrEqual(9);
+    expect(all.some((a) => a.check?.decision === 'REFUSE')).toBe(true);
+    const paid = all.filter((a) => a.paid);
+    expect(paid.length).toBeGreaterThan(0);
+    expect(paid.every((a) => a.paid!.txDigest.length > 20)).toBe(true);
+    const [host] = await main.listMerchants();
+    const ev = (await main.getMerchant(host!)).evidence.find((e) => e.status === 'verified')!;
+    const steps: { ok: boolean }[] = [];
+    for await (const st of main.verifyEvidence(ev.id)) steps.push(st);
+    expect(steps.length).toBeGreaterThan(0);
+  });
+});

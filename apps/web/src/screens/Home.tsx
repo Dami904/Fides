@@ -236,10 +236,12 @@ export function Home({ api }: { api: FidesApi }) {
             <p>
               {api.mode === 'live'
                 ? `These pages show the run the engine made when this server started, and Re-verify checks records now. Settlement in this run: ${api.honesty().items.find((i) => i.key === 'Settlement')?.value ?? 'see the label'}.`
-                : "These pages replay a recorded run of the real engine: the verdicts, signatures and checks are the engine's own output. Settlement in this run is simulated."}{' '}
-              The same engine has also run on Sui testnet and Sui mainnet with real USDC payments. The label at the top right says what is real on each page.
+                : api.honesty().items.find((i) => i.key === 'Settlement')?.real
+                  ? "These pages replay a recording of a real run of the engine on Sui mainnet: real USDC payments, Tatum verification and the Walrus Memory relayer. Re-verify here replays the checks recorded in that run; running it against the chain needs the live server (pnpm web:live)."
+                  : "These pages replay a recorded run of the real engine: the verdicts, signatures and checks are the engine's own output. Settlement in this run is simulated."}{' '}
+              The same engine has also run on Sui testnet, and on mainnet with real USDC payments. The label at the top right says what is real on each page.
             </p>
-            {s && <p className="mono meta">simulation seed {s.seed} · {s.shared.config.agents} agents · {s.shared.config.rounds} rounds · run {short(s.generatedAt, 10)}</p>}
+            {s && <p className="mono meta">simulation board: seed {s.seed} · {s.shared.config.agents} agents · {s.shared.config.rounds} rounds · run {short(s.generatedAt, 10)}</p>}
           </div>
         </div>
       </section>
