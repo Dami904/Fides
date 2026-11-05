@@ -15,7 +15,7 @@ Built and tested on **Sui testnet** and run on **Sui mainnet** (2026-11-04): the
 | | |
 |---|---|
 | Tests | 396 pass, 11 skipped (live network tests, Gemini included, and two slow simulation tests, run on request), typecheck clean |
-| UI | `pnpm web` opens the four screens on recorded fixtures; `pnpm web:live` on a fresh run of the engine (add `-- --live` for Sui testnet); `pnpm mockups` serves the static design mockups |
+| UI | Hosted on recorded fixtures: <https://fides-credit-bureau.vercel.app> (static, no backend, labelled as a recorded run). Locally: `pnpm web` opens the four screens on recorded fixtures; `pnpm web:live` on a fresh run of the engine (add `-- --live` for Sui testnet); `pnpm mockups` serves the static design mockups |
 | Real on-chain run | the full demo on Sui testnet: real MPP USDC payments, Tatum verification, Sui anchors. Output: [`docs/evidence/demo-live-testnet.txt`](docs/evidence/demo-live-testnet.txt) |
 | Measured result | 20 agents, 6 merchants (2 bad): **6 burns with the shared record, 44 without** (86% avoided), no good merchant refused. [`docs/evidence/simulation.txt`](docs/evidence/simulation.txt) |
 | Anchor module (testnet) | package `0x1e58e339d2914686089424a956b34f22997d8cf5fac477f3604d05c027ae6b4a`, events of type `<package>::anchor::Report` |
