@@ -33,7 +33,7 @@ Results of SPEC section 15. Record what was tried, what happened, and the fallba
 - `health`: status ok, relayer version 0.1.0, `write_ready=true`, relayer `https://relayer.memory.walrus.xyz`.
 - Write: `remember` returned ACCEPTED with a job id, not stored yet. The status call reported it saved after under 45 s, with a blob id, in namespace `fides-day1`. So a write is two steps (queue, then wait), as SPEC section 5 says.
 - Recall right after: the record came back, distance 0.320 for a loosely worded query. No fee was charged to us beyond the wallet approval gas. No rate limit hit in one write.
-- Not yet tested: the SDK path (`MemWal.create` with a hex delegate key), which the engine will use. This account is the one the plugin logged into, `MEMWAL_ACCOUNT_ID` in `.env` is set to it.
+- The SDK path (`MemWal.create` with a hex delegate key) was tested in check 2 and is what the engine uses. This account is the one the plugin logged into, `MEMWAL_ACCOUNT_ID` in `.env` is set to it.
 
 ## Check 2: two delegate keys, one account (2026-10-28, SDK `@mysten-incubation/memwal` 0.1.9)
 
@@ -41,7 +41,7 @@ Results of SPEC section 15. Record what was tried, what happened, and the fallba
 - Two different delegate keys are accepted by the relayer on the one account: the plugin's login key and `WALRUS_PRIVATE_KEY`. `WEBAPP_DELEGATE_KEY` is rejected with a 401 (not registered on this account, or wrong account). In `.env`, `MEMWAL_KEY_A` is the plugin's delegate key and `MEMWAL_KEY_B` is `WALRUS_PRIVATE_KEY`.
 - Result: key A wrote a record in namespace `fides-day1` (queued in about 4 s, stored after about 35 s). Key B, a different key, recalled it in the same namespace on the first query (distance 0.33). So the shared Fides Registry design from SPEC section 5 works: one account, a delegate key per agent, one shared recall space.
 - Timing for the engine: a write takes tens of seconds to land, so `report()` must wait for the job and must not block the payment path.
-- Still open: these keys are reused from other setups. Before the demo, create dedicated delegate keys for the agents with `addDelegateKey` (needs the account owner wallet), and use a fresh account and a `merchants` namespace for the registry.
+- Not done: dedicated delegate keys per agent. Every run used these two keys on the one account (agent C falls back to `MEMWAL_KEY_A`). Fides does not depend on it: a report's author is the Sui key that signed it, not the delegate key that stored it. Real runs use the `merchants` namespace or one set per run.
 
 ## Check 3: Tatum Sui mainnet (2026-10-28, free mainnet key)
 
@@ -64,7 +64,7 @@ Results of SPEC section 15. Record what was tried, what happened, and the fallba
 - API notes for the merchants app: `Mppx` comes from `mppx/server` and `mppx/client`; with one method use `mppx.sui.charge({ amount })`, which returns `(Request) => { status: 402, challenge } | { status: 200, withReceipt(response) }`. The README's `mppx.charge(...)(handler)` shape does not match 0.4.12. There is no ready Node http adapter (`NodeListener` only has `sendResponse`), so the script adapts `IncomingMessage` to `Request` by hand. A digest store is required (`InMemoryDigestStore` is fine for dev). Set `secretKey` and `realm` on `Mppx.create`.
 - **Tatum gRPC cannot be used as `rpcUrl` for `@suimpp/mpp`.** Two separate reasons: (1) without a key Tatum's gRPC host answers `RESOURCE_EXHAUSTED` (anonymous throttling), so the key is needed; (2) with the key sent, the host replies with content type `application/grpc` while `SuiGrpcClient` (and so `@suimpp/mpp`) speaks gRPC-web, error "unexpected response content type: application/grpc". Also `@suimpp/mpp` builds its client from `baseUrl` only, so it has no way to send the `x-api-key` header. With Tatum as `rpcUrl` the merchant answered 402 "Could not find the referenced transaction" even though the payment had landed. Side effect: that run still moved 0.01 testnet USDC from Agent A (digest `FLPg5bHeiE7F...`), a paid-but-refused payment; harmless on testnet but a real scenario on mainnet.
 - **Decision:** merchants verify with the package default fullnode. Fides' own payment verification (write rule and SPEC section 8 check 4) uses **Tatum GraphQL**. Tested on the payment above through the testnet gateway: `transaction(digest)` returned sender = Agent A, status SUCCESS, checkpoint 400173491, and balance changes of -10000 and +10000 raw USDC (0.01) between Agent A and the merchants wallet. That is everything section 8 needs (exists, final, sender, amount, recipient). Tatum is therefore on the agent's verification path, not the merchant's.
-- Not done: a mainnet payment (needs mainnet USDC and SUI in Agent A and gas in the merchants wallet), and the x402 dialect (not needed).
+- The mainnet payment ran on 2026-11-04 ("Mainnet runs" below). Not done: the x402 dialect (not needed).
 
 ## Check 5: Move anchor on testnet (2026-10-28)
 
@@ -74,7 +74,7 @@ Results of SPEC section 15. Record what was tried, what happened, and the fallba
 - Testnet results: package `0x1e58e339d2914686089424a956b34f22997d8cf5fac477f3604d05c027ae6b4a`, publish tx `72qRj4ceSoYzVpyp7MMjuFvDUPcHKD3oC52a2yZEFQRC`, test report tx `FPK8RHuG1y6AbWnwUTSYymV6M98WT8HLpRkNUBBdoWho`.
 - Read back through Tatum's **testnet** GraphQL with the testnet key, on the first try: `events(filter: { type: "<pkg>::anchor::Report" })` returned the event with `sender.address` equal to the publisher, and `contents.json` with the merchant string, the verdict, and the two `vector<u8>` fields **as base64** (the sha256 `cd33dc91...` came back as `zTPckTXz...`). Readers must base64-decode before comparing with the hex digest. `transaction(digest)` returned SUCCESS with a checkpoint.
 - So the full-type filter works (a bare `0x2::coin` filter did not, see check 3). The event query is the exact, public index the spec wants.
-- Still to do: publish on mainnet (`node packages/move/publish.mjs mainnet`, needs about 0.1 SUI in Agent A's mainnet wallet) and update the package ID for `FIDES_NETWORK=mainnet`.
+- Published on mainnet on 2026-11-04 ("Mainnet runs" below); the package ID is in `packages/move/deployments.json`.
 
 ## Check 7: hackathon rules (2026-10-26, https://recall-tatum-walrus.vercel.app/)
 

@@ -1,8 +1,10 @@
-﻿20 agents, 6 merchants (2 bad), 12 rounds, seeds 1, 2, 3, shared record on. Settlement simulated.
+Re-measured 2026-11-09 on the current engine (after the 2026-11-04 rule 4 fix). Command: node node_modules/tsx/dist/cli.mjs apps/sim/src/sweep.ts
+
+20 agents, 6 merchants (2 bad), 12 rounds, seeds 1, 2, 3, shared record on. Settlement simulated.
 
 burns  auto-paid good  asked  refused good   setting
-   12             273    269             0   defaults
-   12             320    208             0   reporter weight saturates at 5 reports (default 20)
-   12             273    269             0   one reporter may count up to 5 (default 3)
-   13             344    168             0   established needs Wilson above 0.4 (default 0.6)
-   13             389    115             0   all three of the above
+    6             273    272             0   defaults
+    6             320    208             0   reporter weight saturates at 5 reports (default 20)
+    6             273    272             0   one reporter may count up to 5 (default 3)
+    6             344    168             0   established needs Wilson above 0.4 (default 0.6)
+    6             389    115             0   all three of the above
