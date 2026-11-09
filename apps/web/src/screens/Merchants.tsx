@@ -6,8 +6,8 @@ export function Merchants({ api }: { api: FidesApi }) {
   const { data, error } = useLoad(async () => Promise.all((await api.listMerchants()).map((h) => api.getMerchant(h))), [api]);
   return (
     <>
-      <PageHead title="Merchant records">
-        What the shared record says about each merchant the agents met. Open one for its reports, its tier over time and the checks behind each record.
+      <PageHead title="Sources and their records">
+        What the shared record says about each paid source the agents met. Open one for its reports, its tier over time and the checks behind each record.
       </PageHead>
       {error && <div className="notice bad">The merchants could not be loaded: {error}. This is an error, not an empty record.</div>}
       {!error && !data && <Loading />}

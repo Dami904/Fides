@@ -26,7 +26,7 @@ export function Merchant({ api, host }: { api: FidesApi; host: string }) {
   const rejected = m?.evidence.filter((e) => e.status === 'rejected') ?? [];
   return (
     <>
-      <PageHead crumbs={[['Merchants', href.merchants], [host]]} title={<span className="mono-title">{host}</span>} aside={m?.decision && <Stamp decision={m.decision} big sub="current verdict" />}>
+      <PageHead crumbs={[['Sources', href.merchants], [host]]} title={<span className="mono-title">{host}</span>} aside={m?.decision && <Stamp decision={m.decision} big sub="current verdict" />}>
         {m && <span className="row-pills">
           <Pill state tone={m.tier === 'burned' ? 'bad' : m.tier === 'new' ? 'warn' : 'ok'}>tier: {m.tier}</Pill>
           {m.cannotSay && <Pill state tone="warn">cannot say: not enough history</Pill>}

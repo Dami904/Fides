@@ -4,7 +4,7 @@
 //   pnpm --filter @fides/web fixtures
 import { mkdirSync, writeFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
-import { runDemo, simHarness } from '@fides/agent';
+import { runDemo, runResearchDemo, simHarness } from '@fides/agent';
 import { runSimulation } from '@fides/sim';
 
 const dir = fileURLToPath(new URL('../fixtures/', import.meta.url));
@@ -33,10 +33,18 @@ write('demo', 'FIDES_DEMO', {
   events: report.events,
 });
 
+// The research agent's briefs on the simulated ledger. The mainnet recording (research-mainnet.json) is saved by
+// "pnpm research -- --live --memory=live --json=apps/web/fixtures/research-mainnet.json" and is never overwritten here.
+const rh = await simHarness();
+const research = await runResearchDemo(rh, { log: () => undefined });
+await rh.close();
+writeFileSync(dir + 'research.json', plain({ generatedAt: research.generatedAt, mode: research.mode, network: research.network, question: research.question, sessions: research.sessions, lostUsdc: research.lostUsdc, ok: research.ok }) + '\n');
+
 const shared = await runSimulation({ seed: 1, mode: 'shared' });
 const detached = await runSimulation({ seed: 1, mode: 'detached' });
 const slim = (r: typeof shared) => ({ config: r.config, burns: r.burns, paid: r.paid, refused: r.refused, refusedGood: r.refusedGood, asked: r.asked, lostRaw: r.lostRaw, burnsByMerchant: r.burnsByMerchant, rules: r.rules, events: r.events });
 write('sim', 'FIDES_SIM', { generatedAt: new Date().toISOString(), seed: 1, shared: slim(shared), detached: slim(detached) });
 
+console.log(`research: ${research.sessions.length} sessions, expectations ${research.ok ? 'all met' : 'NOT all met'}`);
 console.log(`demo: ${report.steps.length} steps, ${report.events.length} events, expectations ${report.ok ? 'all met' : 'NOT all met'}`);
 console.log(`sim:  shared ${shared.burns} burns, detached ${detached.burns} burns, ${shared.events.length} events each`);

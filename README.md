@@ -4,17 +4,26 @@
 
 **The hard problem is not remembering what happened. It is letting an agent that has never met a merchant act on what another agent learned, without having to trust that other agent's word.** Every report here is signed by the agent that paid, anchored on Sui by the same address, and checked again by every reader against the chain, so a forged or copied report is rejected and shown, never believed.
 
-Built for the Walrus x Tatum "Total Recall" hackathon. [Judge in 2 minutes](#judge-in-2-minutes) · [The core proof](#the-core-proof) · [Honest limits](#honest-limits) · [Run it](#run-it)
+Built for the Walrus x Tatum "Total Recall" hackathon, in the **Smart Agents for Real Life** track (its first example: a research agent with source trust scores), aiming at the Best Use of Agent Payments and Best Walrus Memory awards. [The research agent](#the-research-agent) · [Judge in 2 minutes](#judge-in-2-minutes) · [The core proof](#the-core-proof) · [Honest limits](#honest-limits) · [Run it](#run-it)
 
 ## Status
 
 Built and tested on **Sui testnet** and run on **Sui mainnet** (2026-11-04): the anchor package `0x2e884850e268d67708d527770bbf3e9e991e0aa845c88c5b68bdaed62943696f` is published immutable, and the whole scripted demo ran on mainnet with real USDC payments, Tatum verification and the real Walrus Memory relayer: every expectation met ([`docs/evidence/demo-live-mainnet.txt`](docs/evidence/demo-live-mainnet.txt)). Then 15 trials in different circumstances ran on mainnet ([`docs/evidence/trials-mainnet.txt`](docs/evidence/trials-mainnet.txt)): 11 paid and reported, 3 refused, 1 declined by the person. These runs wrote 18 records (17 signed reports and the forged one). 14 are retrievable from the shared record on the relayer; the 4 written while an agent was detached are anchored on Sui only. The UI (decision feed, A/B split, merchant record with Re-verify, simulation board) is built, and ran on mainnet on 2026-11-05 ([`docs/evidence/demo-ui-mainnet.txt`](docs/evidence/demo-ui-mainnet.txt)). `pnpm web` runs it on **recorded fixtures** from the real engine; `pnpm web:live` runs the engine first and serves that run to it, with Re-verify checking records for real. A plain lookup page also ships with the registry, and the registry ran against the real relayer and Tatum on mainnet ([`docs/evidence/registry-mainnet.txt`](docs/evidence/registry-mainnet.txt)). Rule 6 was shown changing a real decision on mainnet ([`docs/evidence/demo-rule6-mainnet.txt`](docs/evidence/demo-rule6-mainnet.txt)). See [Honest limits](#honest-limits) and [`docs/ASSUMPTIONS.md`](docs/ASSUMPTIONS.md) for what is verified and what is not.
 
+## The research agent
+
+The application on top of Fides is a research agent that pays for its sources and remembers which ones to trust. Ask it a question and it buys from several paid sources. Before each purchase Fides decides from what other agents reported: pay, ask a person, or refuse. The result is a **brief** that says, for every source, what it delivered or why nothing was bought, and which signed reports the decision rested on. A source the agent did not trust is a labelled gap, never filled with anything.
+
+`pnpm research` runs the story in five sessions: agent A researches and is burned by the news source, agent C is burned by it too, the signal source swaps its payout address, and then agent B, a new session that has never met any of them, researches the same question. B uses the price source, refuses the news source (two independent burns) and the signal source (the payout address changed), and loses nothing. Detached from the shared record, B asks a person about the news source and is burned like the others. It ran on Sui mainnet with real USDC and the Walrus Memory relayer on 2026-11-09 (7 payments of 0.01 USDC, 7 reports): [`docs/evidence/research-mainnet.txt`](docs/evidence/research-mainnet.txt). The hosted site replays that run as its first screen.
+
+What a trust score means here, plainly: Fides judges whether a source **delivered what it promised** (the published format, fresh data, the quoted price, the expected payout address). It cannot judge whether the content is **true**; there is no ground truth in this project. The brief says "delivered as advertised", never "correct". The three sources are mock servers we run.
+
 ## Judge in 2 minutes
 
 | | |
 |---|---|
-| Tests | 406 pass, 11 skipped (live network tests, Gemini included, and two slow simulation tests, run on request), typecheck clean |
+| Tests | 419 pass, 11 skipped (live network tests, Gemini included, and two slow simulation tests, run on request), typecheck clean |
+| Research agent | `pnpm research` (simulated, free) or `FIDES_NETWORK=mainnet pnpm research -- --live --memory=live`. Output on mainnet: [`docs/evidence/research-mainnet.txt`](docs/evidence/research-mainnet.txt) |
 | UI | Hosted: <https://fides-credit-bureau.vercel.app>. It is static, with no backend, and replays the recording of the mainnet run from 2026-11-05, labelled as a recording (real payments link to Suiscan; Re-verify replays the recorded checks). Locally: `pnpm web` opens the four screens on recorded fixtures; `pnpm web:live` on a fresh run of the engine (add `-- --live` for Sui testnet); `pnpm mockups` serves the static design mockups |
 | Real on-chain run | the full demo on Sui testnet: real MPP USDC payments, Tatum verification, Sui anchors. Output: [`docs/evidence/demo-live-testnet.txt`](docs/evidence/demo-live-testnet.txt) |
 | Measured result | 20 agents, 6 merchants (2 bad): **6 burns with the shared record, 44 without** (86% avoided), no good merchant refused. [`docs/evidence/simulation.txt`](docs/evidence/simulation.txt) |
@@ -237,11 +246,11 @@ Trust tiers come from verified outcomes, weighted by the reporter's own track re
 | `sdk` | 79 | the whole check/report loop, forgeries, pending vs rejected, partial failures and retries, rule 6 end to end |
 | `tools`, `mcp` | 38 | the three tools, every vendor's tool shapes, MCP over memory, stdio and HTTP, auth and origin checks, rate limit and deadline |
 | `merchants` | 26 | each merchant's behaviour, the address swap on the real MPP gate |
-| `agent` | 22 | the buy loop, timeouts, refused and unknown payments, a merchant naming another host, reporting retries (inline and in the background), the full demo, the rule 6 demo |
+| `agent` | 28 | the buy loop, timeouts, refused and unknown payments, a merchant naming another host, reporting retries (inline and in the background), the full demo, the rule 6 demo, the research agent (gaps, burned content never shown, unreachable record stated) |
 | `registry` | 30 | verification, forged records, tampered storage, outages, rate limits, page safety, anchors recall missed |
 | `sim` | 4 | repeatability, and (on request) the result |
-| `web` | 47 | every screen rendered, the UI's logic and its API on fixtures and live: attempts, the board per round, the split view's three states, Re-verify for real, a forged record, an unreachable server |
-| **Total** | **417** | 406 run by default |
+| `web` | 54 | every screen rendered, the UI's logic and its API on fixtures and live: attempts, the board per round, the split view's three states, Re-verify for real, a forged record, an unreachable server |
+| **Total** | **430** | 419 run by default |
 
 Live tests (a real relayer, Tatum testnet, real payments) run only with `FIDES_LIVE=1`. Everything else uses a simulated world: a fake ledger, in-process memory, real signatures, real HTTP between agents and merchants, the real engine. The headline demo and the live tests use real payments and a real chain; nothing in them is faked except where stated under [staged versus real](#staged-versus-real).
 
@@ -271,6 +280,8 @@ Read this before trusting any number.
 - **Small on mainnet.** On mainnet: the check 4 payment, the anchor publish, and one full demo run (5 paid merchant calls of 0.01 USDC, 4 anchored reports plus 2 from the other agents, about 0.001 SUI of gas for the demo). Everything else ran on testnet or the simulated ledger.
 
 ## Honest limits
+
+- **The research agent's trust scores are about delivery, not truth.** A source that returns well-formed, fresh, correctly priced nonsense scores as trustworthy. The three sources are our own mock servers, and the research agent uses no language model: the brief is built from what was bought and what Fides decided. The Research screen replays a recording; the live server (`pnpm web:live`) does not run the research agent and says so.
 
 - **Mainnet runs** (2026-11-04): `pnpm day1:mainnet:run` (payment and anchor, `docs/DAY1.md`) and `FIDES_NETWORK=mainnet pnpm demo:live -- --memory=live` (the demo, `docs/evidence/demo-live-mainnet.txt`). Then `FIDES_NETWORK=mainnet pnpm trials -- --yes` (15 trials, `docs/evidence/trials-mainnet.txt`). These runs wrote 18 records: 14 are retrievable from the shared record on the relayer, and the 4 written while an agent was detached are anchored on Sui only. Earlier Walrus Memory test records are in a separate throwaway namespace.
 - **Proof of payment is not proof of bad service.** A payment shows money moved, not that the response was bad. A merchant can pay itself through its own agents to build clean reports (it costs gas), and an honest-looking agent can slander a merchant by paying and reporting a false burn. Mitigations: reporter weighting, a cap on one reporter's influence, two reporters for a refusal, response checks against the published schema. A burn counts against a merchant only if the reporter paid that merchant's pinned payout address, so a reporter cannot pay a wallet of its own and blame any host for the price of gas; the payout address inherited from the shared record is the one most independent reporters paid. Sybil and cluster detection is out of scope.
@@ -331,6 +342,7 @@ pnpm merchants                    # the three mock merchants on 127.0.0.1:4101-4
 pnpm web                          # the UI on http://127.0.0.1:4500 (recorded fixtures)
 pnpm web:live                     # the same UI on a fresh run of the engine (-- --live for Sui testnet)
 pnpm registry                     # lookup page and API on http://127.0.0.1:4200
+pnpm research                     # the research agent over five sessions, simulated (-- --live --memory=live on mainnet; --json=path saves the run)
 pnpm demo:rule6                   # a PAY that becomes an ASK, citing a memory of another merchant (-- --live --memory=live on mainnet)
 pnpm web:build:hosted             # the UI build the hosted site uses (the recorded mainnet run)
 node scripts/balances.mjs         # SUI and USDC balance of each wallet, read-only

@@ -23,6 +23,7 @@ const ICONS = {
   shield: 'M10 2.5 16 5v4.5c0 4-2.5 6.7-6 8-3.5-1.3-6-4-6-8V5zM7.2 10l2 2 3.6-4',
   scale: 'M10 3v14M6 17h8M4 6h12M4 6l-2 5a2.5 2.5 0 0 0 4 0zM16 6l-2 5a2.5 2.5 0 0 0 4 0z',
   signal: 'M3 10a7 7 0 0 1 14 0M6 10a4 4 0 0 1 8 0M3 3l14 14',
+  research: 'M9 3.5a5.5 5.5 0 1 0 0 11 5.5 5.5 0 0 0 0-11zM13 13l3.5 3.5M6.5 9h5M9 6.5v5',
 } as const;
 
 export function Icon({ name, size = 18 }: { name: keyof typeof ICONS; size?: number }) {
@@ -144,9 +145,10 @@ export function Crumbs({ trail }: { trail: [string, string?][] }) {
 
 // ---------- the shell: a site header on the home page, a sidebar in the app ----------
 const NAV: [string, string, keyof typeof ICONS, Route['name'][]][] = [
+  [href.research, 'Research', 'research', ['research']],
   [href.split, 'A / B split', 'split', ['split']],
   [href.feed, 'Decision feed', 'feed', ['feed', 'decision']],
-  [href.merchants, 'Merchants', 'merchants', ['merchants', 'merchant', 'evidence']],
+  [href.merchants, 'Sources', 'merchants', ['merchants', 'merchant', 'evidence']],
   [href.simulation, 'Simulation', 'simulation', ['simulation']],
 ];
 
@@ -216,7 +218,7 @@ export function Shell({ api, route, children }: { api: FidesApi; route: Route; c
             <div className="site-tools">
               <Honesty api={api} />
               <ThemeButton theme={theme} toggle={toggle} />
-              <a className="btn primary small" href={href.split}>Open the demo</a>
+              <a className="btn primary small" href={href.research}>Open the demo</a>
             </div>
           </div>
         </header>

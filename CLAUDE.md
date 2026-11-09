@@ -38,6 +38,7 @@ pnpm check:secrets               # scan staged files for key-like strings (check
 pnpm merchants                   # the three mock merchants on 127.0.0.1:4101-4103
 pnpm demo                        # the scripted demo, simulated, no network
 pnpm demo:live                   # the same on Sui testnet with real payments (-- --memory=live writes real memories)
+pnpm research                    # the research agent (the hackathon application): five sessions, simulated; -- --live --memory=live on mainnet, --json=path saves the run for the UI
 pnpm demo:rule6                  # rule 6 shown once: a PAY becomes an ASK citing another merchant's memory (-- --live --memory=live for mainnet)
 node scripts/balances.mjs        # SUI and USDC per wallet, read-only
 pnpm sim                         # the simulation (-- --seeds=5 --agents=20 --rounds=12 --no-rule6)

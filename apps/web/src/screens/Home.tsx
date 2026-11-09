@@ -50,10 +50,11 @@ const FAQ: [string, string][] = [
   ['Is any data deleted when an agent is detached?', 'No. Detaching removes the agent\'s access to the shared record. Nothing is deleted. What it reports while detached is kept, and written to the shared record once it is attached again.'],
 ];
 
-const SCREENS: [string, string, string, 'split' | 'feed' | 'merchants' | 'simulation'][] = [
+const SCREENS: [string, string, string, 'research' | 'split' | 'feed' | 'merchants' | 'simulation'][] = [
+  [href.research, 'Research agent', 'A question, three paid sources, and a brief that says what each delivered or why nothing was bought.', 'research'],
   [href.split, 'A / B split', 'The same merchant, with and without the shared record. Flip it and watch the verdict change.', 'split'],
   [href.feed, 'Decision feed', 'Every payment attempt in the run, with the verdict and why.', 'feed'],
-  [href.merchants, 'Merchant records', 'Tier, reports and the forged record that was caught. Re-verify any of them.', 'merchants'],
+  [href.merchants, 'Sources', 'Tier, reports and the forged record that was caught. Re-verify any of them.', 'merchants'],
   [href.simulation, 'Simulation', 'Twenty agents, six merchants, twelve rounds. Where the burns land.', 'simulation'],
 ];
 
@@ -80,12 +81,12 @@ export function Home({ api }: { api: FidesApi }) {
     <div className="home">
       <section className="hero">
         <div className="wrap hero-copy">
-          <span className="eyebrow pilled">Credit bureau for machine payments</span>
-          <h1 className="display">Know the merchant before your agent <em>pays</em>.</h1>
-          <p className="lede">AI agents now pay for APIs on their own, one cent at a time. Fides gives every agent the shared, signed history of what happened to the agents that paid before, and turns it into a plain answer: pay, ask a person, or refuse.</p>
+          <span className="eyebrow pilled">A research agent with source trust scores</span>
+          <h1 className="display">Research that knows which sources to <em>trust</em>.</h1>
+          <p className="lede">A research agent buys data, news and signals from paid sources, one cent at a time. Underneath it is Fides, a credit bureau for machine payments: the shared, signed history of what happened to every agent that paid those sources before. The agent uses the sources that delivered, skips the ones that burned others, and hands you a brief that says which and why.</p>
           <div className="cta">
-            <a className="btn primary" href={href.split}>See it decide <Icon name="arrow" size={16} /></a>
-            <a className="btn" href={href.feed}>Browse the run</a>
+            <a className="btn primary" href={href.research}>Open the research agent <Icon name="arrow" size={16} /></a>
+            <a className="btn" href={href.split}>See Fides decide</a>
           </div>
         </div>
 

@@ -2,9 +2,11 @@
 // and live (the registry and a demo server). The screens never know which one they have.
 import demoJson from '../fixtures/demo.json';
 import demoMainnetJson from '../fixtures/demo-mainnet.json';
+import researchJson from '../fixtures/research.json';
+import researchMainnetJson from '../fixtures/research-mainnet.json';
 import simJson from '../fixtures/sim.json';
 import { attempts, parseSteps } from './lib';
-import type { Attempt, CheckResult, DemoFixture, Honesty, MerchantView, SharedState, SimFixture, SplitView, Tier, VerifyStep, EvidenceItem } from './types';
+import type { Attempt, CheckResult, DemoFixture, Honesty, MerchantView, ResearchFixture, SharedState, SimFixture, SplitView, Tier, VerifyStep, EvidenceItem } from './types';
 
 export interface FidesApi {
   mode: 'fixtures' | 'live';
@@ -27,6 +29,8 @@ export interface FidesApi {
   /** The section 8 checks, one step at a time, so a screen can animate them. */
   verifyEvidence(evidenceId: string): AsyncIterable<VerifyStep>;
   getSimulation(): Promise<SimFixture>;
+  /** The research agent's briefs, session by session. Rejects when this source has no research run: never an empty brief. */
+  getResearch(): Promise<ResearchFixture>;
 }
 
 export interface ApiSource {
@@ -36,6 +40,8 @@ export interface ApiSource {
   verify?: (evidenceId: string) => AsyncIterable<VerifyStep>;
   /** The slowest the Re-verify animation goes: each step waits at least this long after the one before. */
   stepDelayMs?: number;
+  /** The research agent's recorded run. Without it the source has none, and getResearch() says so. */
+  research?: ResearchFixture;
   /** Live only: run B's check now with the shared record in the given state. */
   probe?: (state: SharedState) => Promise<{ check: CheckResult; checkedAt: string }>;
 }
@@ -52,6 +58,7 @@ export function fixturesApi(o: { stepDelayMs?: number; recording?: Recording } =
   const demo = (mainnet ? demoMainnetJson : demoJson) as unknown as DemoFixture;
   return apiFrom(demo, simJson as unknown as SimFixture, {
     mode: 'fixtures',
+    research: (mainnet ? researchMainnetJson : researchJson) as unknown as ResearchFixture,
     honesty: {
       items: mainnet
         ? [
@@ -220,6 +227,10 @@ export function apiFrom(demo: DemoFixture, sim: SimFixture, src: ApiSource): Fid
     },
 
     getSimulation: async () => sim,
+    getResearch: async () => {
+      if (!src.research) throw new Error('this source has no research run: the live server does not run the research agent (run pnpm research, or open the hosted recording)');
+      return src.research;
+    },
   };
 }
 

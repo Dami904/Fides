@@ -21,7 +21,7 @@ export function Evidence({ api, id }: { api: FidesApi; id: string }) {
   const outside = steps.filter((s) => !CHECKS.some(([n]) => n === s.name));
   return (
     <>
-      <PageHead crumbs={[['Merchants', href.merchants], [merchant.host, href.merchant(merchant.host)], [`Record ${e.id.slice(0, 8)}`]]}
+      <PageHead crumbs={[['Sources', href.merchants], [merchant.host, href.merchant(merchant.host)], [`Record ${e.id.slice(0, 8)}`]]}
         title={<span className="ev-title"><Seal id={e.id} status={rejected ? 'rejected' : 'verified'} size={40} />{rejected ? 'Rejected record' : `A ${e.verdict} report`}</span>}>
         {rejected ? 'Someone published this claiming a burn. It failed a check, so it is shown here and never counted.' : `Agent ${e.agent} paid ${merchant.host}, checked what came back, signed this record and anchored its hash on Sui.`}
       </PageHead>

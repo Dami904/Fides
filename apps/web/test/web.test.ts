@@ -248,3 +248,21 @@ describe('the mainnet recording', () => {
     expect(steps.length).toBeGreaterThan(0);
   });
 });
+
+describe('the research recordings', () => {
+  for (const recording of ['sim', 'mainnet'] as const) {
+    it(`${recording}: five sessions, every expectation of the run was met, burned content never appears`, async () => {
+      const r = await fixturesApi({ stepDelayMs: 0, recording }).getResearch();
+      expect(r.sessions.map((s) => s.id)).toEqual([1, 2, 3, 5, 6]);
+      expect(r.ok).toBe(true);
+      expect(r.sessions.every((s) => s.expectations.every((e) => e.ok))).toBe(true);
+      for (const s of r.sessions) for (const x of s.brief.sections) {
+        if (x.outcome !== 'used') expect(x.findings).toEqual([]);
+        if (x.outcome === 'refused' || x.outcome === 'declined') expect(x.txDigest).toBeNull();
+      }
+      const b = r.sessions.find((s) => s.id === 5)!.brief;
+      expect(b.sections.map((x) => x.outcome)).toEqual(['used', 'refused', 'refused']);
+      expect(b.lostUsdc).toBe('0.00');
+    });
+  }
+});

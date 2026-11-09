@@ -1,0 +1,429 @@
+{
+  "generatedAt": "2026-11-09T19:53:11.861Z",
+  "mode": "sim",
+  "network": "sim",
+  "question": "What is happening with SUI right now, and is it worth acting on?",
+  "sessions": [
+    {
+      "id": 1,
+      "title": "Agent A researches for the first time",
+      "agent": "A",
+      "question": "What is happening with SUI right now, and is it worth acting on?",
+      "brief": {
+        "question": "What is happening with SUI right now, and is it worth acting on?",
+        "agent": "A",
+        "sections": [
+          {
+            "topic": "prices",
+            "label": "Market prices",
+            "host": "good.fides-demo.test",
+            "decision": "ASK",
+            "tier": "new",
+            "cannotSay": true,
+            "rules": [
+              "tier"
+            ],
+            "reasons": [
+              "cannot say: not enough history to classify this merchant"
+            ],
+            "evidenceIds": [],
+            "memoryBlobIds": [],
+            "sharedState": "attached",
+            "approved": true,
+            "amountUsdc": "0.01",
+            "txDigest": "TX000000000000000000000000000000000000000001",
+            "reportedEvidenceId": "08852d01e7ba2092bd97239068c6c6002c8693fd14d91ec0fccfd8a30f017a7b",
+            "findings": [
+              "SUI $1.23",
+              "BTC $67,000.5",
+              "ETH $3,400.1"
+            ],
+            "asOf": "2026-11-09T19:53:11.708Z",
+            "outcome": "used",
+            "note": "A person approved the payment. Delivered as advertised."
+          },
+          {
+            "topic": "news",
+            "label": "Headlines",
+            "host": "flaky.fides-demo.test",
+            "decision": "ASK",
+            "tier": "new",
+            "cannotSay": true,
+            "rules": [
+              "tier"
+            ],
+            "reasons": [
+              "cannot say: not enough history to classify this merchant"
+            ],
+            "evidenceIds": [],
+            "memoryBlobIds": [],
+            "sharedState": "attached",
+            "approved": true,
+            "amountUsdc": "0.01",
+            "txDigest": "TX000000000000000000000000000000000000000002",
+            "reportedEvidenceId": "f42c3ecaca2959cb458f65e69d4d5146b05b4f77f0efb6ead2a3e458eb7c7082",
+            "findings": [
+              "Markets move at 1794253991",
+              "Sui ecosystem update 1794253991"
+            ],
+            "asOf": "2026-11-09T19:53:11.741Z",
+            "outcome": "used",
+            "note": "A person approved the payment. Delivered as advertised."
+          },
+          {
+            "topic": "signal",
+            "label": "Trading signal",
+            "host": "malicious.fides-demo.test",
+            "decision": "ASK",
+            "tier": "new",
+            "cannotSay": true,
+            "rules": [
+              "tier"
+            ],
+            "reasons": [
+              "cannot say: not enough history to classify this merchant"
+            ],
+            "evidenceIds": [],
+            "memoryBlobIds": [],
+            "sharedState": "attached",
+            "approved": true,
+            "amountUsdc": "0.01",
+            "txDigest": "TX000000000000000000000000000000000000000003",
+            "reportedEvidenceId": "d0358260372c443aee71e16590f3ef5d5bbde52297ad1387a09f2dcee7a6a450",
+            "findings": [
+              "signal: buy, confidence 82%"
+            ],
+            "asOf": "2026-11-09T19:53:11.754Z",
+            "outcome": "used",
+            "note": "A person approved the payment. Delivered as advertised."
+          }
+        ],
+        "usedCount": 3,
+        "spentUsdc": "0.03",
+        "lostUsdc": "0.00",
+        "summary": "Used 3 of 3 sources. Spent 0.03 USDC, lost 0.00."
+      },
+      "expectations": [
+        {
+          "label": "A has no history with any source, so a person is asked about each, and all three deliver",
+          "ok": true,
+          "detail": "prices:used news:used signal:used"
+        },
+        {
+          "label": "every section carries findings from what was delivered",
+          "ok": true
+        },
+        {
+          "label": "A reported all three exchanges as signed, anchored records",
+          "ok": true
+        }
+      ],
+      "notes": []
+    },
+    {
+      "id": 2,
+      "title": "A asks the news source for fresh headlines: junk comes back",
+      "agent": "A",
+      "question": "Any new headlines on SUI?",
+      "brief": {
+        "question": "Any new headlines on SUI?",
+        "agent": "A",
+        "sections": [
+          {
+            "topic": "news",
+            "label": "Headlines",
+            "host": "flaky.fides-demo.test",
+            "decision": "ASK",
+            "tier": "new",
+            "cannotSay": true,
+            "rules": [
+              "tier"
+            ],
+            "reasons": [
+              "cannot say: not enough history to classify this merchant"
+            ],
+            "evidenceIds": [
+              "f42c3ecaca2959cb458f65e69d4d5146b05b4f77f0efb6ead2a3e458eb7c7082"
+            ],
+            "memoryBlobIds": [],
+            "sharedState": "attached",
+            "approved": true,
+            "amountUsdc": "0.01",
+            "txDigest": "TX000000000000000000000000000000000000000004",
+            "reportedEvidenceId": "312b728b6c2e2a6882830159936afc5c3a22cb7a1f2a7942ff00df4473d909a4",
+            "findings": [],
+            "asOf": null,
+            "outcome": "burned",
+            "note": "Paid 0.01 USDC and the response failed a check (schema is \"wrong/v0\", expected fides.news/v1; data is missing or not an object). Its content was thrown away and a signed burn report was written."
+          }
+        ],
+        "usedCount": 0,
+        "spentUsdc": "0.01",
+        "lostUsdc": "0.01",
+        "summary": "Used 0 of 1 sources. Burned by headlines. Spent 0.01 USDC, lost 0.01."
+      },
+      "expectations": [
+        {
+          "label": "A pays, the response fails its checks, and the junk is thrown away",
+          "ok": true,
+          "detail": "burned"
+        },
+        {
+          "label": "the burn is reported as a signed record",
+          "ok": true
+        }
+      ],
+      "notes": []
+    },
+    {
+      "id": 3,
+      "title": "Agent C, another session, asks the same source: stale this time",
+      "agent": "C",
+      "question": "Any new headlines on SUI?",
+      "brief": {
+        "question": "Any new headlines on SUI?",
+        "agent": "C",
+        "sections": [
+          {
+            "topic": "news",
+            "label": "Headlines",
+            "host": "flaky.fides-demo.test",
+            "decision": "PAY_CAPPED",
+            "tier": "new",
+            "cannotSay": false,
+            "rules": [
+              "shared-burn"
+            ],
+            "reasons": [
+              "one other reporter has a verified burn for this merchant: small payments only"
+            ],
+            "evidenceIds": [
+              "312b728b6c2e2a6882830159936afc5c3a22cb7a1f2a7942ff00df4473d909a4"
+            ],
+            "memoryBlobIds": [],
+            "sharedState": "attached",
+            "approved": null,
+            "amountUsdc": "0.01",
+            "txDigest": "TX000000000000000000000000000000000000000005",
+            "reportedEvidenceId": "fb045d60bccf709394e97d0d8c44529bf48148e787f03b93a3d7f312c26363dc",
+            "findings": [],
+            "asOf": null,
+            "outcome": "burned",
+            "note": "Paid 0.01 USDC and the response failed a check (asOf is 3600 s old, maximum is 120 s). Its content was thrown away and a signed burn report was written."
+          }
+        ],
+        "usedCount": 0,
+        "spentUsdc": "0.01",
+        "lostUsdc": "0.01",
+        "summary": "Used 0 of 1 sources. Burned by headlines. Spent 0.01 USDC, lost 0.01."
+      },
+      "expectations": [
+        {
+          "label": "C is burned too: a second independent report",
+          "ok": true,
+          "detail": "burned"
+        }
+      ],
+      "notes": []
+    },
+    {
+      "id": 5,
+      "title": "Agent B, a new session, researches the same question",
+      "agent": "B",
+      "question": "What is happening with SUI right now, and is it worth acting on?",
+      "brief": {
+        "question": "What is happening with SUI right now, and is it worth acting on?",
+        "agent": "B",
+        "sections": [
+          {
+            "topic": "prices",
+            "label": "Market prices",
+            "host": "good.fides-demo.test",
+            "decision": "ASK",
+            "tier": "new",
+            "cannotSay": true,
+            "rules": [
+              "similar-incident"
+            ],
+            "reasons": [
+              "2 similar incident(s) at other merchants: new_merchant"
+            ],
+            "evidenceIds": [
+              "08852d01e7ba2092bd97239068c6c6002c8693fd14d91ec0fccfd8a30f017a7b"
+            ],
+            "memoryBlobIds": [
+              "blob3",
+              "blob4"
+            ],
+            "sharedState": "attached",
+            "approved": true,
+            "amountUsdc": "0.01",
+            "txDigest": "TX000000000000000000000000000000000000000006",
+            "reportedEvidenceId": "464bc9b0e81569a64ead32007539895c59efbf653c6aa7103c38925d4721c3d2",
+            "findings": [
+              "SUI $1.23",
+              "BTC $67,000.5",
+              "ETH $3,400.1"
+            ],
+            "asOf": "2026-11-09T19:53:11.817Z",
+            "outcome": "used",
+            "note": "A person approved the payment. Delivered as advertised."
+          },
+          {
+            "topic": "news",
+            "label": "Headlines",
+            "host": "flaky.fides-demo.test",
+            "decision": "REFUSE",
+            "tier": "burned",
+            "cannotSay": false,
+            "rules": [
+              "shared-burns"
+            ],
+            "reasons": [
+              "2 independent reporters have verified burns for this merchant"
+            ],
+            "evidenceIds": [
+              "312b728b6c2e2a6882830159936afc5c3a22cb7a1f2a7942ff00df4473d909a4",
+              "fb045d60bccf709394e97d0d8c44529bf48148e787f03b93a3d7f312c26363dc"
+            ],
+            "memoryBlobIds": [],
+            "sharedState": "attached",
+            "approved": null,
+            "amountUsdc": "0.01",
+            "txDigest": null,
+            "reportedEvidenceId": null,
+            "findings": [],
+            "asOf": null,
+            "outcome": "refused",
+            "note": "Not paid. Fides refused this source."
+          },
+          {
+            "topic": "signal",
+            "label": "Trading signal",
+            "host": "malicious.fides-demo.test",
+            "decision": "REFUSE",
+            "tier": "new",
+            "cannotSay": true,
+            "rules": [
+              "address"
+            ],
+            "reasons": [
+              "payout address changed from the pinned address and the price spiked",
+              "the pinned address comes from verified reports in the shared record"
+            ],
+            "evidenceIds": [],
+            "memoryBlobIds": [],
+            "sharedState": "attached",
+            "approved": null,
+            "amountUsdc": "0.04",
+            "txDigest": null,
+            "reportedEvidenceId": null,
+            "findings": [],
+            "asOf": null,
+            "outcome": "refused",
+            "note": "Not paid. Fides refused this source."
+          }
+        ],
+        "usedCount": 1,
+        "spentUsdc": "0.01",
+        "lostUsdc": "0.00",
+        "summary": "Used 1 of 3 sources. Did not pay headlines and trading signal. Spent 0.01 USDC, lost 0.00."
+      },
+      "expectations": [
+        {
+          "label": "B uses the price source (a person is asked: nobody has reported a problem with it)",
+          "ok": true,
+          "detail": "used ASK"
+        },
+        {
+          "label": "B refuses the news source, citing both burns it never saw happen",
+          "ok": true,
+          "detail": "refused cites 2"
+        },
+        {
+          "label": "B refuses the signal source: the payout address changed and the price jumped",
+          "ok": true,
+          "detail": "refused"
+        },
+        {
+          "label": "the refused sections are labelled gaps with no content",
+          "ok": true
+        },
+        {
+          "label": "B lost nothing",
+          "ok": true,
+          "detail": "0.00"
+        }
+      ],
+      "notes": [
+        "B has never met these sources. What it knows came from A and C through the shared record."
+      ]
+    },
+    {
+      "id": 6,
+      "title": "B loses access to the shared record and asks the news source again",
+      "agent": "B",
+      "question": "Any new headlines on SUI?",
+      "brief": {
+        "question": "Any new headlines on SUI?",
+        "agent": "B",
+        "sections": [
+          {
+            "topic": "news",
+            "label": "Headlines",
+            "host": "flaky.fides-demo.test",
+            "decision": "ASK",
+            "tier": "new",
+            "cannotSay": true,
+            "rules": [
+              "tier"
+            ],
+            "reasons": [
+              "cannot say: not enough history to classify this merchant"
+            ],
+            "evidenceIds": [],
+            "memoryBlobIds": [],
+            "sharedState": "detached",
+            "approved": true,
+            "amountUsdc": "0.01",
+            "txDigest": "TX000000000000000000000000000000000000000007",
+            "reportedEvidenceId": "c62fe91b15038b2193827dd8d6c22deb70fba5d1ce51df60d41f11fab1106dc7",
+            "findings": [],
+            "asOf": null,
+            "outcome": "burned",
+            "note": "Paid 0.01 USDC and the response failed a check (schema is \"wrong/v0\", expected fides.news/v1; data is missing or not an object). Its content was thrown away and a signed burn report was written, held back from the shared record until it can be written. The shared record was detached, so this decision rested on this agent's own history only."
+          }
+        ],
+        "usedCount": 0,
+        "spentUsdc": "0.01",
+        "lostUsdc": "0.01",
+        "summary": "Used 0 of 1 sources. Burned by headlines. Spent 0.01 USDC, lost 0.01."
+      },
+      "expectations": [
+        {
+          "label": "detached, B cannot see the burns: it can only ask a person",
+          "ok": true,
+          "detail": "detached ASK"
+        },
+        {
+          "label": "the person approves and B is burned, as A and C were",
+          "ok": true,
+          "detail": "burned"
+        },
+        {
+          "label": "once attached again, B's held burn is written to the shared record",
+          "ok": true
+        }
+      ],
+      "notes": [
+        "Detaching removes B's access to the shared record. Nothing was deleted from it."
+      ]
+    }
+  ],
+  "lostUsdc": {
+    "A": "0.01",
+    "B": "0.01",
+    "C": "0.01"
+  },
+  "ok": true
+}

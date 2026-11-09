@@ -85,6 +85,7 @@ export type Route =
   | { name: 'feed' }
   | { name: 'decision'; index: number }
   | { name: 'split' }
+  | { name: 'research' }
   | { name: 'merchants' }
   | { name: 'merchant'; host: string }
   | { name: 'evidence'; id: string }
@@ -97,6 +98,7 @@ export function parseRoute(hash: string): Route {
   switch (head) {
     case 'feed': return /^\d+$/.test(arg) ? { name: 'decision', index: Number(arg) } : { name: 'feed' };
     case 'split': return { name: 'split' };
+    case 'research': return { name: 'research' };
     case 'merchant': case 'merchants': return arg ? { name: 'merchant', host: arg } : { name: 'merchants' };
     case 'evidence': return arg ? { name: 'evidence', id: arg } : { name: 'merchants' };
     case 'simulation': return { name: 'simulation' };
@@ -105,7 +107,7 @@ export function parseRoute(hash: string): Route {
 }
 
 export const href = {
-  home: '#/', feed: '#/feed', split: '#/split', merchants: '#/merchants', simulation: '#/simulation',
+  home: '#/', feed: '#/feed', split: '#/split', research: '#/research', merchants: '#/merchants', simulation: '#/simulation',
   decision: (i: number) => `#/feed/${i}`,
   merchant: (host: string) => `#/merchants/${encodeURIComponent(host)}`,
   evidence: (id: string) => `#/evidence/${encodeURIComponent(id)}`,

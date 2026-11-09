@@ -33,11 +33,12 @@ async function show(hash: string, api: FidesApi = fixturesApi({ stepDelayMs: 0 }
 
 describe('every screen renders from the fixtures', () => {
   const pages: [string, string, RegExp][] = [
-    ['home', '#/', /Know the merchant before your agent pays/],
+    ['home', '#/', /Research that knows which sources to trust/],
+    ['research', '#/research', /A research agent that knows which sources to trust/],
     ['feed', '#/feed', /Decision feed/],
     ['one decision', '#/feed/0', /Agent A/],
     ['A and B', '#/split', /A and B, side by side/],
-    ['merchants', '#/merchants', /Merchant records/],
+    ['merchants', '#/merchants', /Sources and their records/],
     ['one merchant', `#/merchants/${demo.merchants.flaky}`, new RegExp(demo.merchants.flaky.replace(/\./g, '\\.'))],
     ['simulation', '#/simulation', /How often Fides was right/],
   ];
@@ -141,5 +142,43 @@ describe('the A / B split with a live engine behind it', () => {
     await act(() => new Promise((r) => setTimeout(r, 20)));
     expect(page.textContent).toMatch(/Live check not available for this state \(the shared record cannot be switched off here\)\. Showing the recorded decision/);
     expect(page.querySelector('.notice.bad')).toBeNull();
+  });
+});
+
+describe('the research agent screen', () => {
+  const click = async (el: Element) => { await act(async () => { (el as HTMLElement).click(); }); };
+
+  for (const recording of ['sim', 'mainnet'] as const) {
+    it(`shows the brief by a new agent that refuses what others learned, from the ${recording} recording`, async () => {
+      const page = await show('#/research', fixturesApi({ stepDelayMs: 0, recording }));
+      const t = page.textContent ?? '';
+      expect(t).toMatch(/What is happening with SUI right now/);
+      expect(t).toMatch(/Used 1 of 3 sources/);
+      expect(page.querySelectorAll('.src.used')).toHaveLength(1);
+      expect(page.querySelectorAll('.src.refused')).toHaveLength(2);
+      // A refused source is a labelled gap: no findings, nothing paid, and it says so.
+      for (const s of Array.from(page.querySelectorAll('.src.refused'))) {
+        expect(s.querySelector('.findings')).toBeNull();
+        expect(s.textContent).toMatch(/nothing was bought, so nothing is claimed/);
+      }
+      expect(t).toMatch(/never "correct"/); // it says what a trust score does not mean
+    });
+  }
+
+  it('switching to a burned session shows the junk thrown away, not used', async () => {
+    const page = await show('#/research', fixturesApi({ stepDelayMs: 0 }));
+    const second = page.querySelectorAll('.sessions button')[1]!;
+    await click(second);
+    expect(page.querySelectorAll('.src.burned')).toHaveLength(1);
+    expect(page.querySelector('.src.burned .findings')).toBeNull();
+    expect(page.textContent).toMatch(/Nothing from this source is in the brief/);
+    expect(page.textContent).toMatch(/lost to burns/);
+  });
+
+  it('a source with no research run says so, and never shows an empty brief', async () => {
+    const api: FidesApi = { ...fixturesApi({ stepDelayMs: 0 }), getResearch: () => Promise.reject(new Error('this source has no research run')) };
+    const page = await show('#/research', api);
+    expect(page.textContent).toMatch(/could not be loaded: this source has no research run/);
+    expect(page.querySelector('.src')).toBeNull();
   });
 });

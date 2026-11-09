@@ -69,3 +69,16 @@ export interface SplitView {
   lossOthers: { A: number; C: number };
 }
 export interface Honesty { items: { key: string; value: string; real: boolean }[] }
+
+/** The research agent's brief, one per session. Mirrors apps/agent/src/research.ts: the UI never imports the engine. */
+export type SectionOutcome = 'used' | 'burned' | 'refused' | 'declined' | 'error';
+export interface BriefSection {
+  topic: string; label: string; host: string | null; outcome: SectionOutcome;
+  decision: Decision | null; tier: string | null; cannotSay: boolean; rules: string[]; reasons: string[];
+  evidenceIds: string[]; memoryBlobIds: string[]; sharedState: string | null; approved: boolean | null;
+  amountUsdc: string | null; txDigest: string | null; reportedEvidenceId: string | null;
+  findings: string[]; asOf: string | null; note: string;
+}
+export interface Brief { question: string; agent: string; sections: BriefSection[]; usedCount: number; spentUsdc: string; lostUsdc: string; summary: string }
+export interface ResearchSession { id: number; title: string; agent: string; question: string; brief: Brief; expectations: { label: string; ok: boolean; detail?: string }[]; notes: string[] }
+export interface ResearchFixture { generatedAt: string; mode: string; network: string; question: string; sessions: ResearchSession[]; lostUsdc: Record<string, string>; ok: boolean }

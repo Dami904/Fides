@@ -90,7 +90,7 @@ export function Feed({ api }: { api: FidesApi }) {
         {list.map((a, i) => <Row key={all!.indexOf(a)} a={a} n={all!.indexOf(a)} fresh={shown !== null && i === list.length - 1} />)}
       </div>
 
-      <NextStep to={href.merchants} label="Merchant records" hint="What all of this adds up to for each merchant." />
+      <NextStep to={href.merchants} label="Sources" hint="What all of this adds up to for each source." />
     </>
   );
 }

@@ -49,6 +49,11 @@ export interface BuyResult {
   txDigest?: string;
   status?: number | null;
   exchange?: Exchange;
+  /**
+   * What the merchant delivered, and when it says it was made. Present only when the payment went through and every
+   * check on the response passed: the content of a burned response is never returned, so nothing built on it can use it.
+   */
+  delivered?: { data: unknown; asOf: string };
   check?: CheckResult;
   receipt?: ReportReceipt;
   /** The payment happened but reporting it failed. It is queued: call retryUnreported(). */
@@ -275,6 +280,15 @@ export class PayingAgent {
     const pinned = this.o.fides.lookup(host).pinnedPayTo ?? challenge.recipient;
     const ex = evaluateExchange({ doc, bodyText, nowMs: this.o.now(), latencyMs, maxLatencyMs: this.o.maxLatencyMs, quotedRaw, paidRaw: quotedRaw, payTo: challenge.recipient, pinnedPayTo: pinned });
     this.emit({ type: 'response', agent, host, status, latencyMs, checks: ex.checks, problems: ex.problems });
+    let delivered: BuyResult['delivered'];
+    if (bodyText !== null && Object.values(ex.checks).every(Boolean)) {
+      try {
+        const j = JSON.parse(bodyText) as { data?: unknown; asOf?: unknown };
+        if (j.data !== undefined) delivered = { data: j.data, asOf: String(j.asOf ?? '') };
+      } catch {
+        // the schema check already passed, so this cannot happen; if it does, nothing is delivered
+      }
+    }
 
     // 7. Report it. Finality can lag the payment, so a not-final-yet answer is retried a few times, never polled forever.
     const issuedAt = new Date(this.o.now()).toISOString();
@@ -311,6 +325,6 @@ export class PayingAgent {
       this.scheduleRetry();
       this.emit({ type: 'error', agent, host, message: `payment made but not reported yet, queued for retry: ${reportError}` });
     }
-    return { agent, url, host, decision: v.decision, approved, paid: true, txDigest, status, exchange: ex, check, ...(receipt ? { receipt } : {}), ...(reportError ? { reportError } : {}) };
+    return { agent, url, host, decision: v.decision, approved, paid: true, txDigest, status, exchange: ex, ...(delivered ? { delivered } : {}), check, ...(receipt ? { receipt } : {}), ...(reportError ? { reportError } : {}) };
   }
 }

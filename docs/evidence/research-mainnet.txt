@@ -1,0 +1,85 @@
+Research agent on mainnet (live). Agents A, B, C. Three paid sources: prices, headlines, trading signal.
+
+== Session 1: Agent A researches for the first time
+  Question: What is happening with SUI right now, and is it worth acting on?
+  Agent A. Used 3 of 3 sources. Spent 0.03 USDC, lost 0.00.
+  
+    [USED] Market prices (good.fides-demo.test, tier new)
+        A person approved the payment. Delivered as advertised.
+        - SUI $1.23
+        - BTC $67,000.5
+        - ETH $3,400.1
+    [USED] Headlines (flaky.fides-demo.test, tier new)
+        A person approved the payment. Delivered as advertised.
+        - Markets move at 1794253596
+        - Sui ecosystem update 1794253596
+    [USED] Trading signal (malicious.fides-demo.test, tier new)
+        A person approved the payment. Delivered as advertised.
+        - signal: buy, confidence 82%
+  [ok] A has no history with any source, so a person is asked about each, and all three deliver
+  [ok] every section carries findings from what was delivered
+  [ok] A reported all three exchanges as signed, anchored records
+
+== Session 2: A asks the news source for fresh headlines: junk comes back
+  Question: Any new headlines on SUI?
+  Agent A. Used 0 of 1 sources. Burned by headlines. Spent 0.01 USDC, lost 0.01.
+  
+    [BURNED] Headlines (flaky.fides-demo.test, tier new)
+        Paid 0.01 USDC and the response failed a check (schema is "wrong/v0", expected fides.news/v1; data is missing or not an object). Its content was thrown away and a signed burn report was written.
+        why: cannot say: not enough history to classify this merchant
+        relied on 1 signed report(s): ec29acfc
+  [ok] A pays, the response fails its checks, and the junk is thrown away
+  [ok] the burn is reported as a signed record
+
+== Session 3: Agent C, another session, asks the same source: stale this time
+  Question: Any new headlines on SUI?
+  Agent C. Used 0 of 1 sources. Burned by headlines. Spent 0.01 USDC, lost 0.01.
+  
+    [BURNED] Headlines (flaky.fides-demo.test, tier new)
+        Paid 0.01 USDC and the response failed a check (asOf is 3600 s old, maximum is 120 s). Its content was thrown away and a signed burn report was written.
+        why: one other reporter has a verified burn for this merchant: small payments only
+        relied on 1 signed report(s): 9afb8982
+  [ok] C is burned too: a second independent report
+
+== The signal source swaps its payout address and quotes four times the price.
+
+== Session 5: Agent B, a new session, researches the same question
+  Question: What is happening with SUI right now, and is it worth acting on?
+  Agent B. Used 1 of 3 sources. Did not pay headlines and trading signal. Spent 0.01 USDC, lost 0.00.
+  
+    [USED] Market prices (good.fides-demo.test, tier new)
+        A person approved the payment. Delivered as advertised.
+        - SUI $1.23
+        - BTC $67,000.5
+        - ETH $3,400.1
+        relied on 1 signed report(s): fa9b621d
+    [REFUSED] Headlines (flaky.fides-demo.test, tier burned)
+        Not paid. Fides refused: 2 independent reporters have verified burns for this merchant.
+        why: 2 independent reporters have verified burns for this merchant
+        relied on 2 signed report(s): 9afb8982, 5100ac7a
+    [REFUSED] Trading signal (malicious.fides-demo.test, tier new)
+        Not paid. Fides refused: payout address changed from the pinned address and the price spiked.
+        why: payout address changed from the pinned address and the price spiked
+        why: the pinned address comes from verified reports in the shared record
+  B has never met these sources. What it knows came from A and C through the shared record.
+  [ok] B uses the price source (a person is asked: nobody has reported a problem with it)
+  [ok] B refuses the news source, citing both burns it never saw happen
+  [ok] B refuses the signal source: the payout address changed and the price jumped
+  [ok] the refused sections are labelled gaps with no content
+  [ok] B lost nothing
+
+== Session 6: B loses access to the shared record and asks the news source again
+  Question: Any new headlines on SUI?
+  Agent B. Used 0 of 1 sources. Burned by headlines. Spent 0.01 USDC, lost 0.01.
+  
+    [BURNED] Headlines (flaky.fides-demo.test, tier new)
+        Paid 0.01 USDC and the response failed a check (schema is "wrong/v0", expected fides.news/v1; data is missing or not an object). Its content was thrown away and a signed burn report was written, held back from the shared record until it can be written. The shared record was detached, so this decision rested on this agent's own history only.
+        why: cannot say: not enough history to classify this merchant
+  Detaching removes B's access to the shared record. Nothing was deleted from it.
+  [ok] detached, B cannot see the burns: it can only ask a person
+  [ok] the person approves and B is burned, as A and C were
+  [ok] once attached again, B's held burn is written to the shared record
+
+Cost of the burns (USDC): A 0.01, B 0.01, C 0.01. B lost nothing while attached (session 5) and the same as A and C once detached (session 6).
+All expectations met.
+saved apps/web/fixtures/research-mainnet.json

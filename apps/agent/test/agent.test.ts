@@ -4,6 +4,8 @@ import { PayingAgent, type AgentEvent } from '../src/agent.js';
 import { digestOfCredential, PaymentNotSentError, readChallenge } from '../src/mpp.js';
 import { runDemo } from '../src/demo.js';
 import { runRule6 } from '../src/rule6.js';
+import { findingsOf, research } from '../src/research.js';
+import { runResearchDemo, sourcesOf } from '../src/research-demo.js';
 import { simHarness, type Harness } from '../src/harness.js';
 
 const open: Harness[] = [];
@@ -308,5 +310,71 @@ describe('rule 6 demo, simulated', () => {
     expect(r.after.verdict.citations.memoryBlobIds.length).toBeGreaterThan(0);
     expect(r.cited.every((c) => c.merchantHost !== h.merchants.good.host && c.pattern === 'clean_streak')).toBe(true);
     expect(r.detached.verdict.citations.memoryBlobIds).toEqual([]);
+  });
+});
+
+describe('the research agent', () => {
+  it('the whole story: uses a trusted source, refuses two others it learned about from other agents, loses nothing', async () => {
+    const h = await sim();
+    const r = await runResearchDemo(h, { log: () => undefined });
+    expect(r.sessions.flatMap((s) => s.expectations.filter((e) => !e.ok).map((e) => `session ${s.id}: ${e.label} ${e.detail ?? ''}`))).toEqual([]);
+    expect(r.ok).toBe(true);
+    const b = r.sessions.find((s) => s.id === 5)!.brief;
+    expect(b.sections.map((s) => s.outcome)).toEqual(['used', 'refused', 'refused']);
+    expect(b.lostUsdc).toBe('0.00');
+    expect(r.lostUsdc).toEqual({ A: '0.01', B: '0.01', C: '0.01' });
+  });
+
+  it('a source Fides refuses is a labelled gap: nothing paid, no content, and the reasons are given', async () => {
+    const h = await sim();
+    const [a, b] = [h.makeAgent('A', () => true), h.makeAgent('B', () => true)];
+    const src = sourcesOf(h);
+    await h.merchants.flaky.admin('/admin/flaky', { force: 'junk' });
+    await research(a.agent, 'q', [src.news]); // A is burned
+    const c = h.makeAgent('C', () => true);
+    await h.merchants.flaky.admin('/admin/flaky', { force: 'stale' });
+    await research(c.agent, 'q', [src.news]); // C is burned
+    const brief = await research(b.agent, 'q', [src.news]);
+    const s = brief.sections[0]!;
+    expect(s).toMatchObject({ outcome: 'refused', decision: 'REFUSE', findings: [], txDigest: null, amountUsdc: '0.01' });
+    expect(s.evidenceIds).toHaveLength(2);
+    expect(brief.spentUsdc).toBe('0.00');
+    expect(brief.usedCount).toBe(0);
+  });
+
+  it('a burned response is never part of the brief', async () => {
+    const h = await sim();
+    const a = h.makeAgent('A', () => true);
+    await h.merchants.flaky.admin('/admin/flaky', { force: 'junk' });
+    const brief = await research(a.agent, 'q', [sourcesOf(h).news]);
+    expect(brief.sections[0]).toMatchObject({ outcome: 'burned', findings: [], asOf: null });
+    expect(brief.lostUsdc).toBe('0.01');
+    expect(brief.sections[0]!.findings).toEqual([]);
+  });
+
+  it('an unreachable shared record is stated in the section, never presented as a clean answer', async () => {
+    const h = await sim();
+    const a = h.makeAgent('A', () => true);
+    h.setMemoryDown(true);
+    const brief = await research(a.agent, 'q', [sourcesOf(h).prices]);
+    const s = brief.sections[0]!;
+    expect(s.sharedState).toBe('unreachable');
+    expect(s.decision).not.toBe('PAY'); // unreachable never softens a decision into a payment
+    expect(s.note).toMatch(/shared record was unreachable/);
+  });
+
+  it('a person who declines an ASK means nothing is paid', async () => {
+    const h = await sim();
+    const a = h.makeAgent('A', () => false);
+    const brief = await research(a.agent, 'q', [sourcesOf(h).prices]);
+    expect(brief.sections[0]).toMatchObject({ outcome: 'declined', approved: false, txDigest: null, findings: [] });
+    expect(brief.spentUsdc).toBe('0.00');
+  });
+
+  it('turns known shapes into plain lines and shows anything else as it came', () => {
+    expect(findingsOf('prices', { prices: { SUI: 1.5, BTC: 67000 } })).toEqual(['SUI $1.5', 'BTC $67,000']);
+    expect(findingsOf('news', { headlines: ['a', 'b'] })).toEqual(['a', 'b']);
+    expect(findingsOf('signal', { signal: 'buy', confidence: 0.82 })).toEqual(['signal: buy, confidence 82%']);
+    expect(findingsOf('other', { x: 1 })).toEqual(['{"x":1}']);
   });
 });

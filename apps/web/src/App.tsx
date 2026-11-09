@@ -8,6 +8,7 @@ import { Feed } from './screens/Feed';
 import { Home } from './screens/Home';
 import { Merchant } from './screens/Merchant';
 import { Merchants } from './screens/Merchants';
+import { Research } from './screens/Research';
 import { Simulation } from './screens/Simulation';
 import { Split } from './screens/Split';
 
@@ -26,6 +27,7 @@ export function App({ api: given }: { api?: FidesApi } = {}) {
       {route.name === 'home' && <Home api={api} />}
       {route.name === 'feed' && <Feed api={api} />}
       {route.name === 'decision' && <Decision api={api} index={route.index} />}
+      {route.name === 'research' && <Research api={api} />}
       {route.name === 'split' && <Split api={api} />}
       {route.name === 'merchants' && <Merchants api={api} />}
       {route.name === 'merchant' && <Merchant api={api} host={route.host} />}
