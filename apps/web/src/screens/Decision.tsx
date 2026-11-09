@@ -1,7 +1,7 @@
 import type { ReactNode } from 'react';
 import type { FidesApi } from '../api';
-import { Chip, flagOf, Icon, Loading, Meter, PageHead, Pill, Seal, Stamp, useLoad } from '../components';
-import { href, shortAddr, usd } from '../lib';
+import { Chip, flagOf, Icon, Loading, Meter, PageHead, Pill, Recalled, Seal, Stamp, useLoad } from '../components';
+import { href, recallChangedDecision, shortAddr, usd } from '../lib';
 import type { Attempt, CheckName, Decision as Verdict } from '../types';
 
 export const CHECK_LABEL: Record<CheckName, string> = { schemaValid: 'matches schema', fresh: 'fresh', onTime: 'on time', amountMatchesQuote: 'price as quoted', payToMatchesPinned: 'pay-to as pinned' };
@@ -31,6 +31,8 @@ function VerdictCard({ a }: { a: Attempt }) {
         </div>
         <div className="lab">Cites</div>
         <div className="row-pills">{c.evidenceIds.length ? c.evidenceIds.map((id) => <a key={id} href={href.evidence(id)}><Chip id={id} /></a>) : <span className="muted small">no signed records for this merchant</span>}</div>
+        <div className="lab">Recalled</div>
+        <Recalled memories={c.recalled} ids={c.memoryBlobIds} changed={recallChangedDecision(c.rules, c.tier)} />
         <div className="lab">Shared record</div>
         <div className="row-pills">
           <Pill state tone={c.sharedState === 'attached' ? 'ok' : 'warn'}>{c.sharedState}</Pill>

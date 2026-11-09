@@ -182,3 +182,57 @@ describe('the research agent screen', () => {
     expect(page.querySelector('.src')).toBeNull();
   });
 });
+
+describe('recalled memories and the merchant timeline on screen', () => {
+  it('the mainnet research brief shows the recalled memories with their distance and the limit', async () => {
+    const page = await show('#/research', fixturesApi({ stepDelayMs: 0, recording: 'mainnet' }));
+    const rec = Array.from(page.querySelectorAll('.recalled li'));
+    expect(rec.length).toBeGreaterThan(0);
+    for (const li of rec) {
+      expect(li.textContent).toMatch(/a burn at \S+fides-demo\.test/);
+      expect(li.textContent).toMatch(/distance 0\.\d{3}/);
+      expect(li.textContent).toMatch(/limit 0\.45/);
+    }
+    // These memories were cited for a new source, which would have been asked about anyway. The screen says so.
+    expect(page.textContent).toMatch(/did not change the decision/);
+  });
+
+  it('the research brief links the records it relied on and wrote to their evidence pages', async () => {
+    const api = fixturesApi({ stepDelayMs: 0 });
+    const page = await show('#/research', api);
+    const links = Array.from(page.querySelectorAll<HTMLAnchorElement>('.src a[href^="#/evidence/"]'));
+    expect(links.length).toBeGreaterThan(0);
+    for (const a of links) {
+      const id = decodeURIComponent(a.getAttribute('href')!.slice('#/evidence/'.length));
+      await expect(api.getEvidence(id)).resolves.toBeTruthy();
+    }
+    expect(page.querySelector('.s-event')?.textContent).toMatch(/swapped its payout address/);
+  });
+
+  it('a research record opens with a way back to the research run', async () => {
+    const api = fixturesApi({ stepDelayMs: 0 });
+    const r = await api.getResearch();
+    const id = r.sessions[1]!.brief.sections[0]!.reportedEvidenceId!;
+    const page = await show(`#/evidence/${id}`, api);
+    expect(page.textContent).toMatch(/research session 2/);
+    expect(page.textContent).toMatch(/A burned report/);
+    expect(page.querySelector('a[href="#/research"]')).not.toBeNull();
+  });
+
+  it('a recording made before distances were kept says so instead of inventing one', async () => {
+    const page = await show('#/feed/5', fixturesApi({ stepDelayMs: 0, recording: 'mainnet' }));
+    const t = page.textContent ?? '';
+    expect(t).toMatch(/Recalled/);
+    expect(t).not.toMatch(/distance 0\.\d{3}/);
+  });
+
+  it('a merchant page shows how the tier moved, one step per attempt, linking to the decision', async () => {
+    const page = await show(`#/merchants/${demo.merchants.flaky}`);
+    const steps = Array.from(page.querySelectorAll('.tl-step'));
+    expect(steps.length).toBe((await fixturesApi().getMerchant(demo.merchants.flaky)).timeline.length);
+    expect(page.textContent).toMatch(/How the tier moved/);
+    expect(page.textContent).toMatch(/saw tier: new/);
+    expect(steps[0]!.querySelector('a')!.getAttribute('href')).toMatch(/^#\/feed\/\d+$/);
+    expect(page.querySelectorAll('.tl-step.burned').length).toBeGreaterThan(0);
+  });
+});

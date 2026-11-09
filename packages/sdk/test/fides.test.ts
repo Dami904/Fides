@@ -574,6 +574,11 @@ describe('rule 6 end to end: a recalled memory of a different merchant changes a
     expect(after.verdict.rulesFired).toEqual(['similar-incident']);
     expect(after.verdict.citations.memoryBlobIds).toEqual([w.memory.texts.at(-1)!.id]); // the cited memory
     expect(after.verdict.reasons.join(' ')).toMatch(/clean_streak/);
+    // The cited memory comes with how close it was, and what it is about: another merchant.
+    expect(after.recalled).toHaveLength(1);
+    expect(after.recalled[0]).toMatchObject({ blobId: w.memory.texts.at(-1)!.id, merchantHost: Y, patterns: ['clean_streak'] });
+    expect(after.recalled[0]!.distance).toBeLessThan(0.45);
+    expect(before.recalled).toEqual([]); // no rule 6, nothing recalled to show
   });
 
   it('detached, the same agent never hears about it and keeps paying', async () => {
@@ -588,6 +593,7 @@ describe('rule 6 end to end: a recalled memory of a different merchant changes a
     const r = await b.fides.check(b.input({ merchantHost: X }));
     expect(r.verdict.rulesFired).not.toContain('similar-incident');
     expect(r.verdict.citations.memoryBlobIds).toEqual([]);
+    expect(r.recalled).toEqual([]);
   });
 });
 

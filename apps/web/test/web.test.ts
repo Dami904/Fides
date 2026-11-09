@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import demoJson from '../fixtures/demo.json';
 import simJson from '../fixtures/sim.json';
 import { fixturesApi } from '../src/api';
-import { attempts, boardAt, gradeAt, glyphCells, href, merchantOrder, parseRoute, parseSteps, short, shortAddr, usd } from '../src/lib';
+import { attempts, boardAt, gradeAt, glyphCells, href, merchantOrder, parseRoute, parseSteps, recallChangedDecision, short, shortAddr, usd } from '../src/lib';
 import type { DemoFixture, SimFixture, VerifyStep } from '../src/types';
 
 const demo = demoJson as unknown as DemoFixture;
@@ -253,16 +253,81 @@ describe('the research recordings', () => {
   for (const recording of ['sim', 'mainnet'] as const) {
     it(`${recording}: five sessions, every expectation of the run was met, burned content never appears`, async () => {
       const r = await fixturesApi({ stepDelayMs: 0, recording }).getResearch();
-      expect(r.sessions.map((s) => s.id)).toEqual([1, 2, 3, 5, 6]);
+      expect(r.sessions).toHaveLength(5);
       expect(r.ok).toBe(true);
       expect(r.sessions.every((s) => s.expectations.every((e) => e.ok))).toBe(true);
       for (const s of r.sessions) for (const x of s.brief.sections) {
         if (x.outcome !== 'used') expect(x.findings).toEqual([]);
         if (x.outcome === 'refused' || x.outcome === 'declined') expect(x.txDigest).toBeNull();
       }
-      const b = r.sessions.find((s) => s.id === 5)!.brief;
+      const b = r.sessions.find((s) => s.agent === 'B' && s.brief.sections.length > 1)!.brief;
       expect(b.sections.map((x) => x.outcome)).toEqual(['used', 'refused', 'refused']);
       expect(b.lostUsdc).toBe('0.00');
     });
+
+    it(`${recording}: every record the research run wrote or cited opens as evidence, and says where it came from`, async () => {
+      const a = fixturesApi({ stepDelayMs: 0, recording });
+      const r = await a.getResearch();
+      const sections = r.sessions.flatMap((s) => s.brief.sections);
+      const written = sections.flatMap((x) => (x.reportedEvidenceId ? [x.reportedEvidenceId] : []));
+      const cited = sections.flatMap((x) => x.evidenceIds);
+      expect(written.length).toBeGreaterThan(0);
+      for (const id of new Set([...written, ...cited])) {
+        const { item } = await a.getEvidence(id);
+        expect(item.id).toBe(id);
+        expect(item.status).toBe('verified');
+      }
+      for (const [n, s] of r.sessions.entries()) for (const x of s.brief.sections) {
+        if (!x.reportedEvidenceId) continue;
+        const { item, merchant } = await a.getEvidence(x.reportedEvidenceId);
+        // A record from the demo run keeps its demo page; only the research run's own records point back to the research run.
+        if (item.research) {
+          expect(item.research.session).toBe(n + 1);
+          expect(merchant.host).toBe(x.host);
+          expect(item.verdict).toBe(x.outcome === 'burned' ? 'burned' : 'clean');
+          if (x.outcome === 'burned') expect(item.problems.length).toBeGreaterThan(0);
+        }
+      }
+    });
   }
+
+  it('the address swap is shown as what changed before a session, not as a session of its own', async () => {
+    const r = await fixturesApi({ stepDelayMs: 0 }).getResearch();
+    expect(r.sessions.map((s) => s.id)).toEqual([1, 2, 3, 4, 5]);
+    expect(r.sessions.find((s) => s.before)?.agent).toBe('B');
+  });
+});
+
+describe('rule 6 that did not change a decision', () => {
+  it('is only a change when the tier rule would have paid', () => {
+    expect(recallChangedDecision(['tier'], 'new')).toBeNull();
+    expect(recallChangedDecision(['similar-incident'], 'new')).toBe(false);
+    expect(recallChangedDecision(['similar-incident'], 'established')).toBe(true);
+  });
+});
+
+describe('the merchant timeline', () => {
+  it('has one step per attempt on that merchant, in order, with the tier the agent saw and the outcome', async () => {
+    const all = await api.listDecisions();
+    for (const host of await api.listMerchants()) {
+      const m = await api.getMerchant(host);
+      const mine = all.map((a, index) => ({ a, index })).filter((x) => x.a.host === host);
+      expect(m.timeline.map((t) => t.index)).toEqual(mine.map((x) => x.index));
+      expect(m.timeline.map((t) => t.agent)).toEqual(mine.map((x) => x.a.agent));
+      for (const t of m.timeline) {
+        const a = all[t.index]!;
+        expect(t.tier).toBe(a.check?.tier ?? null); // what the engine said, never recomputed
+        expect(t.outcome).toBe(!a.paid ? 'not paid' : a.response && Object.values(a.response.checks).every(Boolean) ? 'clean' : 'burned');
+      }
+    }
+  });
+
+  it('shows a burned merchant moving from new to burned, and a refusal that paid nothing', async () => {
+    const flaky = await api.getMerchant(demo.merchants.flaky);
+    const tiers = flaky.timeline.map((t) => t.tier);
+    expect(tiers[0]).toBe('new');
+    expect(tiers).toContain('burned');
+    const refused = flaky.timeline.find((t) => t.decision === 'REFUSE')!;
+    expect(refused.outcome).toBe('not paid');
+  });
 });

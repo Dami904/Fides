@@ -7,11 +7,11 @@ Results of SPEC section 15. Record what was tried, what happened, and the fallba
 | 1 | Walrus Memory write and recall on mainnet | done | See "Check 1" below. |
 | 2 | Two delegate keys, one account, shared namespace | done | See "Check 2" below. Shared registry design confirmed. |
 | 3 | Tatum Sui: auth, JSON-RPC vs gRPC, event queries, `rpcUrl` for `@suimpp/mpp` | done | See "Check 3" and "Check 4". Tatum gRPC cannot be `rpcUrl` for `@suimpp/mpp`; GraphQL is the Tatum path. |
-| 4 | End-to-end MPP payment on Sui | testnet done | See "Check 4" below. Mainnet payment still to do. |
-| 5 | Publish Move anchor, emit event, read back via Tatum | testnet done | See "Check 5" below. Mainnet publish still to do. |
+| 4 | End-to-end MPP payment on Sui | done | Testnet 2026-10-28 ("Check 4"), mainnet 2026-11-04 ("Mainnet runs"). |
+| 5 | Publish Move anchor, emit event, read back via Tatum | done | Testnet 2026-10-28 ("Check 5"), mainnet 2026-11-04 ("Mainnet runs"). |
 | 6 | Sign and verify an evidence record | done | Offline. See below. Run: `node packages/evidence/day1-check6-signing.mjs` |
 | 7 | Hackathon rules: mainnet for Agent Payments award, how memories are counted | done | See "Check 7" below. Event Rules read in Chrome on 2026-10-28. Both questions are unanswered by the rules; decisions recorded. |
-| 8 | Fund a small test wallet | todo | |
+| 8 | Fund a small test wallet | done | Agents A, B, C and the merchants wallet hold small amounts of SUI and USDC on testnet and mainnet. Read them with `node scripts/balances.mjs`. |
 
 ## Findings without credentials (2026-10-25, npm registry)
 
@@ -91,6 +91,8 @@ Results of SPEC section 15. Record what was tried, what happened, and the fallba
 - Local machine: Node 24.15.0, pnpm 11.21.0 (not 22 and 10.28 as noted above). `pnpm install` finished; it took about 3 minutes because the npm registry was slow. pnpm 11 reports `ERR_PNPM_IGNORED_BUILDS` for `esbuild@0.21.5` and exits 1. Vitest runs without the esbuild build script (it only validates the binary), so `allowBuilds.esbuild` is set to `false` in `pnpm-workspace.yaml`. Without that, pnpm 11's dependency status check made `pnpm test` fail.
 
 ## Blocked (2026-10-25)
+
+*Resolved. The later runs on 2026-10-28 and 2026-11-04 had network access, and every check above was done. Kept as the record of what was first tried.*
 
 Checks 1 to 5 and 7 are blocked: the container's network policy denies `docs.tatum.io`, `tatum.io`, `*.gateway.tatum.io`, `*.walrus.xyz`, `docs.wal.app`, `fullnode.mainnet.sui.io` and the hackathon rules site (retried twice, still 403 on CONNECT). Needs the environment's Network access widened. Checks 1 to 5 also need keys and a funded wallet.
 

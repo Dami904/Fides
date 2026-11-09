@@ -1,14 +1,14 @@
-// The research agent, scripted over three sessions (SPEC section 17's story, told as research).
+// The research agent, scripted over five sessions (SPEC section 17's story, told as research).
 //
 //  1  Agent A researches the question for the first time. It has no history with any source, so Fides asks a person
 //     about each one; the person approves; all three deliver.
 //  2  A asks the news source for fresh headlines. It returns junk. A pays, throws the junk away, and reports a signed burn.
 //  3  Agent C, another session, asks the news source too. Stale this time. A second independent burn.
-//  4  The signal source swaps its payout address and quotes four times the price.
-//  5  Agent B, a new session that has never met any of them, researches the same question. It reads the shared record:
+//     Between sessions 3 and 4, the signal source swaps its payout address and quotes four times the price.
+//  4  Agent B, a new session that has never met any of them, researches the same question. It reads the shared record:
 //     it uses the price source, refuses the news source (two independent burns) and the signal source (the payout address
 //     changed). It loses nothing.
-//  6  B loses access to the shared record (detached: nothing is deleted). Same question to the news source: nobody
+//  5  B loses access to the shared record (detached: nothing is deleted). Same question to the news source: nobody
 //     can warn it, so it asks a person, and gets burned. That is what the memory was worth.
 import type { AgentEvent, AskPolicy } from './agent.js';
 import type { Expectation } from './demo.js';
@@ -23,6 +23,8 @@ export interface ResearchSession {
   agent: string;
   /** What the agent asked. */
   question: string;
+  /** Something that changed in the world just before this session, not done by any agent. */
+  before?: string;
   brief: Brief;
   expectations: Expectation[];
   notes: string[];
@@ -67,10 +69,12 @@ export async function runResearchDemo(h: Harness, o: { log?: (line: string) => v
 
   log(`Research agent on ${h.network} (${h.mode}). Agents A, B, C. Three paid sources: prices, headlines, trading signal.`);
 
+  let before: string | undefined;
   const session = async (id: number, title: string, who: typeof A, question: string, sources: Source[], check: (b: Brief, s: ResearchSession, expect: Expect) => void) => {
     log(`\n== Session ${id}: ${title}`);
     const brief = await research(who.agent, question, sources);
-    const s: ResearchSession = { id, title, agent: who.name, question, brief, expectations: [], notes: [] };
+    const s: ResearchSession = { id, title, agent: who.name, question, ...(before ? { before } : {}), brief, expectations: [], notes: [] };
+    before = undefined;
     const expect: Expect = (label, ok, detail) => {
       s.expectations.push({ label, ok, ...(detail ? { detail } : {}) });
     };
@@ -104,9 +108,10 @@ export async function runResearchDemo(h: Harness, o: { log?: (line: string) => v
   });
 
   await m.malicious.admin('/admin/turn-malicious');
-  log('\n== The signal source swaps its payout address and quotes four times the price.');
+  before = 'The signal source swapped its payout address and now quotes four times the price.';
+  log(`\n== Between sessions: ${before}`);
 
-  await session(5, 'Agent B, a new session, researches the same question', B, QUESTION, [src.prices, src.news, src.signal], (b, s, expect) => {
+  await session(4, 'Agent B, a new session, researches the same question', B, QUESTION, [src.prices, src.news, src.signal], (b, s, expect) => {
     const p = sec(b, 'prices');
     const n = sec(b, 'news');
     const g = sec(b, 'signal');
@@ -120,7 +125,7 @@ export async function runResearchDemo(h: Harness, o: { log?: (line: string) => v
 
   B.fides.setSharedRecord('detached');
   await flaky('junk');
-  await session(6, 'B loses access to the shared record and asks the news source again', B, 'Any new headlines on SUI?', [src.news], (b, s, expect) => {
+  await session(5, 'B loses access to the shared record and asks the news source again', B, 'Any new headlines on SUI?', [src.news], (b, s, expect) => {
     const n = sec(b, 'news');
     expect('detached, B cannot see the burns: it can only ask a person', n.sharedState === 'detached' && n.decision === 'ASK' && n.evidenceIds.length === 0, `${n.sharedState} ${n.decision}`);
     expect('the person approves and B is burned, as A and C were', n.outcome === 'burned', n.outcome);
@@ -134,7 +139,7 @@ export async function runResearchDemo(h: Harness, o: { log?: (line: string) => v
   log(`  [${written ? 'ok' : 'FAIL'}] once attached again, B's held burn is written to the shared record`);
 
   const ok = sessions.every((s) => s.expectations.every((e) => e.ok));
-  log(`\nCost of the burns (USDC): A ${lost.A!.toFixed(2)}, B ${lost.B!.toFixed(2)}, C ${lost.C!.toFixed(2)}. B lost nothing while attached (session 5) and the same as A and C once detached (session 6).`);
+  log(`\nCost of the burns (USDC): A ${lost.A!.toFixed(2)}, B ${lost.B!.toFixed(2)}, C ${lost.C!.toFixed(2)}. B lost nothing while attached (session 4) and the same as A and C once detached (session 5).`);
   log(ok ? 'All expectations met.' : 'SOME EXPECTATIONS FAILED.');
   return {
     generatedAt: new Date().toISOString(), mode: h.mode, network: h.network, question: QUESTION, sessions,

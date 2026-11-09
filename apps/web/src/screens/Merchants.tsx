@@ -7,7 +7,7 @@ export function Merchants({ api }: { api: FidesApi }) {
   return (
     <>
       <PageHead title="Sources and their records">
-        What the shared record says about each paid source the agents met. Open one for its reports, its tier over time and the checks behind each record.
+        What the shared record says about each paid source the agents met. Open one for how its tier moved from attempt to attempt, its reports, and the checks behind each record.
       </PageHead>
       {error && <div className="notice bad">The merchants could not be loaded: {error}. This is an error, not an empty record.</div>}
       {!error && !data && <Loading />}

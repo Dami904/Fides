@@ -4,7 +4,7 @@ import { PayingAgent, type AgentEvent } from '../src/agent.js';
 import { digestOfCredential, PaymentNotSentError, readChallenge } from '../src/mpp.js';
 import { runDemo } from '../src/demo.js';
 import { runRule6 } from '../src/rule6.js';
-import { findingsOf, research } from '../src/research.js';
+import { findingsOf, recallChangedDecision, research } from '../src/research.js';
 import { runResearchDemo, sourcesOf } from '../src/research-demo.js';
 import { simHarness, type Harness } from '../src/harness.js';
 
@@ -319,8 +319,17 @@ describe('the research agent', () => {
     const r = await runResearchDemo(h, { log: () => undefined });
     expect(r.sessions.flatMap((s) => s.expectations.filter((e) => !e.ok).map((e) => `session ${s.id}: ${e.label} ${e.detail ?? ''}`))).toEqual([]);
     expect(r.ok).toBe(true);
-    const b = r.sessions.find((s) => s.id === 5)!.brief;
+    expect(r.sessions.map((s) => s.id)).toEqual([1, 2, 3, 4, 5]);
+    // The address swap is not a session: it is recorded as what changed before session 4.
+    expect(r.sessions.filter((s) => s.before).map((s) => s.id)).toEqual([4]);
+    const b = r.sessions.find((s) => s.id === 4)!.brief;
     expect(b.sections.map((s) => s.outcome)).toEqual(['used', 'refused', 'refused']);
+    // Every burn carries what failed; nothing else does.
+    for (const x of r.sessions.flatMap((s) => s.brief.sections)) expect(x.problems.length > 0).toBe(x.outcome === 'burned');
+    // A cited memory that could not change the outcome says so.
+    for (const x of r.sessions.flatMap((s) => s.brief.sections)) {
+      if (x.rules.includes('similar-incident') && x.tier === 'new') expect(x.note).toMatch(/did not change the decision/);
+    }
     expect(b.lostUsdc).toBe('0.00');
     expect(r.lostUsdc).toEqual({ A: '0.01', B: '0.01', C: '0.01' });
   });
@@ -340,6 +349,36 @@ describe('the research agent', () => {
     expect(s.evidenceIds).toHaveLength(2);
     expect(brief.spentUsdc).toBe('0.00');
     expect(brief.usedCount).toBe(0);
+  });
+
+  it('the quoted amount comes back on the buy result, paid or not', async () => {
+    const h = await sim();
+    const a = h.makeAgent('A', () => false);
+    const r = await a.agent.buy(h.merchants.good.resource);
+    expect(r.paid).toBe(false);
+    expect(r.amount).toBe('0.01');
+    const brief = await research(h.makeAgent('B', () => true).agent, 'q', [sourcesOf(h).prices]);
+    expect(brief.sections[0]!.amountUsdc).toBe('0.01');
+    await h.close();
+  });
+
+  it('rule 6 changes an outcome only for a merchant the tier rule would have paid', () => {
+    expect(recallChangedDecision('established')).toBe(true);
+    expect(recallChangedDecision('trusted')).toBe(true);
+    expect(recallChangedDecision('new')).toBe(false);
+    expect(recallChangedDecision('burned')).toBe(false);
+    expect(recallChangedDecision(null)).toBe(false);
+  });
+
+  it('an approved payment that fails is an error with its reason, never "nobody approved"', async () => {
+    const h = await sim();
+    const payer = { pay: async () => { throw new PaymentNotSentError('not enough gas'); } };
+    const a = h.makeAgent('A', () => true, undefined, { payer });
+    const s = (await research(a.agent, 'q', [sourcesOf(h).prices])).sections[0]!;
+    expect(s).toMatchObject({ outcome: 'error', decision: 'ASK', approved: true, txDigest: null });
+    expect(s.note).toMatch(/not enough gas/);
+    expect(s.note).not.toMatch(/nobody approved/);
+    await h.close();
   });
 
   it('a burned response is never part of the brief', async () => {

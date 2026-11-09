@@ -14,7 +14,7 @@ Built and tested on **Sui testnet** and run on **Sui mainnet** (2026-11-04): the
 
 The application on top of Fides is a research agent that pays for its sources and remembers which ones to trust. Ask it a question and it buys from several paid sources. Before each purchase Fides decides from what other agents reported: pay, ask a person, or refuse. The result is a **brief** that says, for every source, what it delivered or why nothing was bought, and which signed reports the decision rested on. A source the agent did not trust is a labelled gap, never filled with anything.
 
-`pnpm research` runs the story in five sessions: agent A researches and is burned by the news source, agent C is burned by it too, the signal source swaps its payout address, and then agent B, a new session that has never met any of them, researches the same question. B uses the price source, refuses the news source (two independent burns) and the signal source (the payout address changed), and loses nothing. Detached from the shared record, B asks a person about the news source and is burned like the others. It ran on Sui mainnet with real USDC and the Walrus Memory relayer on 2026-11-09 (7 payments of 0.01 USDC, 7 reports): [`docs/evidence/research-mainnet.txt`](docs/evidence/research-mainnet.txt). The hosted site replays that run as its first screen.
+`pnpm research` runs the story in five sessions: agent A researches and is burned by the news source, agent C is burned by it too, the signal source swaps its payout address, and then agent B, a new session that has never met any of them, researches the same question. B uses the price source, refuses the news source (two independent burns) and the signal source (the payout address changed), and loses nothing. Detached from the shared record, B asks a person about the news source and is burned like the others. It ran on Sui mainnet with real USDC and the Walrus Memory relayer on 2026-11-09, three complete times (7 payments of 0.01 USDC and 7 reports each): [`docs/evidence/research-mainnet.txt`](docs/evidence/research-mainnet.txt). The hosted site replays the latest run as its first screen. Each decision shows the memories it recalled with their distance (in that run, B's ASK on the price source cites two burns at the news source, at distances 0.371 and 0.382, limit 0.45). Those matched the pattern "new merchant", so the ASK is the one a new source gets anyway, and the brief says so; the rule 6 demo is the one that turns a PAY into an ASK. Every signed report the brief relied on or wrote opens as an evidence page with its five checks.
 
 What a trust score means here, plainly: Fides judges whether a source **delivered what it promised** (the published format, fresh data, the quoted price, the expected payout address). It cannot judge whether the content is **true**; there is no ground truth in this project. The brief says "delivered as advertised", never "correct". The three sources are mock servers we run.
 
@@ -22,7 +22,7 @@ What a trust score means here, plainly: Fides judges whether a source **delivere
 
 | | |
 |---|---|
-| Tests | 419 pass, 11 skipped (live network tests, Gemini included, and two slow simulation tests, run on request), typecheck clean |
+| Tests | 433 pass, 11 skipped (live network tests, Gemini included, and two slow simulation tests, run on request), typecheck clean |
 | Research agent | `pnpm research` (simulated, free) or `FIDES_NETWORK=mainnet pnpm research -- --live --memory=live`. Output on mainnet: [`docs/evidence/research-mainnet.txt`](docs/evidence/research-mainnet.txt) |
 | UI | Hosted: <https://fides-credit-bureau.vercel.app>. It is static, with no backend, and replays the recording of the mainnet run from 2026-11-05, labelled as a recording (real payments link to Suiscan; Re-verify replays the recorded checks). Locally: `pnpm web` opens the four screens on recorded fixtures; `pnpm web:live` on a fresh run of the engine (add `-- --live` for Sui testnet); `pnpm mockups` serves the static design mockups |
 | Real on-chain run | the full demo on Sui testnet: real MPP USDC payments, Tatum verification, Sui anchors. Output: [`docs/evidence/demo-live-testnet.txt`](docs/evidence/demo-live-testnet.txt) |
@@ -246,11 +246,11 @@ Trust tiers come from verified outcomes, weighted by the reporter's own track re
 | `sdk` | 79 | the whole check/report loop, forgeries, pending vs rejected, partial failures and retries, rule 6 end to end |
 | `tools`, `mcp` | 38 | the three tools, every vendor's tool shapes, MCP over memory, stdio and HTTP, auth and origin checks, rate limit and deadline |
 | `merchants` | 26 | each merchant's behaviour, the address swap on the real MPP gate |
-| `agent` | 28 | the buy loop, timeouts, refused and unknown payments, a merchant naming another host, reporting retries (inline and in the background), the full demo, the rule 6 demo, the research agent (gaps, burned content never shown, unreachable record stated) |
+| `agent` | 31 | the buy loop, timeouts, refused and unknown payments, a merchant naming another host, reporting retries (inline and in the background), the full demo, the rule 6 demo, the research agent (gaps, burned content never shown, unreachable record stated, a cited memory that did not change the outcome) |
 | `registry` | 30 | verification, forged records, tampered storage, outages, rate limits, page safety, anchors recall missed |
 | `sim` | 4 | repeatability, and (on request) the result |
-| `web` | 54 | every screen rendered, the UI's logic and its API on fixtures and live: attempts, the board per round, the split view's three states, Re-verify for real, a forged record, an unreachable server |
-| **Total** | **430** | 419 run by default |
+| `web` | 65 | every screen rendered, the UI's logic and its API on fixtures and live: attempts, the board per round, the split view's three states, Re-verify for real, a forged record, an unreachable server, every research record opening as evidence |
+| **Total** | **444** | 433 run by default |
 
 Live tests (a real relayer, Tatum testnet, real payments) run only with `FIDES_LIVE=1`. Everything else uses a simulated world: a fake ledger, in-process memory, real signatures, real HTTP between agents and merchants, the real engine. The headline demo and the live tests use real payments and a real chain; nothing in them is faked except where stated under [staged versus real](#staged-versus-real).
 

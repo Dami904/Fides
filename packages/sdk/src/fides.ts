@@ -83,8 +83,20 @@ export interface RejectedReport {
   reason: string;
 }
 
+/** A recalled memory the verdict cited (rule 6): a burn at a DIFFERENT merchant, and how close it was to the question asked. */
+export interface RecalledMemory {
+  blobId: string;
+  /** Lower is more similar. Compared with the config's similarityMaxDistance. */
+  distance: number;
+  merchantHost: string;
+  /** The pattern tags that matched the situation. */
+  patterns: string[];
+}
+
 export interface CheckResult {
   verdict: Verdict;
+  /** The memories the verdict cited, with their distance. Empty unless rule 6 decided. */
+  recalled: RecalledMemory[];
   decisionId: number;
   /** Set when an idempotency key was given and the decision allows payment. */
   claim?: { key: string; status: 'reserved' | 'duplicate' };
@@ -464,7 +476,18 @@ export class Fides {
     });
     for (const a of verdict.alerts) state.openAlert(a.merchant, a.kind, now);
 
-    return { verdict, decisionId, ...(claim ? { claim } : {}), sharedState: recall.state, rejected, pending };
+    const cited = new Set(verdict.citations.memoryBlobIds);
+    const byBlob = new Map<string, RecalledMemory>();
+    if (recall.state === 'attached') {
+      for (const s of recall.similar) {
+        if (!cited.has(s.blobId)) continue;
+        const m = byBlob.get(s.blobId) ?? { blobId: s.blobId, distance: s.distance, merchantHost: s.merchantHost, patterns: [] };
+        m.distance = Math.min(m.distance, s.distance);
+        if (!m.patterns.includes(s.pattern)) m.patterns.push(s.pattern);
+        byBlob.set(s.blobId, m);
+      }
+    }
+    return { verdict, recalled: [...byBlob.values()], decisionId, ...(claim ? { claim } : {}), sharedState: recall.state, rejected, pending };
   }
 
   /** Read-time verification of one recalled report: see ReportVerifier. */

@@ -1,6 +1,7 @@
 import type { FidesApi } from '../api';
 import { Icon, Loading, PageHead, Pill, Seal, Stamp, useLoad } from '../components';
 import { href, shortAddr } from '../lib';
+import type { TimelineStep } from '../types';
 import type { EvidenceItem, Tier } from '../types';
 
 function EvidenceRow({ e }: { e: EvidenceItem }) {
@@ -15,6 +16,37 @@ function EvidenceRow({ e }: { e: EvidenceItem }) {
       <span className="mono tiny muted">{e.id.slice(0, 8)}</span>
       <span className="c-go" aria-hidden="true"><Icon name="arrow" size={15} /></span>
     </a>
+  );
+}
+
+const OUTCOME_WORD = { clean: 'delivered', burned: 'burned', 'not paid': 'not paid' } as const;
+
+/** How the tier moved: what each agent saw at the moment it decided about this merchant, in order, from the engine's own check. */
+function Timeline({ steps }: { steps: TimelineStep[] }) {
+  if (!steps.length) return <p className="empty">No agent has tried this merchant in this run.</p>;
+  return (
+    <ol className="tl">
+      {steps.map((t, n) => {
+        const prev = steps[n - 1]?.tier;
+        const moved = prev && t.tier && prev !== t.tier;
+        return (
+          <li key={t.index} className={`tl-step ${t.outcome === 'not paid' ? 'skip' : t.outcome}`}>
+            <i className="tl-dot" aria-hidden="true" />
+            <a className="tl-body" href={href.decision(t.index)}>
+              <span className="tl-head"><b>Agent {t.agent}</b><span className="muted small">attempt {t.index + 1}</span></span>
+              <span className="row-pills">
+                {t.tier && <Pill state tone={t.tier === 'burned' ? 'bad' : t.tier === 'new' ? 'warn' : 'ok'}>saw tier: {t.tier}</Pill>}
+                {moved && <Pill state>moved from {prev}</Pill>}
+                {t.cannotSay && <Pill state tone="warn">cannot say</Pill>}
+                {t.sharedState && t.sharedState !== 'attached' && <Pill state tone="warn">shared record {t.sharedState}</Pill>}
+                {t.decision && <Stamp decision={t.decision} />}
+                <span className={`tl-out ${t.outcome === 'burned' ? 'red' : t.outcome === 'clean' ? 'green' : 'muted'}`}>{OUTCOME_WORD[t.outcome]}</span>
+              </span>
+            </a>
+          </li>
+        );
+      })}
+    </ol>
   );
 }
 
@@ -65,6 +97,11 @@ export function Merchant({ api, host }: { api: FidesApi; host: string }) {
               <p className="muted tiny">One verified burn drops a merchant to burned at once. Recovery is slow.</p>
             </section>
           </div>
+
+          <section aria-label="How the tier moved">
+            <div className="section-row"><h2>How the tier moved</h2><span className="muted small">The tier each agent saw when it decided, from the engine's own check. Not recomputed here.</span></div>
+            <div className="panel"><Timeline steps={m.timeline} /></div>
+          </section>
 
           <section aria-label="Evidence">
             <div className="section-row"><h2>Evidence</h2><span className="muted small">Open a record to re-run its five checks.</span></div>

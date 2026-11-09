@@ -8,7 +8,7 @@ export type CheckName = 'schemaValid' | 'fresh' | 'onTime' | 'amountMatchesQuote
 
 export type AgentEvent =
   | { type: 'challenge'; agent: string; url: string; host: string; amount: string; recipient: string }
-  | { type: 'check'; agent: string; host: string; decision: Decision; rules: string[]; reasons: string[]; evidenceIds: string[]; memoryBlobIds: string[]; sharedState: SharedState; rejected: number; pending: number; tier: Tier; confidence: number; cannotSay: boolean }
+  | { type: 'check'; agent: string; host: string; decision: Decision; rules: string[]; reasons: string[]; evidenceIds: string[]; memoryBlobIds: string[]; recalled?: RecalledMemory[]; sharedState: SharedState; rejected: number; pending: number; tier: Tier; confidence: number; cannotSay: boolean }
   | { type: 'asked'; agent: string; host: string; approved: boolean }
   | { type: 'paid'; agent: string; host: string; txDigest: string }
   | { type: 'response'; agent: string; host: string; status: number | null; latencyMs: number; checks: Record<CheckName, boolean>; problems: string[] }
@@ -54,12 +54,23 @@ export interface Attempt {
   skipped?: Extract<AgentEvent, { type: 'skipped' }>;
 }
 export interface VerifyStep { name: string; ok: boolean; detail: string }
-export interface EvidenceItem { id: string; agent: string; verdict: 'clean' | 'burned'; problems: string[]; status: 'verified' | 'rejected'; rejectReason?: string }
+export interface EvidenceItem {
+  id: string; agent: string; verdict: 'clean' | 'burned'; problems: string[]; status: 'verified' | 'rejected'; rejectReason?: string;
+  /** Set when the record was written in the research run: the session it came from and the payment it describes. */
+  research?: { session: number; title: string; txDigest: string | null };
+}
 export interface MerchantView {
   host: string; tier: Tier; decision?: Decision; cannotSay: boolean;
   clean: number; burned: number; reporters: number; rejectedCount: number;
   firstPaidAt?: string; quotedNow?: string; addressAlert: boolean;
   evidence: EvidenceItem[];
+  /** Every attempt on this merchant, oldest first, with the tier the deciding agent saw at that moment. */
+  timeline: TimelineStep[];
+}
+export interface TimelineStep {
+  /** Position in the run's decision feed, for linking. */
+  index: number; agent: string; tier: Tier | null; decision: Decision | null; cannotSay: boolean;
+  sharedState: SharedState | null; outcome: 'clean' | 'burned' | 'not paid';
 }
 export interface SplitView {
   host: string;
@@ -75,10 +86,18 @@ export type SectionOutcome = 'used' | 'burned' | 'refused' | 'declined' | 'error
 export interface BriefSection {
   topic: string; label: string; host: string | null; outcome: SectionOutcome;
   decision: Decision | null; tier: string | null; cannotSay: boolean; rules: string[]; reasons: string[];
-  evidenceIds: string[]; memoryBlobIds: string[]; sharedState: string | null; approved: boolean | null;
+  evidenceIds: string[]; memoryBlobIds: string[]; recalled?: RecalledMemory[]; sharedState: string | null; approved: boolean | null;
   amountUsdc: string | null; txDigest: string | null; reportedEvidenceId: string | null;
+  /** What a burned response failed. Recordings made before this field existed lack it. */
+  problems?: string[];
   findings: string[]; asOf: string | null; note: string;
 }
 export interface Brief { question: string; agent: string; sections: BriefSection[]; usedCount: number; spentUsdc: string; lostUsdc: string; summary: string }
-export interface ResearchSession { id: number; title: string; agent: string; question: string; brief: Brief; expectations: { label: string; ok: boolean; detail?: string }[]; notes: string[] }
+export interface ResearchSession { id: number; title: string; agent: string; question: string;
+  /** What changed in the world just before this session, done by no agent (the signal source swapping its address). */
+  before?: string;
+  brief: Brief; expectations: { label: string; ok: boolean; detail?: string }[]; notes: string[] }
 export interface ResearchFixture { generatedAt: string; mode: string; network: string; question: string; sessions: ResearchSession[]; lostUsdc: Record<string, string>; ok: boolean }
+
+/** A memory a verdict cited (rule 6) and how close it was to the question. Recordings made before this field existed lack it. */
+export interface RecalledMemory { blobId: string; distance: number; merchantHost: string; patterns: string[] }

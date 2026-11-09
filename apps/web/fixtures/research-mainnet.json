@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-11-09T19:49:44.433Z",
+  "generatedAt": "2026-11-09T20:32:15.856Z",
   "mode": "live",
   "network": "mainnet",
   "question": "What is happening with SUI right now, and is it worth acting on?",
@@ -28,17 +28,19 @@
             ],
             "evidenceIds": [],
             "memoryBlobIds": [],
+            "recalled": [],
             "sharedState": "attached",
             "approved": true,
             "amountUsdc": "0.01",
-            "txDigest": "5viAvsNLSCdf8hi2kvznaCPMChvuSJ6ocCPMLv9PxFr",
-            "reportedEvidenceId": "fa9b621d8ccc811241e46271e55f4c81ec0c13c1eb938707fb2c5a85f5949c6d",
+            "txDigest": "CPjv9RwTmYd6CKK14x5ZZ5CSdZXcK6P4WPorpRTgqRMx",
+            "reportedEvidenceId": "ba815f105237cbb9814a4eff3ab4029b205f0f26f4d6cae439623b720cf4d229",
+            "problems": [],
             "findings": [
               "SUI $1.23",
               "BTC $67,000.5",
               "ETH $3,400.1"
             ],
-            "asOf": "2026-11-09T19:46:03.106Z",
+            "asOf": "2026-11-09T20:28:17.243Z",
             "outcome": "used",
             "note": "A person approved the payment. Delivered as advertised."
           },
@@ -57,16 +59,18 @@
             ],
             "evidenceIds": [],
             "memoryBlobIds": [],
+            "recalled": [],
             "sharedState": "attached",
             "approved": true,
             "amountUsdc": "0.01",
-            "txDigest": "94rZ2eRMGQa65A5K6vzS2mzsVnLWh8fB25QW5C8zJVB7",
-            "reportedEvidenceId": "ec29acfcef2b0eb8a52ce694bb6720c3b382808ec55f241432c380111d760d34",
+            "txDigest": "BXgZ59ppk8R1ZtKUT1meKezyDACkQdhHKo1QFCi8GuUk",
+            "reportedEvidenceId": "d7b179bda1722f6bafc8a7c43657db956cf8d59170cc47e40eb58681232451fc",
+            "problems": [],
             "findings": [
-              "Markets move at 1794253596",
-              "Sui ecosystem update 1794253596"
+              "Markets move at 1794256127",
+              "Sui ecosystem update 1794256127"
             ],
-            "asOf": "2026-11-09T19:46:36.332Z",
+            "asOf": "2026-11-09T20:28:47.366Z",
             "outcome": "used",
             "note": "A person approved the payment. Delivered as advertised."
           },
@@ -85,15 +89,17 @@
             ],
             "evidenceIds": [],
             "memoryBlobIds": [],
+            "recalled": [],
             "sharedState": "attached",
             "approved": true,
             "amountUsdc": "0.01",
-            "txDigest": "3e3yZzf6js8g3ZVJvTCHkb8k3TZhm6wqChqHKGjre7Ug",
-            "reportedEvidenceId": "ed54afa3d25018bf8d5a7f188f28d744685c993ca5366b70dd4282f02176b483",
+            "txDigest": "4RQ2u5JsNUJ42m88hmAaPVgQiJgZe8TjxxfA1prD8VwC",
+            "reportedEvidenceId": "fc378e432c13139e4b0659df399a9d2c93481f3e20e42745a8576348777dea7c",
+            "problems": [],
             "findings": [
               "signal: buy, confidence 82%"
             ],
-            "asOf": "2026-11-09T19:47:11.969Z",
+            "asOf": "2026-11-09T20:29:18.884Z",
             "outcome": "used",
             "note": "A person approved the payment. Delivered as advertised."
           }
@@ -143,14 +149,19 @@
               "cannot say: not enough history to classify this merchant"
             ],
             "evidenceIds": [
-              "ec29acfcef2b0eb8a52ce694bb6720c3b382808ec55f241432c380111d760d34"
+              "d7b179bda1722f6bafc8a7c43657db956cf8d59170cc47e40eb58681232451fc"
             ],
             "memoryBlobIds": [],
+            "recalled": [],
             "sharedState": "attached",
             "approved": true,
             "amountUsdc": "0.01",
-            "txDigest": "91wvwaKoMHzUT5hf7PZeTdcwtUUjUWaqJqiXT3kRkz3B",
-            "reportedEvidenceId": "9afb8982e6fd03df4ee372a5fbe3961204b9be8e872ada075b2cceaaf1b943ff",
+            "txDigest": "DRKyMrLckDBZcmVzC7J8Meoqjh95Z1qgJ52za5siN2ug",
+            "reportedEvidenceId": "405fa84c982d34f02e0247270454aad46a3e49da0795472c291dfd4631f3b335",
+            "problems": [
+              "schema is \"wrong/v0\", expected fides.news/v1",
+              "data is missing or not an object"
+            ],
             "findings": [],
             "asOf": null,
             "outcome": "burned",
@@ -198,14 +209,18 @@
               "one other reporter has a verified burn for this merchant: small payments only"
             ],
             "evidenceIds": [
-              "9afb8982e6fd03df4ee372a5fbe3961204b9be8e872ada075b2cceaaf1b943ff"
+              "405fa84c982d34f02e0247270454aad46a3e49da0795472c291dfd4631f3b335"
             ],
             "memoryBlobIds": [],
+            "recalled": [],
             "sharedState": "attached",
             "approved": null,
             "amountUsdc": "0.01",
-            "txDigest": "76HVDc4BRRnuxPJ2GLeY7utNT4n7QgDzUpoR4oG33Cg3",
-            "reportedEvidenceId": "5100ac7ade47681bac101da2ec8366d80145a82dc7d967dfaac23332af7d1575",
+            "txDigest": "9FdMWfvSSWrhBRvVycQVXDstkqyabJkpTFhvwNmv7UxY",
+            "reportedEvidenceId": "a987ea392060648afad3f7f6376d97a30d2e0c9ab2c9831b62eacc6b5ecd0260",
+            "problems": [
+              "asOf is 3600 s old, maximum is 120 s"
+            ],
             "findings": [],
             "asOf": null,
             "outcome": "burned",
@@ -227,10 +242,11 @@
       "notes": []
     },
     {
-      "id": 5,
+      "id": 4,
       "title": "Agent B, a new session, researches the same question",
       "agent": "B",
       "question": "What is happening with SUI right now, and is it worth acting on?",
+      "before": "The signal source swapped its payout address and now quotes four times the price.",
       "brief": {
         "question": "What is happening with SUI right now, and is it worth acting on?",
         "agent": "B",
@@ -249,25 +265,44 @@
               "2 similar incident(s) at other merchants: new_merchant"
             ],
             "evidenceIds": [
-              "fa9b621d8ccc811241e46271e55f4c81ec0c13c1eb938707fb2c5a85f5949c6d"
+              "ba815f105237cbb9814a4eff3ab4029b205f0f26f4d6cae439623b720cf4d229"
             ],
             "memoryBlobIds": [
-              "AthzvhnN76IOJxUuhzuTsnG3CAV4G2jXcmLrjDuorHo",
-              "xynHcN6-bnUKFs_MhWKWM1UWXIcDxDNSjCjH1vfzU0Q"
+              "f_p5QsXKnLlT5lYCsH4bbK2byIU5wCLfOxUK8Otje0Y",
+              "ZU9vgY43rZ0Dq9kc9zEnA2CYybuysZHU_LojruUwGLE"
+            ],
+            "recalled": [
+              {
+                "blobId": "f_p5QsXKnLlT5lYCsH4bbK2byIU5wCLfOxUK8Otje0Y",
+                "distance": 0.3712550868168446,
+                "merchantHost": "flaky.fides-demo.test",
+                "patterns": [
+                  "new_merchant"
+                ]
+              },
+              {
+                "blobId": "ZU9vgY43rZ0Dq9kc9zEnA2CYybuysZHU_LojruUwGLE",
+                "distance": 0.38227404210878113,
+                "merchantHost": "flaky.fides-demo.test",
+                "patterns": [
+                  "new_merchant"
+                ]
+              }
             ],
             "sharedState": "attached",
             "approved": true,
             "amountUsdc": "0.01",
-            "txDigest": "83C19yY2YT8nE52Fs2jj2zFNu7fe3VXeYq4zL7coHG1z",
-            "reportedEvidenceId": "b34e7fb96e4e3ee1e8a3c366467ad9e1c2caa7858d32bfbb65e1b83c23bc46ce",
+            "txDigest": "527cJ2dUST1gppsbuRjJKYqhUmzjkdWBNkxqDbLaVr4C",
+            "reportedEvidenceId": "a39a871b10513b1554b1ff6259b62b9813003ae7e68e62fc09eaa9b53f00016c",
+            "problems": [],
             "findings": [
               "SUI $1.23",
               "BTC $67,000.5",
               "ETH $3,400.1"
             ],
-            "asOf": "2026-11-09T19:48:46.579Z",
+            "asOf": "2026-11-09T20:31:16.742Z",
             "outcome": "used",
-            "note": "A person approved the payment. Delivered as advertised."
+            "note": "A person approved the payment. Delivered as advertised. Recalled memories of other merchants are cited, but they did not change the decision: this source is new, so a person would have been asked anyway."
           },
           {
             "topic": "news",
@@ -283,19 +318,21 @@
               "2 independent reporters have verified burns for this merchant"
             ],
             "evidenceIds": [
-              "9afb8982e6fd03df4ee372a5fbe3961204b9be8e872ada075b2cceaaf1b943ff",
-              "5100ac7ade47681bac101da2ec8366d80145a82dc7d967dfaac23332af7d1575"
+              "405fa84c982d34f02e0247270454aad46a3e49da0795472c291dfd4631f3b335",
+              "a987ea392060648afad3f7f6376d97a30d2e0c9ab2c9831b62eacc6b5ecd0260"
             ],
             "memoryBlobIds": [],
+            "recalled": [],
             "sharedState": "attached",
             "approved": null,
             "amountUsdc": "0.01",
             "txDigest": null,
             "reportedEvidenceId": null,
+            "problems": [],
             "findings": [],
             "asOf": null,
             "outcome": "refused",
-            "note": "Not paid. Fides refused: 2 independent reporters have verified burns for this merchant."
+            "note": "Not paid. Fides refused this source."
           },
           {
             "topic": "signal",
@@ -313,15 +350,17 @@
             ],
             "evidenceIds": [],
             "memoryBlobIds": [],
+            "recalled": [],
             "sharedState": "attached",
             "approved": null,
             "amountUsdc": "0.04",
             "txDigest": null,
             "reportedEvidenceId": null,
+            "problems": [],
             "findings": [],
             "asOf": null,
             "outcome": "refused",
-            "note": "Not paid. Fides refused: payout address changed from the pinned address and the price spiked."
+            "note": "Not paid. Fides refused this source."
           }
         ],
         "usedCount": 1,
@@ -360,7 +399,7 @@
       ]
     },
     {
-      "id": 6,
+      "id": 5,
       "title": "B loses access to the shared record and asks the news source again",
       "agent": "B",
       "question": "Any new headlines on SUI?",
@@ -383,11 +422,16 @@
             ],
             "evidenceIds": [],
             "memoryBlobIds": [],
+            "recalled": [],
             "sharedState": "detached",
             "approved": true,
             "amountUsdc": "0.01",
-            "txDigest": "DfGxJwMKEc4o5FNwUMi78bqKLUnVAD1XYAVEWcDds3vP",
-            "reportedEvidenceId": "936ed4eff87fe5193588924a9f749621151434616cf643a390b0fa8021125c4c",
+            "txDigest": "7fbzggDBXkkobcWfzGgNZukucH1quJWYuUNLNWnFkPEX",
+            "reportedEvidenceId": "6ba93c95586688920dd75fd1589c85aa623a43763e35d2af8521a50ff9f730bc",
+            "problems": [
+              "schema is \"wrong/v0\", expected fides.news/v1",
+              "data is missing or not an object"
+            ],
             "findings": [],
             "asOf": null,
             "outcome": "burned",

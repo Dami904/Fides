@@ -8,6 +8,7 @@
 // promised (the published format, fresh, the quoted price, the expected payout address). There is no ground truth here,
 // and the brief says "delivered as advertised", never "correct".
 import { parseAmount } from '@fides/core';
+import type { RecalledMemory } from '@fides/sdk';
 import type { BuyResult, DecisionName, PayingAgent } from './agent.js';
 
 export interface Source {
@@ -41,6 +42,8 @@ export interface BriefSection {
   evidenceIds: string[];
   /** The recalled memories of other merchants it rested on (rule 6). */
   memoryBlobIds: string[];
+  /** The same memories with their recall distance and the pattern that matched. */
+  recalled: RecalledMemory[];
   sharedState: string | null;
   /** A person was asked, and what they said. Null when nobody was asked. */
   approved: boolean | null;
@@ -48,6 +51,8 @@ export interface BriefSection {
   txDigest: string | null;
   /** The report this agent wrote about the exchange, if it paid. */
   reportedEvidenceId: string | null;
+  /** What the response failed, when it was paid for and burned. Empty otherwise. */
+  problems: string[];
   /** Plain lines from what was delivered. Empty unless the outcome is "used". */
   findings: string[];
   asOf: string | null;
@@ -64,6 +69,14 @@ export interface Brief {
   /** Paid, then thrown away because the response failed a check. */
   lostUsdc: string;
   summary: string;
+}
+
+/**
+ * Whether a rule 6 (similar-incident) ASK changed the outcome. Rule 6 is checked just before the tier rule, which pays only
+ * an established or trusted merchant. For any other tier the tier rule would have asked a person too.
+ */
+export function recallChangedDecision(tier: string | null): boolean {
+  return tier === 'established' || tier === 'trusted';
 }
 
 const usdc = (raw: bigint) => (Number(raw) / 1e6).toFixed(2);
@@ -86,6 +99,11 @@ function sectionFrom(src: Source, r: BuyResult, amount: string | null): BriefSec
   const s = sectionCore(src, r, amount);
   // A decision made without the shared record rests on this agent's own history only. Say so, whatever the outcome.
   const shared = r.check?.sharedState;
+  // Rule 6 comes before the tier rule. For a merchant that is not yet established the tier rule asks a person anyway,
+  // so the recalled memories were cited without changing the outcome. Say so rather than let the citation overclaim.
+  if (s.rules.includes('similar-incident') && !recallChangedDecision(s.tier)) {
+    s.note += ' Recalled memories of other merchants are cited, but they did not change the decision: this source is new, so a person would have been asked anyway.';
+  }
   if (shared && shared !== 'attached') s.note += ` The shared record was ${shared}, so this decision rested on this agent's own history only.`;
   return s;
 }
@@ -104,17 +122,21 @@ function sectionCore(src: Source, r: BuyResult, amount: string | null): BriefSec
     reasons: v?.reasons ?? [],
     evidenceIds: v?.citations.evidenceIds ?? [],
     memoryBlobIds: v?.citations.memoryBlobIds ?? [],
+    recalled: r.check?.recalled ?? [],
     sharedState: r.check?.sharedState ?? null,
     approved: r.approved,
     amountUsdc: amount,
     txDigest: r.txDigest ?? null,
     reportedEvidenceId: r.receipt?.evidenceId ?? null,
+    problems: failed ? r.exchange!.problems : [],
     findings: [] as string[],
     asOf: null as string | null,
   };
   if (r.decision === null) return { ...base, outcome: 'error', note: `Could not be used: ${r.error ?? 'unknown error'}.` };
   if (r.decision === 'REFUSE') return { ...base, outcome: 'refused', note: 'Not paid. Fides refused this source.' };
-  if (!r.paid) return { ...base, outcome: 'declined', note: 'Not paid. Fides asked a person and nobody approved.' };
+  if (!r.paid && r.approved === false) return { ...base, outcome: 'declined', note: 'Not paid. Fides asked a person and nobody approved.' };
+  // Approved, or allowed without asking, and still not paid: the payment itself failed. That is an error, not a choice.
+  if (!r.paid) return { ...base, outcome: 'error', note: `Not paid: ${r.error ?? 'the payment did not go through'}.` };
   if (failed || !r.delivered) {
     return { ...base, outcome: 'burned', note: `Paid ${amount ?? '?'} USDC and the response failed a check (${r.exchange?.problems.join('; ') ?? 'no usable response'}). Its content was thrown away and a signed burn report was written${r.receipt && r.receipt.status !== 'complete' ? ', held back from the shared record until it can be written' : ''}.` };
   }
@@ -128,10 +150,8 @@ export async function research(agent: PayingAgent, question: string, sources: So
   let spent = 0n;
   let lost = 0n;
   for (const src of sources) {
-    const before = agent.events.length;
     const r = await agent.buy(src.resource);
-    const ch = agent.events.slice(before).find((e) => e.type === 'challenge');
-    const amount = ch && ch.type === 'challenge' ? ch.amount : null;
+    const amount = r.amount ?? null;
     const s = sectionFrom(src, r, amount);
     if (r.paid && amount) {
       spent += parseAmount(amount);

@@ -11,7 +11,6 @@
 // because with the defaults a merchant needs several independent reporters, which a short script cannot give it.
 // That is the one thing that is not the shipped setting, and the run says so.
 import type { FidesConfig } from '@fides/core';
-import { buildSituationQuery } from '@fides/memory';
 import type { CheckResult } from '@fides/sdk';
 import type { AgentEvent, AskPolicy } from './agent.js';
 import { describeBuy, type Expectation } from './demo.js';
@@ -86,12 +85,8 @@ export async function runRule6(h: Harness, o: { log?: (line: string) => void } =
   expect('rule 6 made it: similar-incident', v.rulesFired.includes('similar-incident'), v.rulesFired.join(', '));
   expect('it cites the recalled memory', v.citations.memoryBlobIds.length >= 1, `${v.citations.memoryBlobIds.length} memories`);
   expect('the reason names the pattern that was recalled', /clean_streak/.test(v.reasons.join(' ')));
-  // The distances behind the citation, from the same question the engine asked (informational: asked again just now).
-  const st = await m.good.state();
-  const asked = await h.sharedReader().recallForMerchant(m.good.host, buildSituationQuery({ host: m.good.host, payTo: st.payTo, amount: st.price, tier: v.tier }), { limit: 20 });
-  const cited = (asked.state === 'attached' ? asked.similar : [])
-    .filter((s) => v.citations.memoryBlobIds.includes(s.blobId))
-    .map((s) => ({ blobId: s.blobId, distance: s.distance, pattern: s.pattern, merchantHost: s.merchantHost }));
+  // The distances behind the citation come from the decision itself, not from asking again.
+  const cited = after.recalled.map((s) => ({ blobId: s.blobId, distance: s.distance, pattern: s.patterns.join(', '), merchantHost: s.merchantHost }));
   for (const c of cited) log(`  cites memory ${c.blobId.slice(0, 10)} about ${c.merchantHost}, pattern ${c.pattern}, recall distance ${c.distance.toFixed(3)} (limit 0.45)`);
   expect('every cited memory is about the other merchant', cited.length > 0 && cited.every((c) => c.merchantHost !== m.good.host), cited.map((c) => c.merchantHost).join(', '));
 

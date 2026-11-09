@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import type { FidesApi } from '../api';
-import { Chip, Icon, Loading, NextStep, PageHead, Pill, Stamp, useLoad } from '../components';
-import { href } from '../lib';
+import { Chip, Icon, Loading, NextStep, PageHead, Pill, Recalled, Stamp, useLoad } from '../components';
+import { href, recallChangedDecision } from '../lib';
 import type { BriefSection, ResearchSession, SectionOutcome } from '../types';
 
 const OUTCOME: Record<SectionOutcome, { label: string; tone: 'ok' | 'bad' | 'warn' }> = {
@@ -49,10 +49,17 @@ function Source({ s, explorerTx }: { s: BriefSection; explorerTx: FidesApi['expl
         <ul className="reasons small">{s.reasons.map((r) => <li key={r}>{r}</li>)}</ul>
       )}
 
+      {(s.memoryBlobIds.length > 0 || (s.recalled?.length ?? 0) > 0) && (
+        <div className="src-cites">
+          <span className="lab">Recalled</span>
+          <Recalled memories={s.recalled} ids={s.memoryBlobIds} changed={recallChangedDecision(s.rules, s.tier)} />
+        </div>
+      )}
+
       {s.evidenceIds.length > 0 && (
         <div className="src-cites">
           <span className="lab">Relied on {s.evidenceIds.length} signed report{s.evidenceIds.length > 1 ? 's' : ''}</span>
-          <span className="row-pills">{s.evidenceIds.map((id) => <Chip key={id} id={id} />)}</span>
+          <span className="row-pills">{s.evidenceIds.map((id) => <a key={id} href={href.evidence(id)} title="Open this record and re-run its checks"><Chip id={id} /></a>)}</span>
         </div>
       )}
 
@@ -60,6 +67,7 @@ function Source({ s, explorerTx }: { s: BriefSection; explorerTx: FidesApi['expl
         {s.amountUsdc && <span>{s.txDigest ? 'paid' : 'quoted'} {s.amountUsdc} USDC</span>}
         {s.txDigest && explorerTx && <a className="ext mono" href={explorerTx(s.txDigest)} target="_blank" rel="noopener noreferrer" title={s.txDigest}>tx …{s.txDigest.slice(-8)} on Sui ↗</a>}
         {s.asOf && <span>as of {s.asOf.slice(11, 19)} UTC</span>}
+        {s.reportedEvidenceId && <a className="mono" href={href.evidence(s.reportedEvidenceId)} title="The signed record this agent wrote about the exchange">reported as {s.reportedEvidenceId.slice(0, 8)} →</a>}
       </footer>
     </article>
   );
@@ -69,10 +77,11 @@ function SessionList({ sessions, selected, onPick }: { sessions: ResearchSession
   return (
     <nav className="sessions" aria-label="Research sessions">
       <ol>
-        {sessions.map((s) => (
+        {sessions.map((s, n) => (
           <li key={s.id}>
+            {s.before && <p className="s-event" role="note"><Icon name="cross" size={13} />{s.before}</p>}
             <button type="button" aria-pressed={s.id === selected} onClick={() => onPick(s.id)}>
-              <span className="who">{s.agent}</span>
+              <span className="who" title={`session ${n + 1}, agent ${s.agent}`}>{s.agent}</span>
               <span className="s-body">
                 <b>{s.title}</b>
                 <span className="dots" aria-hidden="true">
@@ -120,6 +129,7 @@ export function Research({ api }: { api: FidesApi }) {
               <div><b className={b.lostUsdc !== '0.00' ? 'red' : ''}>{b.lostUsdc}<small> USDC</small></b><span><i className={`d ${b.lostUsdc !== '0.00' ? 'bad' : 'ok'}`} />lost to burns</span></div>
             </div>
             <p className="brief-sum">{b.summary}</p>
+            {sel.before && <p className="notice alert small"><b>Before this session: </b>{sel.before}</p>}
             {sel.notes.map((n) => <p key={n} className="muted small">{n}</p>)}
             <div className="srcs">
               {b.sections.map((s) => <Source key={s.topic} s={s} explorerTx={api.explorerTx} />)}

@@ -1,7 +1,7 @@
 import { Component, useCallback, useEffect, useRef, useState, type ReactNode } from 'react';
 import type { FidesApi } from './api';
 import { glyphCells, href, short, type Route } from './lib';
-import type { Decision, VerifyStep } from './types';
+import type { Decision, RecalledMemory, VerifyStep } from './types';
 
 // ---------- icons: one stroke set, drawn on a 20 pixel grid ----------
 const ICONS = {
@@ -91,6 +91,36 @@ export function Stamp({ decision, big, sub, press }: { decision: Decision; big?:
       {sub && <small>{sub}</small>}
     </span>
   );
+}
+
+/** The engine's default similarityMaxDistance. A recalled memory only counts when its distance is below this. */
+export const SIMILARITY_MAX = 0.45;
+
+/**
+ * The memories a verdict cited (rule 6): what they are about, which pattern matched, and how close they were to the
+ * question. A recording made before distances were kept has only the ids, and says so.
+ */
+export function Recalled({ memories, ids, changed }: { memories?: RecalledMemory[] | undefined; ids: string[]; changed?: boolean | null }) {
+  // Rule 6 can decide without changing the outcome: a merchant that is not established would be asked about anyway.
+  const same = changed === false && <p className="muted small recalled-same">These memories are cited, but they did not change the decision: this merchant is not established, so a person would have been asked anyway.</p>;
+  if (memories && memories.length) {
+    return (
+      <>
+      <ul className="recalled">
+        {memories.map((m) => (
+          <li key={m.blobId}>
+            <span className="mono tiny" title={m.blobId}>{short(m.blobId, 10)}</span>
+            <span>a burn at <b className="mono">{m.merchantHost}</b>, pattern {m.patterns.join(', ')}</span>
+            <span className="dist" title={`Lower is closer. A memory counts below ${SIMILARITY_MAX}.`}>distance <b className="mono">{m.distance.toFixed(3)}</b> <span className="muted">(limit {SIMILARITY_MAX})</span></span>
+          </li>
+        ))}
+      </ul>
+      {same}
+      </>
+    );
+  }
+  if (ids.length) return <><span className="muted small">{ids.length} recalled memor{ids.length > 1 ? 'ies' : 'y'}, distance not recorded in this run</span>{same}</>;
+  return <span className="muted small">none: no memory of another merchant changed this decision</span>;
 }
 
 export function Meter({ value }: { value: number }) {

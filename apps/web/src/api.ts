@@ -179,8 +179,15 @@ export function apiFrom(demo: DemoFixture, sim: SimFixture, src: ApiSource): Fid
       const isFlaky = host === demo.merchants.flaky;
       if (isFlaky && forged) evidence.push({ id: forged.id, agent: '?', verdict: 'burned', problems: [], status: 'rejected', rejectReason: forged.reason });
       const alert = demo.steps.flatMap((s) => s.results).some((r) => r.host === host && (r.check?.verdict.alerts.length ?? 0) > 0);
+      // The tier each agent saw when it decided, as the engine reported it. Nothing is recomputed here.
+      const timeline: MerchantView['timeline'] = all.flatMap((a, index) => a.host !== host ? [] : [{
+        index, agent: a.agent, tier: (a.check?.tier ?? null) as Tier | null, decision: a.check?.decision ?? null, cannotSay: a.check?.cannotSay ?? false,
+        sharedState: a.check?.sharedState ?? null,
+        outcome: !a.paid ? 'not paid' as const : a.response && Object.values(a.response.checks).every(Boolean) ? 'clean' as const : 'burned' as const,
+      }]);
       return {
         host,
+        timeline,
         tier: last?.tier ?? 'new',
         decision: last?.decision,
         cannotSay: last?.cannotSay ?? true,
@@ -200,6 +207,18 @@ export function apiFrom(demo: DemoFixture, sim: SimFixture, src: ApiSource): Fid
         const merchant = await this.getMerchant(host);
         const item = merchant.evidence.find((e) => e.id === id);
         if (item) return { merchant, item };
+      }
+      // A record the research agent wrote. Its merchant page is the scripted demo's, so the screen links back to the research run.
+      // Sessions are numbered by position: an older recording numbered them 1, 2, 3, 5, 6.
+      for (const [n, s] of (src.research?.sessions ?? []).entries()) {
+        for (const x of s.brief.sections) {
+          if (x.reportedEvidenceId !== id || !x.host) continue;
+          const burned = x.outcome === 'burned';
+          // Older recordings kept what failed only in the note.
+          const problems = x.problems ?? (burned ? [/failed a check \((.*?)\)\. Its content/.exec(x.note)?.[1] ?? 'failed a check'] : []);
+          const item: EvidenceItem = { id, agent: s.agent, verdict: burned ? 'burned' : 'clean', problems, status: 'verified', research: { session: n + 1, title: s.title, txDigest: x.txDigest } };
+          return { merchant: await this.getMerchant(x.host), item };
+        }
       }
       throw new Error(`no record ${id.slice(0, 16)} in the shared record`);
     },

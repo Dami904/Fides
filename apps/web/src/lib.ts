@@ -113,6 +113,16 @@ export const href = {
   evidence: (id: string) => `#/evidence/${encodeURIComponent(id)}`,
 };
 
+/**
+ * Whether a rule 6 (similar-incident) ASK changed the outcome. Rule 6 is checked just before the tier rule, which pays only
+ * an established or trusted merchant; for any other tier a person would have been asked anyway. Mirrors
+ * recallChangedDecision in apps/agent/src/research.ts.
+ */
+export function recallChangedDecision(rules: string[], tier: string | null): boolean | null {
+  if (!rules.includes('similar-incident')) return null;
+  return tier === 'established' || tier === 'trusted';
+}
+
 export const short = (s: string | undefined, n = 8) => (s ? s.slice(0, n) : '');
 export const shortAddr = (s: string) => (s.length > 20 ? `${s.slice(0, 8)}…${s.slice(-4)}` : s);
 export const usd = (n: number | string) => Number(n).toFixed(2);

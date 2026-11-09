@@ -10,6 +10,7 @@ import {
   type CheckResult,
   type Exchange,
   type Fides,
+  type RecalledMemory,
   type ReportReceipt,
   type SchemaDoc,
 } from '@fides/sdk';
@@ -29,7 +30,7 @@ export type AskPolicy = (ctx: AskContext) => boolean | Promise<boolean>;
 
 export type AgentEvent =
   | { type: 'challenge'; agent: string; url: string; host: string; amount: string; recipient: string }
-  | { type: 'check'; agent: string; host: string; decision: DecisionName; rules: string[]; reasons: string[]; evidenceIds: string[]; memoryBlobIds: string[]; sharedState: string; rejected: number; pending: number; tier: string; confidence: number; cannotSay: boolean }
+  | { type: 'check'; agent: string; host: string; decision: DecisionName; rules: string[]; reasons: string[]; evidenceIds: string[]; memoryBlobIds: string[]; recalled: RecalledMemory[]; sharedState: string; rejected: number; pending: number; tier: string; confidence: number; cannotSay: boolean }
   | { type: 'asked'; agent: string; host: string; approved: boolean }
   | { type: 'paid'; agent: string; host: string; txDigest: string }
   | { type: 'response'; agent: string; host: string; status: number | null; latencyMs: number; checks: Exchange['checks']; problems: string[] }
@@ -47,6 +48,8 @@ export interface BuyResult {
   approved: boolean | null;
   paid: boolean;
   txDigest?: string;
+  /** What the merchant quoted, in USDC, once a payment was requested. Set whether or not it was paid. */
+  amount?: string;
   status?: number | null;
   exchange?: Exchange;
   /**
@@ -223,24 +226,24 @@ export class PayingAgent {
     try {
       check = await this.o.fides.check(input, { idempotencyKey: key });
     } catch (e) {
-      return fail(`check failed: ${(e as Error).message}`, host);
+      return fail(`check failed: ${(e as Error).message}`, host, { amount: challenge.amount });
     }
     const v = check.verdict;
     this.emit({
       type: 'check', agent, host, decision: v.decision, rules: v.rulesFired, reasons: v.reasons,
-      evidenceIds: v.citations.evidenceIds, memoryBlobIds: v.citations.memoryBlobIds, sharedState: check.sharedState,
+      evidenceIds: v.citations.evidenceIds, memoryBlobIds: v.citations.memoryBlobIds, recalled: check.recalled, sharedState: check.sharedState,
       rejected: check.rejected.length, pending: check.pending, tier: v.tier, confidence: v.confidence, cannotSay: v.cannotSay,
     });
 
     let approved: boolean | null = null;
     if (v.decision === 'REFUSE') {
       this.emit({ type: 'skipped', agent, host, why: 'refused' });
-      return { agent, url, host, decision: v.decision, approved, paid: false, check, error: 'refused' };
+      return { agent, url, host, decision: v.decision, approved, paid: false, amount: challenge.amount, check, error: 'refused' };
     }
     if (v.decision === 'ASK') {
       approved = await (this.o.askPolicy ?? (() => false))({ agent, host, url, amount: challenge.amount, check });
       this.emit({ type: 'asked', agent, host, approved });
-      if (!approved) return { agent, url, host, decision: v.decision, approved, paid: false, check, error: 'asked, not approved' };
+      if (!approved) return { agent, url, host, decision: v.decision, approved, paid: false, amount: challenge.amount, check, error: 'asked, not approved' };
       this.o.fides.approve(input, key);
     }
 
@@ -251,11 +254,11 @@ export class PayingAgent {
     } catch (e) {
       if (e instanceof PaymentNotSentError) {
         this.o.fides.release(key);
-        return fail(`payment failed: ${e.message}`, host, { decision: v.decision, approved, check });
+        return fail(`payment failed: ${e.message}`, host, { decision: v.decision, approved, amount: challenge.amount, check });
       }
       // The transfer may have reached the chain. Keep the spend counted and leave the claim for reconciliation.
       this.o.fides.markUnknown(key);
-      return fail(`payment outcome unknown, spend kept until reconciled: ${(e as Error).message}`, host, { decision: v.decision, approved, check });
+      return fail(`payment outcome unknown, spend kept until reconciled: ${(e as Error).message}`, host, { decision: v.decision, approved, amount: challenge.amount, check });
     }
     this.emit({ type: 'paid', agent, host, txDigest });
     this.o.fides.log({ level: 'info', op: 'payment.sent', msg: `${agent} paid ${challenge.amount}`, key, host, txDigest });
@@ -325,6 +328,6 @@ export class PayingAgent {
       this.scheduleRetry();
       this.emit({ type: 'error', agent, host, message: `payment made but not reported yet, queued for retry: ${reportError}` });
     }
-    return { agent, url, host, decision: v.decision, approved, paid: true, txDigest, status, exchange: ex, ...(delivered ? { delivered } : {}), check, ...(receipt ? { receipt } : {}), ...(reportError ? { reportError } : {}) };
+    return { agent, url, host, decision: v.decision, approved, paid: true, txDigest, amount: challenge.amount, status, exchange: ex, ...(delivered ? { delivered } : {}), check, ...(receipt ? { receipt } : {}), ...(reportError ? { reportError } : {}) };
   }
 }

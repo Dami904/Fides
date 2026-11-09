@@ -604,3 +604,26 @@ a.row:hover .c-go { color: var(--ink); transform: translateX(2px); }
   .sessions li { scroll-snap-align: start; }
   .kpis.three { grid-template-columns: 1fr; }
 }
+
+/* ---------- recalled memories, merchant timeline ---------- */
+.recalled { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+.recalled li { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 12px; font-size: 14px; }
+.recalled .dist { white-space: nowrap; }
+.tl { list-style: none; margin: 0; padding: 0; display: grid; gap: 0; }
+.tl-step { position: relative; display: flex; gap: 14px; padding-bottom: 14px; }
+.tl-step:last-child { padding-bottom: 0; }
+.tl-step::before { content: ''; position: absolute; left: 6px; top: 16px; bottom: -2px; width: 2px; background: var(--rule); }
+.tl-step:last-child::before { display: none; }
+.tl-dot { flex: none; width: 14px; height: 14px; margin-top: 3px; border-radius: 50%; background: var(--rule-strong); box-shadow: 0 0 0 3px var(--surface); position: relative; z-index: 1; }
+.tl-step.clean .tl-dot { background: var(--green); } .tl-step.burned .tl-dot { background: var(--red); } .tl-step.skip .tl-dot { background: var(--ochre); }
+.tl-body { display: grid; gap: 6px; min-width: 0; color: inherit; }
+.tl-body:hover .tl-head b { text-decoration: underline; text-underline-offset: 2px; }
+.tl-head { display: flex; gap: 10px; align-items: baseline; }
+.tl-out { font-size: 13px; font-weight: 500; }
+
+/* research: what changed between sessions, and cited memories that did not change a decision */
+.sessions .s-event { display: flex; gap: 6px; align-items: flex-start; margin: 2px 0 8px; padding: 8px 10px; border-left: 2px solid var(--red); background: var(--red-wash); border-radius: 0 var(--r-m) var(--r-m) 0; font-size: 12.5px; line-height: 1.4; color: var(--ink-2); }
+.sessions .s-event svg { flex: none; margin-top: 2px; color: var(--red); }
+.recalled-same { margin: 6px 0 0; }
+.src-cites a, .src-foot a { text-decoration: none; }
+.src-cites a:hover .chip { background: var(--brand-soft); color: var(--ink); }
