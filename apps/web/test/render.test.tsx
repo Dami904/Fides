@@ -145,8 +145,14 @@ describe('the A / B split with a live engine behind it', () => {
   });
 });
 
+/** Click an element and let React settle. */
+const click = async (el: Element) => { await act(async () => { (el as HTMLElement).click(); }); };
+/** The research sources are collapsed tiles: open every one so its details are in the DOM. */
+async function openTiles(page: HTMLElement) {
+  for (const b of Array.from(page.querySelectorAll('.tile-head[aria-expanded="false"]'))) await click(b);
+}
+
 describe('the research agent screen', () => {
-  const click = async (el: Element) => { await act(async () => { (el as HTMLElement).click(); }); };
 
   for (const recording of ['sim', 'mainnet'] as const) {
     it(`shows the brief by a new agent that refuses what others learned, from the ${recording} recording`, async () => {
@@ -156,6 +162,7 @@ describe('the research agent screen', () => {
       expect(t).toMatch(/Used 1 of 3 sources/);
       expect(page.querySelectorAll('.src.used')).toHaveLength(1);
       expect(page.querySelectorAll('.src.refused')).toHaveLength(2);
+      await openTiles(page);
       // A refused source is a labelled gap: no findings, nothing paid, and it says so.
       for (const s of Array.from(page.querySelectorAll('.src.refused'))) {
         expect(s.querySelector('.findings')).toBeNull();
@@ -167,8 +174,9 @@ describe('the research agent screen', () => {
 
   it('switching to a burned session shows the junk thrown away, not used', async () => {
     const page = await show('#/research', fixturesApi({ stepDelayMs: 0 }));
-    const second = page.querySelectorAll('.sessions button')[1]!;
+    const second = page.querySelectorAll('.steps-track button')[1]!;
     await click(second);
+    await openTiles(page);
     expect(page.querySelectorAll('.src.burned')).toHaveLength(1);
     expect(page.querySelector('.src.burned .findings')).toBeNull();
     expect(page.textContent).toMatch(/Nothing from this source is in the brief/);
@@ -186,6 +194,7 @@ describe('the research agent screen', () => {
 describe('recalled memories and the merchant timeline on screen', () => {
   it('the mainnet research brief shows the recalled memories with their distance and the limit', async () => {
     const page = await show('#/research', fixturesApi({ stepDelayMs: 0, recording: 'mainnet' }));
+    await openTiles(page);
     const rec = Array.from(page.querySelectorAll('.recalled li'));
     expect(rec.length).toBeGreaterThan(0);
     for (const li of rec) {
@@ -200,6 +209,7 @@ describe('recalled memories and the merchant timeline on screen', () => {
   it('the research brief links the records it relied on and wrote to their evidence pages', async () => {
     const api = fixturesApi({ stepDelayMs: 0 });
     const page = await show('#/research', api);
+    await openTiles(page);
     const links = Array.from(page.querySelectorAll<HTMLAnchorElement>('.src a[href^="#/evidence/"]'));
     expect(links.length).toBeGreaterThan(0);
     for (const a of links) {
