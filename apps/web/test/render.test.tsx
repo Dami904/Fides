@@ -246,3 +246,20 @@ describe('recalled memories and the merchant timeline on screen', () => {
     expect(page.querySelectorAll('.tl-step.burned').length).toBeGreaterThan(0);
   });
 });
+
+describe('the simulation board', () => {
+  it('never shows a negative count or percentage, even in a round where the record is behind', async () => {
+    const page = await show('#/simulation');
+    const range = page.querySelector<HTMLInputElement>('input[type="range"]')!;
+    const setValue = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value')!.set!;
+    let behind = false;
+    for (let r = 0; r <= Number(range.max); r++) {
+      await act(async () => { setValue.call(range, String(r)); range.dispatchEvent(new Event('input', { bubbles: true })); });
+      const kpis = page.querySelector('.kpis')!.textContent ?? '';
+      expect(kpis).not.toMatch(/-\d/);
+      if (/more burns? with the record so far/.test(kpis)) behind = true;
+    }
+    // The recorded run has such a round (round 1); if it stops having one, this test no longer checks the wording.
+    expect(behind).toBe(true);
+  });
+});

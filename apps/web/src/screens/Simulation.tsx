@@ -135,6 +135,7 @@ export function Simulation({ api }: { api: FidesApi }) {
   const agents = Array.from({ length: sim.shared.config.agents }, (_, i) => `agent${i + 1}`);
   const merchants = merchantOrder(sim.shared.events);
   const a = boardAt(sim.shared.events, round).totals, b = boardAt(sim.detached.events, round).totals;
+  const avoided = b.burns - a.burns;
   const goodRefused = sim.shared.events.filter((e) => e.round <= round && e.kind === 'good' && e.decision === 'REFUSE').length;
   const gWith = gradeAt(sim.shared.events, round), gWithout = gradeAt(sim.detached.events, round);
   const ruleNames = [...new Set([...Object.keys(sim.shared.rules), ...Object.keys(sim.detached.rules)])].sort((x, y) => (sim.shared.rules[y] ?? 0) - (sim.shared.rules[x] ?? 0));
@@ -146,8 +147,13 @@ export function Simulation({ api }: { api: FidesApi }) {
       </PageHead>
 
       <div className="kpis">
-        <div><b>{b.burns - a.burns}<small> of {b.burns}</small></b><span>burns avoided so far</span></div>
-        <div><b>{b.burns ? `${Math.round((100 * (b.burns - a.burns)) / b.burns)}%` : '0%'}</b><span>fewer burns with the record</span></div>
+        {/* Early on the world with the record can take a burn first. Say that plainly instead of a negative count. */}
+        {avoided >= 0
+          ? <div><b>{avoided}<small> of {b.burns}</small></b><span>burns avoided so far</span></div>
+          : <div><b>{-avoided}</b><span>{-avoided === 1 ? 'more burn' : 'more burns'} with the record so far</span></div>}
+        {avoided > 0
+          ? <div><b>{Math.round((100 * avoided) / b.burns)}%</b><span>fewer burns with the record</span></div>
+          : <div><b>{a.burns}<small> vs {b.burns}</small></b><span>burns with and without the record</span></div>}
         <div><b>{goodRefused}</b><span>times a good merchant was refused</span></div>
         <div><b>{round}<small> / {rounds}</small></b><span>round</span></div>
       </div>
