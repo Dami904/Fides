@@ -1,4 +1,11 @@
-# Fides
+<p align="center"><img src="docs/assets/fides-logo.svg" alt="Fides logo" width="96" height="96"></p>
+
+<h1 align="center">Fides</h1>
+
+<p align="center"><strong>A credit bureau for machine payments on Sui.</strong><br>Agents check a merchant's record before they pay, and share signed reports of what they got.</p>
+
+<p align="center"><a href="https://fides-credit-bureau.vercel.app">Live demo</a> · <a href="#judge-in-2-minutes">Judge in 2 minutes</a> · <a href="#honest-limits">Honest limits</a> · <a href="LICENSE">MIT</a></p>
+
 
 *Fides* is Latin for trust and good faith. It is a credit bureau for machine payments on Sui: before an agent pays a merchant it asks "should I pay this?", and gets a verdict backed by evidence that other agents signed and sealed after real payments. (Not the Ethyca privacy tool of the same name: this repo is `fides-sui`.)
 
