@@ -5,6 +5,11 @@
 **The hard problem is not remembering what happened. It is letting an agent that has never met a merchant act on what another agent learned, without having to trust that other agent's word.** Every report here is signed by the agent that paid, anchored on Sui by the same address, and checked again by every reader against the chain, so a forged or copied report is rejected and shown, never believed.
 
 Built for the Walrus x Tatum "Total Recall" hackathon, in the **Smart Agents for Real Life** track (its first example: a research agent with source trust scores), aiming at the Best Use of Agent Payments and Best Walrus Memory awards. [The research agent](#the-research-agent) · [Judge in 2 minutes](#judge-in-2-minutes) · [The core proof](#the-core-proof) · [Honest limits](#honest-limits) · [Run it](#run-it)
+##demo video
+
+
+https://github.com/user-attachments/assets/a0b13deb-cee2-433d-90be-532bc0f0b1f6
+
 
 ## Status
 
